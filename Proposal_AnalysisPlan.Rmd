@@ -54,12 +54,13 @@ air temp, celsius, predictor, 1b
 ## What tasks will your team conduct? 
 
 ### Data acquisition
-
+Walker
 
 ### Data exploration
-
+Gaby
 
 ### Data wrangling
-
+Tristen
 
 ### Data analysis and visualization
+Yixin
