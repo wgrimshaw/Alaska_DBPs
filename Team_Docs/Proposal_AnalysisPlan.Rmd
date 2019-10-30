@@ -1,0 +1,89 @@
+---
+title: "Proposal and Analysis Plan"
+author: "Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen"
+date: "October 25, 2019"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+## What questions will your team address?
+
+1. To what degree does climate change affect discharge in Alaskan streams and rivers?
+
+## What hypotheses will your team address? 
+
+* Hypotheses should relate directly to your questions. Each numbered hypothesis should match up with the correponding numbered question. 
+* There may be multiple working hypotheses for a single question. If this is the case, note each hypothesis as 1a, 1b. etc.
+
+1a. Streams at varying latitudes will have different responses to changing climate with monotonic trends.
+
+1b. If streams are in areas that experience greater mean air temperature increases during spring seasons, then they will have greater discharge. 
+
+1c. The frequency of high discharge events will have increased through time due to climate change. 
+
+
+## What dataset(s) will your team analyze?
+
+* USGS Alaska discharge data
+* Alaska site locations (spatial)
+* NOAA Alaska mean air temperature data
+
+
+## How will you set up and manage your project repository? 
+
+We will have one master respository and ensure proper communication to avoid merge conflicts.
+
+
+## Create a table of variables you will analyze.
+
+* Column 1: Variable
+* Column 2: Units (if known)
+* Column 3: Dependent (response) or independent (predictor) variable?
+* Column 4: To which hypothesis(es) does this variable pertain?
+
+*Note: You may not know all of the individual variables you plan to analyze at this point. It is sufficient to describe what type of variable you anticipate using (e.g., land cover) and decide on specifics later*
+
+| Variable | Units (if known) | Type of Variable | Hypothesis | 
+|------:|:-----|---------|:------:|
+| Discharge | cfs | Response | 1a, 1b, 1c |
+| Site Number | Latitude/Longitude | Predictor | 1a |
+| Date Time | Year/Month/Day | Predictor | 1c |
+| Air Temperature | Celsius | Predictor | 1b |
+
+
+## What tasks will your team conduct? 
+
+### Data acquisition
+
+Discharge data for the streams will be obtained from the USGS using the dataRetrieval package. The site locations for these same streams will also be obtained from the USGS using the dataRetrieval package. The historic air temperature data will be retrieved from NOAA Climate Data Online (CDO) Database at https://www.ncdc.noaa.gov/cdo-web/.
+
+### Data exploration
+
+Goals for data exploration: 
+
+* Help the team determine which Alaskan sites to choose
+* Use the function 'whatNWISdata' to access metadata about our chosen sites, including what variables have been monitored at that site, start and end dates, and the number of samples for a given variable
+* Determine which 10 USGS sites feature the most data points
+* Looking at data distributions
+* any transformations required for non normally distributed data?
+* Do we have consistent data intervals for time series analysis?
+* Create correlation plots
+
+
+### Data wrangling
+We will need to: 
+
+* remove NAs from quantitative datasets
+* join site data with latitude/longitude
+* fill in any missing data to perform time series
+* join all data sets so measurements are present for all sites
+
+
+### Data analysis and visualization
+
+* Choose 10 sites for each same latitude and divide Alaska into 5 regions by latitude  
+* Choose 5 different rivers where they are in different temperature region, plot ggplot of discharge vs mean air temperature
+* Use high frequency data of discharge to do monotonic trend analysis and also use ARMA model to predict the discharge in the future
+* Plot the decomposed dataset and the prediction of discharge
