@@ -54,7 +54,8 @@ air temp, celsius, predictor, 1b
 ## What tasks will your team conduct? 
 
 ### Data acquisition
-Walker
+
+Discharge data for the streams will be obtained from the USGS using the dataRetrieval package. The site locations for these same streams will also be obtained from the USGS using the dataRetrieval package. The historic air temperature data will be retrieved from NOAA Climate Data Online (CDO) Database at https://www.ncdc.noaa.gov/cdo-web/.
 
 ### Data exploration
 Gaby
