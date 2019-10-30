@@ -64,6 +64,11 @@ Gaby
 
 ### Data wrangling
 We will need to 
+*remove NAs from quantitative datasets
+*join site data with latitude/longitude
+*fill in any missing data to perform time series
+*join all data sets so measurements are present for all sites
+
 
 ### Data analysis and visualization
 1.	Choose 10 points for each same latitude and divide Alaska into 5 regions by latitude.  
