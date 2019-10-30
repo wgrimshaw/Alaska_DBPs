@@ -54,7 +54,8 @@ air temp, celsius, predictor, 1b
 ## What tasks will your team conduct? 
 
 ### Data acquisition
-Walker
+
+Discharge data for the streams will be obtained from the USGS using the dataRetrieval package. The site locations for these same streams will also be obtained from the USGS using the dataRetrieval package. The historic air temperature data will be retrieved from NOAA Climate Data Online (CDO) Database at https://www.ncdc.noaa.gov/cdo-web/.
 
 ### Data exploration
 Gaby
@@ -63,4 +64,6 @@ Gaby
 Tristen
 
 ### Data analysis and visualization
-Yixin
+1.	Choose 10 points for one same latitude and divide Alaska into 5 regions by longitude. Plot ggplot of discharge vs longitude to show the relationship. (Q: should we choose the river that came across for the whole N-S of Alaska, otherwise how do we control the effect of other parameters?)
+2.	Choose 5 different rivers where they are in different temperature region, plot ggplot of discharge vs mean air temperature. 
+3.	Use high frequency data of discharge to do monotonic trend analysis and also use ARMA model to predict the discharge in the future. Plot the decomposed dataset and the prediction of discharge.
