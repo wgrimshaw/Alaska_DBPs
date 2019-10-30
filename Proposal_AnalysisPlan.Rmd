@@ -26,9 +26,9 @@ editor_options:
 
 ## What dataset(s) will your team analyze?
 
-*USGS Alaska discharge data
-*Alaska site locations (spatial)
-*NOAA Alaska mean air temperature data
+* USGS Alaska discharge data
+* Alaska site locations (spatial)
+* NOAA Alaska mean air temperature data
 
 
 ## How will you set up and manage your project repository? 
