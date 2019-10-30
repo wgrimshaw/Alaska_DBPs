@@ -1,7 +1,7 @@
 ---
 title: "Proposal and Analysis Plan"
-author: "Insert names of team members here"
-date: "october 25, 2019"
+author: "Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen"
+date: "October 25, 2019"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
