@@ -26,9 +26,9 @@ editor_options:
 
 ## What dataset(s) will your team analyze?
 
-*USGS Alaska discharge data
-*Alaska site locations (spatial)
-*NOAA Alaska mean air temperature data
+* USGS Alaska discharge data
+* Alaska site locations (spatial)
+* NOAA Alaska mean air temperature data
 
 
 ## How will you set up and manage your project repository? 
@@ -62,14 +62,23 @@ Discharge data for the streams will be obtained from the USGS using the dataRetr
 ### Data exploration
 
 Goals for data exploration: 
-Help the team determine which Alaskan sites to choose.
 
+<<<<<<< HEAD
 -->Use the function 'whatNWISdata' to access metadata about our chosen sites, including what variables have been monitored at that site, start and end dates, and the number of samples for a given variable.
 -->Determine which 10 USGS sites feature the most data points.
 -->Analyze data distributions.
 -->Are there any transformations required for non normally distributed data?
 -->Do we have consistent data intervals for time series analysis
 -->Create correlation plots.
+=======
+* Help the team determine which Alaskan sites to choose
+* Use the function 'whatNWISdata' to access metadata about our chosen sites, including what variables have been monitored at that site, start and end dates, and the number of samples for a given variable
+* Determine which 10 USGS sites feature the most data points
+* Looking at data distributions
+* any transformations required for non normally distributed data?
+* Do we have consistent data intervals for time series analysis?
+* Create correlation plots
+>>>>>>> 7b7f11ee934dad04493e32fcf00cd5d365e2e3ec
 
 
 ### Data wrangling
@@ -82,6 +91,8 @@ We will need to:
 
 
 ### Data analysis and visualization
-1.	Choose 10 points for each same latitude and divide Alaska into 5 regions by latitude.  
-2.	Choose 5 different rivers where they are in different temperature region, plot ggplot of discharge vs mean air temperature. 
-3.	Use high frequency data of discharge to do monotonic trend analysis and also use ARMA model to predict the discharge in the future. Plot the decomposed dataset and the prediction of discharge.
+
+* Choose 10 points for each same latitude and divide Alaska into 5 regions by latitude  
+* Choose 5 different rivers where they are in different temperature region, plot ggplot of discharge vs mean air temperature
+* Use high frequency data of discharge to do monotonic trend analysis and also use ARMA model to predict the discharge in the future
+* Plot the decomposed dataset and the prediction of discharge
