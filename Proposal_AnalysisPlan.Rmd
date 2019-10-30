@@ -60,7 +60,17 @@ We will have one master respository and ensure proper communication to avoid mer
 Discharge data for the streams will be obtained from the USGS using the dataRetrieval package. The site locations for these same streams will also be obtained from the USGS using the dataRetrieval package. The historic air temperature data will be retrieved from NOAA Climate Data Online (CDO) Database at https://www.ncdc.noaa.gov/cdo-web/.
 
 ### Data exploration
-Gaby
+
+Goals for data exploration: 
+Help the team determine which Alaskan sites to choose.
+
+-->Use the function 'whatNWISdata' to access metadata about our chosen sites, including what variables have been monitored at that site, start and end dates, and the number of samples for a given variable.
+-->Determine which 10 USGS sites feature the most data points.
+-->Looking at data distributions.
+-->any transformations required for non normally distributed data?
+-->do we have consistent data intervals for time series analysis
+-->correlation plots.
+
 
 ### Data wrangling
 We will need to: 
