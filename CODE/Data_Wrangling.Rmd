@@ -11,13 +11,31 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## R Markdown
 
+#Obtain Alaskan Data
+```{r}
+library(dataRetrieval)
+AlaskaSites<-whatNWISsites(statecode="02")
+```
+
+
 ## Bin width
 ```{r}
 (max(AlaskaSites$dec_lat_va)-min(AlaskaSites$dec_lat_va))/10
 ```
 
-Actual Bin Width
+## Assign Bin Width Value to a Variable
 ```{r}
 AlaskaBin<-2.002339
 ```
+
+## Filter Alaskan Sites by Streams
+```{r}
+AlaskaStreams<-filter(AlaskaSites, site_tp_cd=="ST")
+```
+
+## Check levels
+```{r}
+levels(AlaskaSites$site_tp_cd)
+```
+
 
