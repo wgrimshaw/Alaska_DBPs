@@ -66,10 +66,10 @@ Help the team determine which Alaskan sites to choose.
 
 -->Use the function 'whatNWISdata' to access metadata about our chosen sites, including what variables have been monitored at that site, start and end dates, and the number of samples for a given variable.
 -->Determine which 10 USGS sites feature the most data points.
--->Looking at data distributions.
--->any transformations required for non normally distributed data?
--->do we have consistent data intervals for time series analysis
--->correlation plots.
+-->Analyze data distributions.
+-->Are there any transformations required for non normally distributed data?
+-->Do we have consistent data intervals for time series analysis
+-->Create correlation plots.
 
 
 ### Data wrangling
