@@ -45,10 +45,12 @@ We will have one master respository and ensure proper communication to avoid mer
 
 *Note: You may not know all of the individual variables you plan to analyze at this point. It is sufficient to describe what type of variable you anticipate using (e.g., land cover) and decide on specifics later*
 
-discharge, cfs, response, 1a. 1b, 1c
-date time, year/month/day, predictor, 1c
-site no, lat/long, predictor, 1a
-air temp, celsius, predictor, 1b
+| Variable | Units (if known) | Type of Variable | Hypothesis | 
+|------:|:-----|---------|:------:|
+| Discharge | cfs | Response | 1a, 1b, 1c |
+| Site Number | Latitude/Longitude | Predictor | 1a |
+| Date Time | Year/Month/Day | Predictor | 1c |
+| Air Temp | Celsius | Predictor | 1b |
 
 
 ## What tasks will your team conduct? 
@@ -61,7 +63,7 @@ Discharge data for the streams will be obtained from the USGS using the dataRetr
 Gaby
 
 ### Data wrangling
-Tristen
+We will need to 
 
 ### Data analysis and visualization
 1.	Choose 10 points for one same latitude and divide Alaska into 5 regions by longitude. Plot ggplot of discharge vs longitude to show the relationship. (Q: should we choose the river that came across for the whole N-S of Alaska, otherwise how do we control the effect of other parameters?)
