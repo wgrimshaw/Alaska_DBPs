@@ -66,6 +66,6 @@ Gaby
 We will need to 
 
 ### Data analysis and visualization
-1.	Choose 10 points for one same latitude and divide Alaska into 5 regions by longitude. Plot ggplot of discharge vs longitude to show the relationship. (Q: should we choose the river that came across for the whole N-S of Alaska, otherwise how do we control the effect of other parameters?)
+1.	Choose 10 points for each same latitude and divide Alaska into 5 regions by latitude.  
 2.	Choose 5 different rivers where they are in different temperature region, plot ggplot of discharge vs mean air temperature. 
 3.	Use high frequency data of discharge to do monotonic trend analysis and also use ARMA model to predict the discharge in the future. Plot the decomposed dataset and the prediction of discharge.
