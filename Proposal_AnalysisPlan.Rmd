@@ -45,10 +45,12 @@ We will have one master respository and ensure proper communication to avoid mer
 
 *Note: You may not know all of the individual variables you plan to analyze at this point. It is sufficient to describe what type of variable you anticipate using (e.g., land cover) and decide on specifics later*
 
-discharge, cfs, response, 1a. 1b, 1c
-date time, year/month/day, predictor, 1c
-site no, lat/long, predictor, 1a
-air temp, celsius, predictor, 1b
+| Variable | Units (if known) | Type of Variable | Hypothesis | 
+|------:|:-----|---------|:------:|
+| Discharge | cfs | Response | 1a, 1b, 1c |
+| Site Number | Latitude/Longitude | Predictor | 1a |
+| Date Time | Year/Month/Day | Predictor | 1c |
+| Air Temperature | Celsius | Predictor | 1b |
 
 
 ## What tasks will your team conduct? 
@@ -58,10 +60,26 @@ air temp, celsius, predictor, 1b
 Discharge data for the streams will be obtained from the USGS using the dataRetrieval package. The site locations for these same streams will also be obtained from the USGS using the dataRetrieval package. The historic air temperature data will be retrieved from NOAA Climate Data Online (CDO) Database at https://www.ncdc.noaa.gov/cdo-web/.
 
 ### Data exploration
-Gaby
+
+Goals for data exploration: 
+Help the team determine which Alaskan sites to choose.
+
+-->Use the function 'whatNWISdata' to access metadata about our chosen sites, including what variables have been monitored at that site, start and end dates, and the number of samples for a given variable.
+-->Determine which 10 USGS sites feature the most data points.
+-->Looking at data distributions.
+-->any transformations required for non normally distributed data?
+-->do we have consistent data intervals for time series analysis
+-->correlation plots.
+
 
 ### Data wrangling
-Tristen
+We will need to: 
+
+* remove NAs from quantitative datasets
+* join site data with latitude/longitude
+* fill in any missing data to perform time series
+* join all data sets so measurements are present for all sites
+
 
 ### Data analysis and visualization
 1.	Choose 10 points for each same latitude and divide Alaska into 5 regions by latitude. Plot ggplot of discharge over time for each latitude region to explore the discharge change in different regions. 
