@@ -30,7 +30,6 @@ editor_options:
 * Alaska site locations (spatial)
 * NOAA Alaska mean air temperature data
 
-
 ## How will you set up and manage your project repository? 
 
 We will have one master respository and ensure proper communication to avoid merge conflicts.
@@ -62,6 +61,7 @@ Discharge data for the streams will be obtained from the USGS using the dataRetr
 ### Data exploration
 
 Goals for data exploration: 
+
 
 * Help the team determine which Alaskan sites to choose
 * Use the function 'whatNWISdata' to access metadata about our chosen sites, including what variables have been monitored at that site, start and end dates, and the number of samples for a given variable
