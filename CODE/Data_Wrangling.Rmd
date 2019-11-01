@@ -13,8 +13,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #Obtain Alaskan Data
 ```{r}
+library(dplyr)
 library(dataRetrieval)
-AlaskaSites<-whatNWISsites(statecode="02")
+AlaskaSites<-whatNWISsites(stateCd="02")
 ```
 
 
@@ -28,14 +29,25 @@ AlaskaSites<-whatNWISsites(statecode="02")
 AlaskaBin<-2.002339
 ```
 
-## Filter Alaskan Sites by Streams
 ```{r}
-AlaskaStreams<-filter(AlaskaSites, site_tp_cd=="ST")
+levels(AlaskaSites$site_tp_cd)
+AlaskaSites$site_tp_cd<-as.factor(AlaskaSites$site_tp_cd)
 ```
 
-## Check levels
+```{r}
+class(AlaskaSites$site_tp_cd)
+
+```
+
 ```{r}
 levels(AlaskaSites$site_tp_cd)
 ```
+
+
+```{r}
+AlaskaSites<-filter(AlaskaSites, site_tp_cd=="ST")
+```
+
+
 
 
