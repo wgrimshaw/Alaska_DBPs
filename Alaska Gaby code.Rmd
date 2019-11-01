@@ -1,0 +1,63 @@
+---
+title: "alaska gaby"
+author: "Gaby Garcia"
+date: "11/1/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+title: "Data Wrangling"
+author: "All of us"
+date: "10/30/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+#Obtain Alaskan Data
+```{r}
+library(dplyr)
+library(dataRetrieval)
+AlaskaSites<-whatNWISsites(stateCd="02",parameterCd="00060")
+```
+
+
+## Bin width
+```{r}
+(max(AlaskaSites$dec_lat_va)-min(AlaskaSites$dec_lat_va))/10
+```
+
+## Assign Bin Width Value to a Variable
+```{r}
+AlaskaBin<-2.002339
+```
+
+```{r}
+levels(AlaskaSites$site_tp_cd)
+AlaskaSites$site_tp_cd<-as.factor(AlaskaSites$site_tp_cd)
+```
+
+```{r}
+class(AlaskaSites$site_tp_cd)
+
+```
+
+```{r}
+levels(AlaskaSites$site_tp_cd)
+```
+
+
+```{r}
+AlaskaSites<-filter(AlaskaSites, site_tp_cd=="ST")
+```
+
+
+
+
