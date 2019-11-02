@@ -87,4 +87,3 @@ We will need to:
 * Choose 5 different rivers where they are in different temperature region, plot ggplot of discharge vs mean air temperature
 * Use high frequency data of discharge to do monotonic trend analysis and also use ARMA model to predict the discharge in the future
 * Plot the decomposed dataset and the prediction of discharge
-
