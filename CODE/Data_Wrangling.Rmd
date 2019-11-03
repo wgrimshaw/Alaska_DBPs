@@ -5,7 +5,7 @@ date: "10/30/2019"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 ## R Markdown
 
@@ -33,6 +33,7 @@ AlaskaSites_Stream <- AlaskaSites_Stream %>%
   mutate(Latitude_Bin = floor(((dec_lat_va - min(dec_lat_va))/Lat_Step)+1))
 
 ## Write site list to csv
+
 write.csv(AlaskaSites_Stream, "../DATA/PROCESSED/Alaska_Streamflow_Sites.csv")
 
 ## Bin Assignments
@@ -45,41 +46,10 @@ write.csv(AlaskaSites_Stream, "../DATA/PROCESSED/Alaska_Streamflow_Sites.csv")
 Alaska_Gaby <- filter(AlaskaSites_Stream, Latitude_Bin == 5)
 ```
 
-```{r}
-## Period of record
-
-```
-
-
-## Bin width
-```{r}
-(max(AlaskaSites$dec_lat_va)-min(AlaskaSites$dec_lat_va))/10
-```
-
-## Assign Bin Width Value to a Variable
-```{r}
-AlaskaBin<-2.002339
-```
 
 ```{r}
-levels(AlaskaSites$site_tp_cd)
-AlaskaSites$site_tp_cd<-as.factor(AlaskaSites$site_tp_cd)
-```
 
-```{r}
-class(AlaskaSites$site_tp_cd)
 
 ```
-
-```{r}
-levels(AlaskaSites$site_tp_cd)
-```
-
-
-```{r}
-AlaskaSites<-filter(AlaskaSites, site_tp_cd=="ST")
-```
-
-
 
 

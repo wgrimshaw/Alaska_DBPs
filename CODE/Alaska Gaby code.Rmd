@@ -5,21 +5,6 @@ date: "11/1/2019"
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-title: "Data Wrangling"
-author: "All of us"
-date: "10/30/2019"
-output: pdf_document
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## R Markdown
 
 #Obtain Alaskan Data
 ```{r}
@@ -39,25 +24,72 @@ AlaskaSites<-whatNWISsites(stateCd="02",parameterCd="00060")
 AlaskaBin<-2.002339
 ```
 
+### Check levels and change site_tp_cd to a factor
 ```{r}
 levels(AlaskaSites$site_tp_cd)
 AlaskaSites$site_tp_cd<-as.factor(AlaskaSites$site_tp_cd)
 ```
 
+### Check class of site_tp_cd
 ```{r}
 class(AlaskaSites$site_tp_cd)
 
 ```
 
-```{r}
-levels(AlaskaSites$site_tp_cd)
-```
 
-
+### Filter AlaskaSites by Stream
 ```{r}
 AlaskaSites<-filter(AlaskaSites, site_tp_cd=="ST")
 ```
 
+### Read in Alaska Streamflow Sites document 
+```{r}
+Alaska_Sites <- read.csv("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/PROCESSED/Alaska_Streamflow_Sites.csv")
+```
+
+
+## Filter Alaska Streamflow Sites document for Latitude Bin
+```{r}
+AlaskaLatitude5 <- filter(Alaska_Sites, Latitude_Bin == 5)
+```
 
 
 
+## Upload Alaskan Bin 5 Sites with periods of record included
+```{r}
+library(openxlsx)
+AlaskaBin5<-read.xlsx("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/RAW/USGSDischargeSitesBin5Final.xlsx")
+```
+
+
+### Find Period of Record
+```{r}
+AlaskaBin5 <- mutate(AlaskaBin5, PeriodofRecord = PeriodofRecordEnd-PeriodofRecordStart)
+```
+
+###Change Period of Record to factor
+```{r}
+AlaskaBin5$PeriodofRecord<-as.factor(AlaskaBin5$PeriodofRecord)
+```
+
+```{r}
+levels(AlaskaBin5$PeriodofRecord)
+```
+
+>Longest period of Record for Bin 5 is CHILKAT R NR KLUKWAN AK, or 15056500
+
+
+## Use Walker's for loop to find Longest Period of Record for Bin 5
+```{r}
+# initialize counter
+#date_summary <- AlaskaBin5$SiteNumber
+#size <- vector(length = 1)
+#counter = 1
+#for(site in AlaskaBin5$SiteNumber){
+ # flowdata <- readNWISdv(site, "00060")
+  #size[counter] <- length(flowdata$Date)
+ # counter = counter + 1
+#}
+#sitesize <- data.frame(cbind(AlaskaBin5$SiteNumber, size))
+#sitesize$V1[which.max(sitesize$size)]
+```
