@@ -44,6 +44,8 @@ sitesize$V1[which.max(sitesize$size)]
 ```
 
 For latitude 4, use site 15052500.
+For latitude 6, use site 15304000.
+For latitude 7, use site 15514000.
 For latitude 8, use site 15453500.
 For latitude 9, use site 15908000.
 For latitude 10, use site 15896000.
