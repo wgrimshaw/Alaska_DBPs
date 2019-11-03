@@ -20,8 +20,8 @@ library(dataRetrieval)
 ## Importing Data
 
 ```{r cars}
-getwd() ## puts you within the code folder
-Alaska_Sites <- read.csv("../DATA/PROCESSED/Alaska_Streamflow_Sites.csv")
+getwd() ## puts you within the main project
+Alaska_Sites <- read.csv("./DATA/PROCESSED/Alaska_Streamflow_Sites.csv")
 ## filter for a certain latitude bin
 ## Bin Assignments
 ## Gaby = 5
