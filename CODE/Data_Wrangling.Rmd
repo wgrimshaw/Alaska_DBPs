@@ -63,8 +63,8 @@ site.dat <- readNWISsite(siteNumbers = c("15297680","15297610", "15072000", "150
                                       "15908000", "15896000"))
 
 #Write raw files
-write.csv(discharge.dat, row.names = FALSE,  file = "../DATA/RAW/NWIS_Discharge.csv")
-write.csv(site.dat, row.names = FALSE,  file = "../DATA/RAW/NWIS_SiteInfo.csv")
+#write.csv(discharge.dat, row.names = FALSE,  file = "../DATA/RAW/NWIS_Discharge.csv")
+#write.csv(site.dat, row.names = FALSE,  file = "../DATA/RAW/NWIS_SiteInfo.csv")
 
 ```
 
