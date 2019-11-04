@@ -46,44 +46,51 @@ We will have one master respository and ensure proper communication to avoid mer
 
 | Variable | Units (if known) | Type of Variable | Hypothesis | 
 |------:|:-----|---------|:------:|
-| Discharge | cfs | Response | 1a, 1b, 1c |
+| Discharge | Cubic feet per second | Response | 1a, 1b, 1c |
 | Site Number | Latitude/Longitude | Predictor | 1a |
 | Date Time | Year/Month/Day | Predictor | 1c |
+| Date of First Snowmelt | Year/Month/Day | Predictor | 1a, 1b, 1c |
 | Air Temperature | Celsius | Predictor | 1b |
-
+| Precipitation | Millimeters | Predictor | 1a, 1c |
+| HUC 8 Watershed Size | Square Meters | Predictor | 1a, 1b | 
+| Permafrost Melt | Qualitative | Predictor | 1b | 
+| Glacial Coverage/Melting | Qualitative | Predictor | 1b | 
 
 ## What tasks will your team conduct? 
 
 ### Data acquisition
 
-Discharge data for the streams will be obtained from the USGS using the dataRetrieval package. The site locations for these same streams will also be obtained from the USGS using the dataRetrieval package. The historic air temperature data will be retrieved from NOAA Climate Data Online (CDO) Database at https://www.ncdc.noaa.gov/cdo-web/.
+Discharge data for the streams will be obtained from the USGS using the dataRetrieval package. The site locations for these same streams will also be obtained from the USGS using the dataRetrieval package. The historic air temperature and precipitation data will be retrieved from NOAA Climate Data Online (CDO) Database at https://www.ncdc.noaa.gov/cdo-web/. HUC8 watershed size data will be retrieved from ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/Hydrography/WBD/National/GDB/. Time permitting, we will retrieve qualitative data related to permafrost melting and glacial coverage/melting from scientific literature.
 
 ### Data exploration
 
 Goals for data exploration: 
 
-
-* Help the team determine which Alaskan sites to choose
+* Determine which Alaskan sites to choose
 * Use the function 'whatNWISdata' to access metadata about our chosen sites, including what variables have been monitored at that site, start and end dates, and the number of samples for a given variable
 * Determine which 10 USGS sites feature the most data points
 * Looking at data distributions
-* any transformations required for non normally distributed data?
+* Any transformations required for non-normally distributed data?
 * Do we have consistent data intervals for time series analysis?
 * Create correlation plots
 
 
 ### Data wrangling
-We will need to: 
 
-* remove NAs from quantitative datasets
-* join site data with latitude/longitude
-* fill in any missing data to perform time series
-* join all data sets so measurements are present for all sites
+* Remove NAs from quantitative datasets
+* Join site data with latitude/longitude
+* Fill in any missing data to perform time series
+* Join all data sets so measurements are present for all sites
 
 
 ### Data analysis and visualization
 
-* Choose 10 sites for each same latitude and divide Alaska into 5 regions by latitude  
-* Choose 5 different rivers where they are in different temperature region, plot ggplot of discharge vs mean air temperature
 * Use high frequency data of discharge to do monotonic trend analysis and also use ARMA model to predict the discharge in the future
 * Plot the decomposed dataset and the prediction of discharge
+<<<<<<< HEAD
+=======
+* Plot ggplot of discharge vs mean air temperature
+* Time series analysis of temperature, precipitation, date of snowmelt and how they relate with discharge
+* Map of ten sites
+
+>>>>>>> 08b1d67505657842148164abf07c54655d05d3ec
