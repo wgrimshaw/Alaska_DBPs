@@ -24,7 +24,7 @@ library(dataRetrieval)
 # readNWISsite gives info about a specific site.
 site_info <-readNWISsite(siteNumber = c("15297680","15297610", "15072000","15052500","15056500","15304000","15514000","15453500", "15908000","15896000"))
 
-site <- 
+ 
 
 ```
 
@@ -33,7 +33,11 @@ site <-
 You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE}
-plot(pressure)
+library(readr)
+USGSDischargeSitesBin5Final <- read_csv("../DATA/RAW/USGSDischargeSitesBin5Final.csv")
+View(USGSDischargeSitesBin5Final)
+
+site_need <-USGSDischargeSitesBin5Final
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
