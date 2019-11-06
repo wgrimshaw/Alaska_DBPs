@@ -43,4 +43,11 @@ View(USGSDischargeSitesBin5Final)
 site_need <-USGSDischargeSitesBin5Final
 ```
 
+```{r}
+library(dplyr)
+NOAA_Temp_Bin2<- read_csv("/Users/yixinwen/Box/Duke/2019 Fall/Alaska_DBPs/DATA/RAW/NOAA_Temp_Bin2.csv")
+mutate(NOAA_Temp_Bin2, bin = 2)
+  
+```
+
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
