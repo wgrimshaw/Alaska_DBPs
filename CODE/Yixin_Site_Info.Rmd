@@ -22,8 +22,11 @@ library(dataRetrieval)
 
 ```{r cars}
 # readNWISsite gives info about a specific site.
-site_info <-readNWISsite(siteNumber = c("15297680","15297610", "15072000","15052500","15056500","15304000","15514000","15453500", "15908000","15896000"))
+site_info <-readNWISsite(siteNumber = c("15297680","15297610", "15072000","15052500"))
 
+Bin1discharge_info <- readNWISdv(siteNumbers = "15297680", parameterCd = "00060")
+Bin2discharge_info <- readNWISdv(siteNumbers = "15297610", parameterCd = "00060")
+Bin3discharge_info <- readNWISdv(siteNumbers = "15072000", parameterCd = "00060")
  
 
 ```
