@@ -5,7 +5,6 @@ date: "11/1/2019"
 output: pdf_document
 ---
 
-
 #Obtain Alaskan Data
 ```{r}
 library(dplyr)
@@ -43,7 +42,8 @@ AlaskaSites<-filter(AlaskaSites, site_tp_cd=="ST")
 ```
 
 ### Read in Alaska Streamflow Sites document 
-```{r}
+```{r, warning=FALSE, message=FALSE}
+setwd("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/PROCESSED")
 Alaska_Sites <- read.csv("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/PROCESSED/Alaska_Streamflow_Sites.csv")
 ```
 
@@ -54,6 +54,92 @@ AlaskaLatitude5 <- filter(Alaska_Sites, Latitude_Bin == 5)
 ```
 
 
+```{r}
+library(dataRetrieval)
+date_summary <- AlaskaLatitude5$site_no
+size <- vector(length = 1)
+counter = 1
+for(site in AlaskaLatitude5$site_no){
+  flowdata <- readNWISdv(site, "00060")
+  size[counter] <- length(flowdata$Date)
+  counter = counter + 1
+}
+sitesize <- data.frame(cbind(AlaskaLatitude5$site_no, size))
+sitesize$V1[which.max(sitesize$size)]
+```
+>Site with longest period of record in Bin 5 is 15276000, or SHIP C NR ANCHORAGE AK. Period of Record is 33 years. 
+
+
+## Site Discharge Information 
+```{r}
+library(dataRetrieval)
+AnchorageDischarge<- readNWISdv(siteNumbers = "15276000",
+                     parameterCd = "00060",
+                     startDate = "",
+                     endDate = "")
+```
+>	readNWISdv returns time-series data summarized to a day. Default is mean daily.
+
+### Write Site Discharge to a CSV
+```{r}
+Discharge<-write.csv(AnchorageDischarge, file = "Bin5Discharge.csv",row.names=FALSE)
+```
+
+
+## Site Information Summary
+```{r}
+ AnchorageSummary <- whatNWISdata(siteNumbers = "15276000")
+```
+>whatNWISdata is the most general NWIS data import function. User must explicitly define the service parameter. More flexible than the other functions.
+
+### Write Site Information to a CSV
+```{r}
+AnchorageInformation<-write.csv(AnchorageSummary, file = "Bin5Information.csv",row.names=FALSE)
+```
+
+
+### Site Metadata
+```{r}
+AnchorageCodesCoordinates<-readNWISsite(siteNumber="15276000")
+```
+>Gives us drainage area, HUC Code, latitude and longitude 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Upload Alaskan Bin 5 Sites with periods of record included
 ```{r}
@@ -61,17 +147,18 @@ library(openxlsx)
 AlaskaBin5<-read.xlsx("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/RAW/USGSDischargeSitesBin5Final.xlsx")
 ```
 
-
 ### Find Period of Record
 ```{r}
+library(dplyr)
 AlaskaBin5 <- mutate(AlaskaBin5, PeriodofRecord = PeriodofRecordEnd-PeriodofRecordStart)
 ```
 
-###Change Period of Record to factor
+### Change Period of Record to factor
 ```{r}
 AlaskaBin5$PeriodofRecord<-as.factor(AlaskaBin5$PeriodofRecord)
 ```
 
+### Check levels of Period of Record
 ```{r}
 levels(AlaskaBin5$PeriodofRecord)
 ```
@@ -79,17 +166,3 @@ levels(AlaskaBin5$PeriodofRecord)
 >Longest period of Record for Bin 5 is CHILKAT R NR KLUKWAN AK, or 15056500
 
 
-## Use Walker's for loop to find Longest Period of Record for Bin 5
-```{r}
-# initialize counter
-#date_summary <- AlaskaBin5$SiteNumber
-#size <- vector(length = 1)
-#counter = 1
-#for(site in AlaskaBin5$SiteNumber){
- # flowdata <- readNWISdv(site, "00060")
-  #size[counter] <- length(flowdata$Date)
- # counter = counter + 1
-#}
-#sitesize <- data.frame(cbind(AlaskaBin5$SiteNumber, size))
-#sitesize$V1[which.max(sitesize$size)]
-```
