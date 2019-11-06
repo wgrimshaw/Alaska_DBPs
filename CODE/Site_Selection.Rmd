@@ -28,7 +28,7 @@ Alaska_Sites <- read.csv("./DATA/PROCESSED/Alaska_Streamflow_Sites.csv")
 ## Tristen = 6 & 7
 ## Yixin = 1-3
 ## Walker = 8-11 & 4
-Alaska <- filter(Alaska_Sites, Latitude_Bin == 10)
+Alaska <- filter(Alaska_Sites, Latitude_Bin == 3)
 # for loop
 # initialize counter
 date_summary <- Alaska$site_no
@@ -42,8 +42,13 @@ for(site in Alaska$site_no){
 sitesize <- data.frame(cbind(Alaska$site_no, size))
 sitesize$V1[which.max(sitesize$size)]
 ```
-
+For latitude 1, use site 15297680.
+For latitude 2, use site 15297610.
+For latitude 3, use site 15072000.
 For latitude 4, use site 15052500.
+For latitude 6, use site 15304000.
+For latitude 7, use site 15514000.
 For latitude 8, use site 15453500.
 For latitude 9, use site 15908000.
 For latitude 10, use site 15896000.
+

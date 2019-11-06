@@ -87,7 +87,10 @@ Goals for data exploration:
 
 * Use high frequency data of discharge to do monotonic trend analysis and also use ARMA model to predict the discharge in the future
 * Plot the decomposed dataset and the prediction of discharge
+<<<<<<< HEAD
+=======
 * Plot ggplot of discharge vs mean air temperature
 * Time series analysis of temperature, precipitation, date of snowmelt and how they relate with discharge
 * Map of ten sites
 
+>>>>>>> 08b1d67505657842148164abf07c54655d05d3ec

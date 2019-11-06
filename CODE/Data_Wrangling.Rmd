@@ -49,6 +49,22 @@ Alaska_Gaby <- filter(AlaskaSites_Stream, Latitude_Bin == 5)
 
 ```{r}
 
+#Discharge data for all sites
+discharge.dat <- readNWISdv(siteNumbers = c("15297680","15297610", "15072000", "15052500",
+                                      "15276000", "15304000", "15514000", "15453500",
+                                      "15908000", "15896000"), #Bins 1-10
+                     parameterCd = c("00060"), # Discharge
+                     startDate = "",
+                     endDate = "")
+
+#Site data for all sites
+site.dat <- readNWISsite(siteNumbers = c("15297680","15297610", "15072000", "15052500",
+                                      "15276000", "15304000", "15514000", "15453500",
+                                      "15908000", "15896000"))
+
+#Write raw files
+#write.csv(discharge.dat, row.names = FALSE,  file = "../DATA/RAW/NWIS_Discharge.csv")
+#write.csv(site.dat, row.names = FALSE,  file = "../DATA/RAW/NWIS_SiteInfo.csv")
 
 ```
 
