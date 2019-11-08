@@ -68,4 +68,17 @@ site.dat <- readNWISsite(siteNumbers = c("15297680","15297610", "15072000", "150
 
 ```
 
+``` {r} 
+#Add bin numbers 6 and 7 to raw data
+getwd()
+bins_6_7 <- read.csv("../DATA/RAW/NOAA_Precip_Bin6_7.csv")
+bins_6_7 <- bins_6_7 %>% mutate(Bin = STATION)
 
+bins_6_7$Bin <- 
+  ifelse(bins_6_7$Bin == "USW00026615", "6", 
+         "7")
+
+#Write as processed csv
+#write.csv(bins_6_7, row.names = FALSE,  file = "../DATA/PROCESSED/NOAA_Temp_Precip_Bin_6_7.csv")
+
+```
