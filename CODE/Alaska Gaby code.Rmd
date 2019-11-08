@@ -166,3 +166,133 @@ levels(AlaskaBin5$PeriodofRecord)
 >Longest period of Record for Bin 5 is CHILKAT R NR KLUKWAN AK, or 15056500
 
 
+
+# Import all Data Frames
+```{r, warning=FALSE}
+setwd("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/RAW")
+NOAATempPrecipBin1<-read.csv("NOAA_Temp_Bin1.csv")
+NOAATempPrecipBin2<-read.csv("NOAA_Temp_Bin2.csv")
+NOAATempPrecipBin3<-read.csv("NOAA_Temp_Bin3.csv")
+NOAATempPrecipBin5<-read.csv("Bin5TempandPrecip.csv")
+
+NOAATempPrecip48910<-read.csv("NOAA_Precip_Temp_Bin_4_8_9_10.csv")
+```
+
+### Add Bin 2 Column to NOAATempPrecipBin2
+```{r}
+NOAATempPrecipBin2$Bin<-2
+```
+
+
+### Remove Tavg Column from Precip 
+```{r}
+NOAATempPrecip48910<-select(NOAATempPrecip48910,-c(8))
+```
+
+### Add Bin Columns with values for 4, 8, and 9
+```{r}
+library(plyr)
+NOAATempPrecip48910$Bin<-revalue(NOAATempPrecip48910$STATION,
+                              c('USW00026510'='4', 'USC00500464'='8','USW00027502'='9'))
+```
+
+## Upload Bins 6 and 7 
+```{r, message=FALSE}
+setwd("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/PROCESSED")
+NOAATempPrecipBin67<-read.csv("NOAA_Temp_Precip_Bin_6_7.csv")
+```
+
+### Remove Snow Column from Precip Temp 6 & 7
+```{r}
+NOAATempPrecipBin67<-select(NOAATempPrecipBin67,-c(8))
+```
+
+
+## Fix Date Issues in NOAA Bin 1
+```{r}
+##Tell R to change factor to a date, in the format Month/day/year
+NOAATempPrecipBin1$DATE <- as.Date(NOAATempPrecipBin1$DATE, format = "%m/%d/%y") 
+
+# Changes the format of the "datetime" column to a two digit year, a two digit month, and the day as a number
+NOAATempPrecipBin1$DATE <- format(NOAATempPrecipBin1$DATE, "%y%m%d")
+
+#Creating a function that says that if d is greater than 181231, then it will return a 19, if d is not greater than 181231, then it will return a 20.Paste0 takes the two statements that are inside the function (d>181231, "19", "20")
+
+#The 181231 is the last date of 2018. If d is over this value, a 19 is returned, If D<the number, a 20 is returned. 
+create.early.dates <- (function(d) {
+       paste0(ifelse(d > 181231,"19","20"),d)
+       })
+
+
+#This will input the datetime column into the function we created above for each row of the column
+NOAATempPrecipBin1$DATE<- create.early.dates(NOAATempPrecipBin1$DATE)
+
+#Changes the date time column into a different format to a 4 digit year, a two digit month, and the day as
+NOAATempPrecipBin1$DATE <- as.Date(NOAATempPrecipBin1$DATE, format = "%Y%m%d") 
+
+```
+
+## Fix Date Issues in NOAA Bin 5
+```{r}
+##Tell R to change factor to a date, in the format Month/day/year
+NOAATempPrecipBin5$DATE <- as.Date(NOAATempPrecipBin5$DATE, format = "%m/%d/%y") 
+
+# Changes the format of the "datetime" column to a two digit year, a two digit month, and the day as a number
+NOAATempPrecipBin5$DATE<- format(NOAATempPrecipBin5$DATE, "%y%m%d")
+
+#Creating a function that says that if d is greater than 181231, then it will return a 19, if d is not greater than 181231, then it will return a 20.Paste0 takes the two statements that are inside the function (d>181231, "19", "20")
+
+#The 181231 is the last date of 2018. If d is over this value, a 19 is returned, If D<the number, a 20 is returned. 
+create.early.dates <- (function(d) {
+       paste0(ifelse(d > 181231,"19","20"),d)
+       })
+
+
+#This will input the datetime column into the function we created above for each row of the column
+NOAATempPrecipBin5$DATE<- create.early.dates(NOAATempPrecipBin5$DATE)
+
+#Changes the date time column into a different format to a 4 digit year, a two digit month, and the day as
+NOAATempPrecipBin5$DATE <- as.Date(NOAATempPrecipBin5$DATE, format = "%Y%m%d") 
+```
+
+
+## RBind all TempPrecip Data
+```{r}
+TempPrecip<-rbind(NOAATempPrecipBin1, NOAATempPrecipBin2, NOAATempPrecipBin3, NOAATempPrecipBin5, NOAATempPrecipBin67, NOAATempPrecip48910)
+```
+
+
+# Import in USGS Discharge Data
+```{r, warning=FALSE, message=FALSE}
+setwd("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/RAW")
+NWIS_Discharge<-read.csv("NWIS_Discharge.csv")
+```
+
+###Convert site_no to a factor
+```{r}
+NWIS_Discharge$site_no<-as.factor(NWIS_Discharge$site_no)
+```
+
+## Add Bins to Discharge Data
+```{r}
+library(plyr)
+NWIS_Discharge$Bin<-revalue(NWIS_Discharge$site_no,
+                              c('15297680'='1', '15297610'='2','15072000'='3', '15052500'='4', '15276000'='5', '15304000'='6', '15514000'='7', '15453500'='8', '15908000'='9', '15896000'='10'))
+```
+
+##Rename "Date" to "DATE" in NWIS_Discharge dataframe so both columns match
+```{r}
+names(NWIS_Discharge)[3]<-"DATE"
+```
+
+
+# Join TempPrecip and NWIS_Discharge Data Frames by Date and Bin 
+```{r}
+AlaskaTempPrecipDischarge <- merge(TempPrecip, NWIS_Discharge, by = c('DATE', 'Bin'))
+```
+
+## Export AlaskaTempPrecipDischarge CSV
+```{r}
+AlaskaTempPrecipDischarge<-write.csv(AlaskaTempPrecipDischarge, "AlaskaTempPrecipDischarge.csv")
+```
+
