@@ -52,7 +52,7 @@ Alaska_Sites <- read.csv("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis
 ```{r}
 AlaskaLatitude5 <- filter(Alaska_Sites, Latitude_Bin == 5)
 ```
-
+>Treat Latitude and longitude as continuous variable: how is repsonse variable changing with change in bin? Look at slope. 
 
 ```{r}
 library(dataRetrieval)
