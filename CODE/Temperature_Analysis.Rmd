@@ -18,3 +18,7 @@ library(tidyverse)
 Alaska_Data <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 ```
 
+```{r}
+
+```
+
