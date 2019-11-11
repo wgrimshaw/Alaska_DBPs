@@ -22,30 +22,17 @@ theme_set(theme_classic())
 ```
 
 
-```{r}
+```{r,echo = FALSE}
 # import data
 AlaskaTempPrecipDischarge <- read_csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
-
 # transform bin into factor
 AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
-
-# drop na data in dataframe
-AlaskaTempPrecipDischarge <- AlaskaTempPrecipDischarge %>%
-  drop_na()
-
-# plot discharge  over time for 10 latitude bins
-discharge_plot <- ggplot(AlaskaTempPrecipDischarge)+
-  geom_line(aes(x = DATE, y = Discharge, color = Bin))+
-  labs(x = "", y = expression("Discharge (ft"^3*"/s)"),legend = "Bin")
-print(discharge_plot)
-```
-```{r,echo = FALSE}
-AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
+#drop na
 AlaskaTempPrecipDischarge <- AlaskaTempPrecipDischarge$Discharge %>%
   drop_na()
 # plot discharge  over time for 10 latitude bins
 discharge_plot <- ggplot(AlaskaTempPrecipDischarge)+
-  geom_line(aes(x = DATE, y = Discharge, color = Bin))
+  geom_line(aes(x = DATE, y = Discharge, color = Bin)) # add a representative line
 print(discharge_plot)
   
 ```
@@ -62,6 +49,7 @@ AlaskaDischarge_3_ts <- ts(AlaskaDischarge_3[[13]], frequency = 365)
 AlaskaDischarge3_Decomposed <- stl(AlaskaDischarge_3_ts, s.window = "periodic")
 plot(AlaskaDischarge3_Decomposed)
 ```
+
 ```{r}
 # extract the components 
 AlaskaDischarge3_components <- as.data.frame(AlaskaDischarge3_Decomposed$time.series)
@@ -78,8 +66,8 @@ geom_line(aes(y = Observed, x = Date), size = 0.25) + geom_line(aes(y = trend, x
 ```{r}
 # Generate monthly values from June 1915 to October 2019
 # use linear interpolation
-linearinterpolation <- as.data.frame(approx(Alaska_3$Discharge,n = 1252, method = "linear"))# don't know why the data ends at 2004, it should be in 2019/10
-linearinterpolation$x <- as.Date(linearinterpolation$x,origin = "1915-06-01")
+linearinterpolation <- as.data.frame(approx(Alaska_3$Discharge,n = 1252, method = "linear"))# don't know why the data ends at 2004, it should be ended at 2019/10
+linearinterpolation$x <- as.Date(linearinterpolation$x, origin = "1915-06-01")
 names(linearinterpolation) <-c("Date", "Discharge")
 
 # Generate time series smk.test
@@ -91,6 +79,6 @@ Discharge3_trend
 summary(Discharge3_trend)
 
 ```
-
+2 graphs per person. Choose 6 first
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
