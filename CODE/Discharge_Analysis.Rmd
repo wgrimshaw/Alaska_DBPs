@@ -1,0 +1,96 @@
+---
+title: "Discharge_Analysis"
+author: "Yixin Wen"
+date: "11/11/2019"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, setup, include=FALSE}
+getwd()
+
+library(tidyverse)
+library(lubridate)
+library(dataRetrieval)
+library(trend)
+library(forecast)
+library(tseries)
+
+theme_set(theme_classic())
+```
+
+
+```{r}
+# import data
+AlaskaTempPrecipDischarge <- read_csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+
+# transform bin into factor
+AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
+
+# drop na data in dataframe
+AlaskaTempPrecipDischarge <- AlaskaTempPrecipDischarge %>%
+  drop_na()
+
+# plot discharge  over time for 10 latitude bins
+discharge_plot <- ggplot(AlaskaTempPrecipDischarge)+
+  geom_line(aes(x = DATE, y = Discharge, color = Bin))+
+  labs(x = "", y = expression("Discharge (ft"^3*"/s)"),legend = "Bin")
+print(discharge_plot)
+```
+```{r,echo = FALSE}
+AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
+AlaskaTempPrecipDischarge <- AlaskaTempPrecipDischarge$Discharge %>%
+  drop_na()
+# plot discharge  over time for 10 latitude bins
+discharge_plot <- ggplot(AlaskaTempPrecipDischarge)+
+  geom_line(aes(x = DATE, y = Discharge, color = Bin))
+print(discharge_plot)
+  
+```
+
+```{r}
+# since bin 3 has the longest period, use 3 as an example
+AlaskaDischarge_3 <- AlaskaTempPrecipDischarge %>%
+  filter(Bin == 3)
+
+# dataset decomposition
+AlaskaDischarge_3_ts <- ts(AlaskaDischarge_3[[13]], frequency = 365)
+
+# Generate the decomposition
+AlaskaDischarge3_Decomposed <- stl(AlaskaDischarge_3_ts, s.window = "periodic")
+plot(AlaskaDischarge3_Decomposed)
+```
+```{r}
+# extract the components 
+AlaskaDischarge3_components <- as.data.frame(AlaskaDischarge3_Decomposed$time.series)
+AlaskaDischarge3_components <- mutate (AlaskaDischarge3_components,Observed = AlaskaDischarge_3$Discharge, Date = AlaskaDischarge_3$DATE)
+
+# visualize the trend map onto the data
+ggplot(AlaskaDischarge3_components) +
+geom_line(aes(y = Observed, x = Date), size = 0.25) + geom_line(aes(y = trend, x = Date), color = "#c13d75ff") + geom_hline(yintercept = 0, lty = 2) + ylab(expression("Discharge (ft"^3*"/s)"))
+
+
+
+```
+
+```{r}
+# Generate monthly values from June 1915 to October 2019
+# use linear interpolation
+linearinterpolation <- as.data.frame(approx(Alaska_3$Discharge,n = 1252, method = "linear"))#should be 1252
+linearinterpolation$x <- as.Date(linearinterpolation$x,origin = "1915-06-01")
+names(linearinterpolation) <-c("Date", "Discharge")
+
+# Generate time series smk.test
+Discharge3_ts <- ts(linearinterpolation$Discharge, frequency = 12, start = c(1915,6,1), end = c(2004, 9, 14))
+
+# Run SMK test
+Discharge3_trend <- smk.test(Discharge3_ts)
+Discharge3_trend
+summary(Discharge3_trend)
+
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
