@@ -72,7 +72,23 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 
 <Include R chunks for 5+ lines of summary code (display code and output), 3+ exploratory graphs (display graphs only), and any wrangling you do to your dataset(s).> 
 
+```{r Main Wrangling}
+
+```
+
 ```{r Temperature Graph}
+
+```
+
+```{r Precipitation}
+
+```
+
+```{r Discharge}
+
+```
+
+```{r Snowmelt Change}
 
 ```
 
