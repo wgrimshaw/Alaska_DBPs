@@ -78,12 +78,12 @@ geom_line(aes(y = Observed, x = Date), size = 0.25) + geom_line(aes(y = trend, x
 ```{r}
 # Generate monthly values from June 1915 to October 2019
 # use linear interpolation
-linearinterpolation <- as.data.frame(approx(Alaska_3$Discharge,n = 1252, method = "linear"))#should be 1252
+linearinterpolation <- as.data.frame(approx(Alaska_3$Discharge,n = 1252, method = "linear"))# don't know why the data ends at 2004, it should be in 2019/10
 linearinterpolation$x <- as.Date(linearinterpolation$x,origin = "1915-06-01")
 names(linearinterpolation) <-c("Date", "Discharge")
 
 # Generate time series smk.test
-Discharge3_ts <- ts(linearinterpolation$Discharge, frequency = 12, start = c(1915,6,1), end = c(2004, 9, 14))
+Discharge3_ts <- ts(linearinterpolation$Discharge, frequency = 12, start = c(1915,6,1), end = c(2004, 9, 14)) 
 
 # Run SMK test
 Discharge3_trend <- smk.test(Discharge3_ts)
