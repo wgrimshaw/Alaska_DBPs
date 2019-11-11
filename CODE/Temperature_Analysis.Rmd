@@ -15,10 +15,57 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 ## install packages and read data
 library(tidyverse)
+library(lubridate)
+library(trend)
+library(forecast)
+library(tseries)
 Alaska_Data <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+theme_set(theme_bw())
 ```
 
 ```{r}
+## Data wrangling
+## transform date column from factor to date
+Alaska_Data$DATE <- as.Date(Alaska_Data$DATE, format = "%Y-%m-%d")
+## Transform Bin column to factor
+Alaska_Data$Bin <- as.factor(Alaska_Data$Bin)
+
+
+## create plot of temperature over time for all 10 latitude bins
+ggplot(Alaska_Data, aes(x = DATE, y = TMAX, color = Bin)) +
+  geom_line()
+
+## try with just bins 1, 5, and 9
+Alaska_Data_259 <- Alaska_Data %>%
+  filter(Bin %in% c(2,5,9))
+
+ggplot(Alaska_Data, aes(x = DATE, y = TMAX, color = Bin)) +
+  #geom_line() +
+  geom_smooth()
 
 ```
 
+```{r}
+## decomposition of temperature series since the trends are so seasonal
+## example for bin 5, must remove NAs
+Alaska_Data_5 <- Alaska_Data %>%
+  filter(Bin == 5 & is.na(TMAX) == FALSE)
+## create time series object of temperature
+Alaska_Data_5_ts <- ts(Alaska_Data_5[[9]], frequency = 365)
+
+## decomposition
+Alaska5_Decomposed <- stl(Alaska_Data_5_ts, s.window = "periodic")
+plot(Alaska5_Decomposed)
+```
+
+```{r}
+## Seasonal Mann-Kendall for whether temperature is changing at each site
+# first create new dataset using linear interpolation
+range(Alaska_Data_5$DATE)
+# run smk on time series
+Alaska5Trend <- smk.test(Alaska_Data_5_ts)
+Alaska5Trend
+summary(Alaska5Trend)
+sea.sens.slope(Alaska_Data_5_ts) # gives an error, but not sure why
+```
+There is a statistically significant change in temperature over time for bin 5. Using Sen's slope, the magnitude of this trend is 
