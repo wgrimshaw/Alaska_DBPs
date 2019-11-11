@@ -185,7 +185,8 @@ NOAATempPrecipBin2$Bin<-2
 
 
 ### Remove Tavg Column from Precip 
-```{r}
+```{r, warning=FALSE, message=FALSE}
+library(dplyr)
 NOAATempPrecip48910<-select(NOAATempPrecip48910,-c(8))
 ```
 
@@ -197,7 +198,7 @@ NOAATempPrecip48910$Bin<-revalue(NOAATempPrecip48910$STATION,
 ```
 
 ## Upload Bins 6 and 7 
-```{r, message=FALSE}
+```{r, message=FALSE, warning=FALSE}
 setwd("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/PROCESSED")
 NOAATempPrecipBin67<-read.csv("NOAA_Temp_Precip_Bin_6_7.csv")
 ```
@@ -293,6 +294,202 @@ AlaskaTempPrecipDischarge <- merge(TempPrecip, NWIS_Discharge, by = c('DATE', 'B
 
 ## Export AlaskaTempPrecipDischarge CSV
 ```{r}
-AlaskaTempPrecipDischarge<-write.csv(AlaskaTempPrecipDischarge, "AlaskaTempPrecipDischarge.csv")
+###AlaskaTempPrecipDischarge<-write.csv(AlaskaTempPrecipDischarge, "AlaskaTempPrecipDischarge.csv")
 ```
 
+# Data Analysis and Visualization 
+
+#  Precip
+
+
+### Create Precip only Dataframe
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+AlaskaPrecipOnly<-select(AlaskaTempPrecipDischarge, .data$DATE, .data$PRCP, .data$Bin)
+```
+
+###Check number of Precipitation NA's and remove them
+```{r}
+sum(is.na(AlaskaPrecipOnly))
+newdata<-na.omit(AlaskaPrecipOnly)
+```
+
+# Subset the Data by Bin
+```{r}
+Bin1Precip<- newdata%>%filter(Bin==1)
+Bin2Precip<-newdata%>%filter(Bin==2)
+Bin3Precip<-newdata%>%filter(Bin==3)
+Bin4Precip<-newdata%>%filter(Bin==4)
+Bin5Precip<-newdata%>%filter(Bin==5)
+Bin6Precip<-newdata%>%filter(Bin==6)
+Bin7Precip<-newdata%>%filter(Bin==7)
+Bin8Precip<-newdata%>%filter(Bin==8)
+Bin9Precip<-newdata%>%filter(Bin==9)
+```
+
+
+
+```{r}
+##precip30<- newdata%>%filter(DATE >= as.Date('1995-06-04') & DATE <= as.Date('2019-11-02'))
+```
+
+
+### Set Personal Theme
+```{r}
+gabytheme <- theme_bw(base_size = 22) + 
+  theme(plot.title=element_text(face="bold", size="26", color="IndianRed3", hjust=0.5),
+        axis.title=element_text(size=22, color="black"),
+axis.text = element_text(face="bold", size=16, color = "black"), 
+panel.background=element_rect(fill="white", color="darkblue"), 
+panel.border = element_rect(color = "black", size = 2),
+legend.position = "top", legend.background = element_rect(fill="white", color="black"),
+            legend.key = element_rect(fill="transparent", color="NA"))
+
+theme_set(gabytheme)
+```
+
+
+
+# Plot Bin 1 Precip
+```{r, fig.width=9, fig.height=3}
+library(scales)
+library(ggplot2)
+Bin1PrecipPlot<- 
+  ggplot(Bin1Precip, aes(x = DATE, y = PRCP)) +
+  geom_line() +
+  ggtitle("Alaska Precipitation over Time") +
+  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  scale_x_date(labels=date_format("%Y"),
+               breaks=date_breaks("1 year"))+
+  gabytheme
+print(Bin1PrecipPlot)
+
+```
+
+# Plot Bin 2 Precip over Time
+```{r, fig.width=12}
+library(scales)
+library(ggplot2)
+Bin2PrecipPlot<- 
+  ggplot(Bin2Precip, aes(x = DATE, y = PRCP)) +
+  geom_line() +
+  ggtitle("Alaska Precipitation over Time") +
+  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  scale_x_date(labels=date_format("%y"),
+               breaks=date_breaks("1 year"))+
+  gabytheme
+print(Bin2PrecipPlot)
+```
+>There is a gap in precipitation data collection for Bin 2 from 1986-12-31 to 1995-10-01
+
+# Plot Bin 3 Precip over Time
+```{r, fig.width=17}
+library(scales)
+library(ggplot2)
+Bin3PrecipPlot<- 
+  ggplot(Bin3Precip, aes(x = DATE, y = PRCP)) +
+  geom_line() +
+  ggtitle("Alaska Precipitation over Time") +
+  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  scale_x_date(labels=date_format("%y"),
+               breaks=date_breaks("1 year"))+
+  gabytheme
+print(Bin3PrecipPlot)
+
+```
+>Much higher range in precip values-->more rain and snowfall?
+
+# Plot Bin 4 Precip over Time
+```{r, fig.width=17}
+library(scales)
+library(ggplot2)
+Bin4PrecipPlot<- 
+  ggplot(Bin4Precip, aes(x = DATE, y = PRCP)) +
+  geom_line() +
+  ggtitle("Alaska Precipitation over Time") +
+  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  scale_x_date(labels=date_format("%y"),
+               breaks=date_breaks("1 year"))+
+  gabytheme
+print(Bin4PrecipPlot)
+
+```
+
+# Plot Bin 5 Precip over Time
+```{r, fig.width=17}
+library(scales)
+library(ggplot2)
+Bin5PrecipPlot<- 
+  ggplot(Bin5Precip, aes(x = DATE, y = PRCP)) +
+  geom_line() +
+  ggtitle("Alaska Precipitation over Time") +
+  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  scale_x_date(labels=date_format("%y"),
+               breaks=date_breaks("1 year"))+
+  gabytheme
+print(Bin5PrecipPlot)
+
+```
+
+# Plot Bin 6 Precip over Time
+```{r, fig.width=17}
+library(scales)
+library(ggplot2)
+Bin6PrecipPlot<- 
+  ggplot(Bin6Precip, aes(x = DATE, y = PRCP)) +
+  geom_line() +
+  ggtitle("Alaska Precipitation over Time") +
+  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  scale_x_date(labels=date_format("%y"),
+               breaks=date_breaks("1 year"))+
+  gabytheme
+print(Bin6PrecipPlot)
+
+```
+# Plot Bin 7 Precip over time
+
+```{r, fig.width=17}
+library(scales)
+library(ggplot2)
+Bin7PrecipPlot<- 
+  ggplot(Bin7Precip, aes(x = DATE, y = PRCP)) +
+  geom_line() +
+  ggtitle("Alaska Precipitation over Time") +
+  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  scale_x_date(labels=date_format("%y"),
+               breaks=date_breaks("1 year"))+
+  gabytheme
+print(Bin7PrecipPlot)
+```
+
+
+# Plot Bin 8 Precip over time
+
+```{r, fig.width=17}
+library(scales)
+library(ggplot2)
+Bin8PrecipPlot<- 
+  ggplot(Bin8Precip, aes(x = DATE, y = PRCP)) +
+  geom_line() +
+  ggtitle("Alaska Precipitation over Time") +
+  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  scale_x_date(labels=date_format("%y"),
+               breaks=date_breaks("1 year"))+
+  gabytheme
+print(Bin8PrecipPlot)
+```
+# Plot Bin 9 Precip over time
+```{r, fig.width=17}
+library(scales)
+library(ggplot2)
+Bin9PrecipPlot<- 
+  ggplot(Bin9Precip, aes(x = DATE, y = PRCP)) +
+  geom_line() +
+  ggtitle("Alaska Precipitation over Time") +
+  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  scale_x_date(labels=date_format("%y"),
+               breaks=date_breaks("1 year"))+
+  gabytheme
+print(Bin9PrecipPlot)
+```
+>A lot less precip at highest latitude 
