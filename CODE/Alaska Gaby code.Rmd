@@ -289,13 +289,13 @@ names(NWIS_Discharge)[3]<-"DATE"
 
 # Join TempPrecip and NWIS_Discharge Data Frames by Date and Bin 
 ```{r}
-AlaskaTempPrecipDischarge <- merge(TempPrecip, NWIS_Discharge, by = c('DATE', 'Bin'))
+AlaskaTempPrecipDischarge <- TempPrecip %>%
+  merge(NWIS_Discharge, by = c('DATE', 'Bin')) %>%
+  rename(Discharge = X_00060_00003) %>%
+  select(DATE:Discharge)
 ```
 
-## Export AlaskaTempPrecipDischarge CSV
-```{r}
-###AlaskaTempPrecipDischarge<-write.csv(AlaskaTempPrecipDischarge, "AlaskaTempPrecipDischarge.csv")
-```
+
 
 # Data Analysis and Visualization 
 
@@ -325,6 +325,9 @@ Bin6Precip<-newdata%>%filter(Bin==6)
 Bin7Precip<-newdata%>%filter(Bin==7)
 Bin8Precip<-newdata%>%filter(Bin==8)
 Bin9Precip<-newdata%>%filter(Bin==9)
+=======
+AlaskaTempPrecipDischarge<-write.csv(AlaskaTempPrecipDischarge, "AlaskaTempPrecipDischarge.csv", row.names = F)
+>>>>>>> 1cc38df18fbe03fc1dd2154172895ebf3a4066a7
 ```
 
 
