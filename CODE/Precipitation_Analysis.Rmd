@@ -4,7 +4,7 @@ author: "Gaby Garcia"
 date: "11/11/2019"
 output: pdf_document
 ---
-# Load in Complete dataset
+# Load in Complete Cleaned Dataset
 ```{r, message=FALSE, warning=FALSE}
 
 setwd("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/PROCESSED")
@@ -20,37 +20,41 @@ AlaskaPrecipOnly<-select(AlaskaTempPrecipDischarge, .data$DATE, .data$PRCP, .dat
 
 ### Check number of Precipitation NA's and remove them
 ```{r}
-sum(is.na(AlaskaPrecipOnly))
 newdata<-na.omit(AlaskaPrecipOnly)
 ```
+
 ### Ensure Date is a date object and not a factor
 ```{r}
 newdata$DATE<-as.Date(newdata$DATE)
 ```
 
-# Subset the Data by Bin
+### Ensure Bin is a factor and not an integer
 ```{r}
-Bin1Precip<- newdata%>%filter(Bin==1)
-Bin2Precip<-newdata%>%filter(Bin==2)
-Bin3Precip<-newdata%>%filter(Bin==3)
-Bin4Precip<-newdata%>%filter(Bin==4)
-Bin5Precip<-newdata%>%filter(Bin==5)
-Bin6Precip<-newdata%>%filter(Bin==6)
-Bin7Precip<-newdata%>%filter(Bin==7)
-Bin8Precip<-newdata%>%filter(Bin==8)
-Bin9Precip<-newdata%>%filter(Bin==9)
-
+newdata$Bin <- as.factor(newdata$Bin)
 ```
 
-
-
+# Subset the Data by Bin
 ```{r}
-##precip30<- newdata%>%filter(DATE >= as.Date('1995-06-04') & DATE <= as.Date('2019-11-02'))
+library(plyr)
+
+
+Bin1Precip<-filter(newdata, Bin== 1)
+Bin2Precip<-filter(newdata, Bin== 2)
+Bin3Precip<-filter(newdata, Bin == 3)
+Bin4Precip<-filter(newdata, Bin == 4)
+Bin5Precip<-filter(newdata, Bin == 5)
+Bin6Precip<-filter(newdata, Bin == 6)
+Bin7Precip<-filter(newdata, Bin == 7)
+Bin8Precip<-filter(newdata, Bin == 8)
+Bin9Precip<-filter(newdata, Bin == 9)
+
+
 ```
 
 
 ### Set Personal Theme
 ```{r}
+library(ggplot2)
 gabytheme <- theme_bw(base_size = 22) + 
   theme(plot.title=element_text(face="bold", size="26", color="IndianRed3", hjust=0.5),
         axis.title=element_text(size=22, color="black"),
@@ -89,7 +93,7 @@ Bin2PrecipPlot<-
   ggplot(Bin2Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
   ggtitle("Alaska Precipitation over Time") +
-  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  labs(x = "", y = expression("Precipitation (in)"))+
   scale_x_date(labels=date_format("%y"),
                breaks=date_breaks("1 year"))+
   gabytheme
@@ -209,3 +213,166 @@ Bin9PrecipPlot<-
 print(Bin9PrecipPlot)
 ```
 >A lot less precip at highest latitude 
+
+# Attempt a Precip Line Graph but with geom_smooth
+```{r, fig.width=13, warning=FALSE, message=FALSE}
+PrecipLinePlot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
+  geom_smooth() +
+labs(title="Precipitation Measured over Time", x="Sample Year",
+       y="Precipitation (inches ^3)")+ 
+  scale_x_date(labels=date_format("%y"),
+               breaks=date_breaks("5 years"))+
+  gabytheme
+print(PrecipLinePlot)
+```
+
+## Scatterplot of Full Precipitation Period of Record Colored by Bin
+```{r, fig.width=15, fig.height=10}
+PrecipBoxplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
+  geom_point(alpha=0.6, size=2) +
+labs(title="Precipitation Measured over Time", x="Sample Year",
+       y="Precipitation (inches ^3)")+ 
+  scale_x_date(labels=date_format("%y"),
+               breaks=date_breaks("5 years"))+
+  gabytheme
+print(PrecipBoxplot)
+```
+
+
+##Add Day of Year Column to complete dataframe
+```{r, warning=FALSE, message=FALSE}
+library(dplyr)
+library(lubridate)
+newdata <-mutate(newdata, DOY = yday(DATE))
+```
+
+
+
+###
+```{r}
+library(dplyr)
+
+PrecipMedian <- newdata%>% group_by(Bin, DOY) %>%
+  mutate(PrecipMedian= median(PRCP))
+
+
+dis.doy.med <- ggplot(data.spring.median) +
+  geom_line(aes(x = DOY, y = Dis.Med, color = as.factor(Bin))) +
+  labs(x = "Day of Year", y = "Median Discharge") +
+  scale_color_viridis_d() +
+  theme(legend.position = "top")
+print(dis.doy.med)
+
+
+
+```
+
+##Plot the Median Precipitation by Bin 
+```{r, fig.width=5}
+library(viridis)
+
+PrecipMedianPlot<- ggplot(newdata) +
+  geom_line(aes(x = DOY, y = PrecipMedian, color = as.factor(Bin))) +
+  labs(x = "Day of Year", y = "Median Precipitation") +
+  scale_colour_manual(values=c('#DC143C', '#00CED1','#BA55D3',	'#D2691E', '#32CD32'))
+  theme(legend.position = "top")+
+    theme(legend.key.size = unit(1, "cm"))+
+  labs(color="Bin")
+
+print(PrecipMedianPlot)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Run a Mann-Kendall test for each Bin
+>A Mann-Kendall test will analyze whether there is a monotonic trend in the response variable over time. 
+
+## Mann Kendall for Bin 1
+```{r}
+library(trend)
+Bin1Precip$PRCP<-as.numeric(Bin1Precip$PRCP)
+mk.test(Bin1Precip$PRCP)
+```
+>We see a negative trend in precipitation over time. z is the direction and magnitude of the trend. p=0.203 so we reject the null hypothesis
+
+
+### Pettitt's Test
+Pettitt's test is also included in the `trend` package. This nonparametric test will determine whether there is a shift in the central tendency of the time series and will tell us at what point the changepoint occurs (if it detects one). Note: Pettitt's Test will only test for one changepoint, and further tests must be run if multiple change points are suspected.
+
+```{r}
+# Test for change point
+pettitt.test(Bin1Precip$PRCP)
+
+```
+>Is our p-value <0.05? IF SO THEN OUR CHANGE POINT IS SIGNIFICANT. 
+It is 0.029, so we'll have to go into our data set and look at where change point happened
+change point is 910, so scroll down to place 910 in data set. It happened in 1970-04-28. 
+
+
+## Run separate Mann-Kendall for each change point
+```{r}
+mk.test(Bin1Precip$PRCP[1:909])
+mk.test(Bin1Precip$PRCP[910:2492])
+
+```
+
+## Is there a second change point?
+```{r}
+pettitt.test(Bin1Precip$PRCP[910:2492])  
+```
+>910+858=1768, so look at 1768 row in datatable to see second change point. 1972-09-02
+
+### Check to see if Second Change Point is significant
+```{r}
+mk.test(Bin1Precip$PRCP[910:1767])   
+mk.test(Bin1Precip$PRCP[1768:2492])
+```
+
+
+# Seasonal Mann Kendall for Bin 1 Precip
+
+## Create a time series object
+```{r}
+Bin1TimeSeries<- ts(Bin1Precip$PRCP, 
+                                frequency = 365)
+```
+
+### Decomposition
+```{r}
+Bin1Decomposed <- stl(Bin1TimeSeries, s.window = "periodic")
+plot(Bin1Decomposed)
+```
+
+## Perform Seasonal Mann Kendall Test
+```{r}
+Bin1SeasonalTrend <- smk.test(Bin1TimeSeries)
+
+summary(Bin1SeasonalTrend)
+```
+
+
+>Do Seasonal Mann Kendall test for the 9 stations 
+>Moving average from coding challenge
+
