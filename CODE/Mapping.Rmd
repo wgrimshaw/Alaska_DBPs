@@ -1,0 +1,76 @@
+---
+title: "Mapping"
+author: "Walker Grimshaw"
+date: "11/11/2019"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+## install packages and read data
+library(tidyverse)
+library(lubridate)
+library(trend)
+library(forecast)
+library(tseries)
+library(zoo)
+library(sf)
+library(maps)
+library(dataRetrieval)
+Alaska_Data <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+theme_set(theme_bw())
+```
+
+```{r}
+## this didn't work, need to find another Alaska map
+Alaska_Border <- st_as_sf(map(database = "state", plot = TRUE, fill = TRUE, col = "white")) %>%
+  filter(ID == "alaska")
+
+## create summary dataframe with only site locations
+## NOAA site locations
+NOAA_sites <- c("USC00500464", "USC00502107", "USW00025325", "USW00025624",
+                "USW00025704", "USW00026451", "USW00026510", "USW00026615",
+                "USW00027502", "USW00027502")
+NOAA_Lat <- c(58.3814, 64.8603,	55.35, 55.2207,
+              51.88333, 61.169, 62.9574, 60.785,
+              71.2834, 71.2834)
+NOAA_Lon <- c(-134.645, -147.8484, -131.65, -162.7324,
+              -176.65, -150.0278, -155.6103, -161.8293,
+              -156.7815, -156.7815)
+
+## combine and add bin number by sorting by latitude
+NOAA_site_data <- data.frame(cbind(NOAA_sites, NOAA_Lat, NOAA_Lon)) %>%
+  arrange(NOAA_Lat) %>%
+  mutate(Bin = c(1,2,3,4,5,6,7,8,9, 10),
+         NOAA_Lat = as.numeric(as.character(NOAA_Lat)),
+         NOAA_Lon = as.numeric(as.character(NOAA_Lon)))
+
+## discharge lat and lon in NAD83
+discharge_sites <- readNWISsite(c("15052500", "15072000","15276000", "15297610",
+                                "15297680", "15304000", "15453500", "15514000",
+                                "15896000", "15908000")) %>%
+  select(site_no, dec_lat_va, dec_long_va) %>%
+  arrange(dec_lat_va) %>%
+  mutate(Bin = c(1,2,3,4,5,6,7,8,9,10)) %>%
+  rename(discharge_site = site_no, discharge_lat = dec_lat_va,
+         discharge_long = dec_long_va) %>%
+  mutate(discharge_lat = as.numeric(as.character(discharge_lat)),
+         discharge_long = as.numeric(as.character(discharge_long)))
+
+NOAA_spatial <- st_as_sf(NOAA_site_data, coords = c("NOAA_Lon", "NOAA_Lat"),
+                         crs = 4326)
+discharge_spatial <- st_as_sf(discharge_sites,
+                              coords = c("discharge_long", "discharge_lat"),
+                              crs = 4326)
+
+ggplot() +
+  geom_sf(data = NOAA_spatial, color = "blue") +
+  geom_sf(data = discharge_spatial, color = "red")
+```
+

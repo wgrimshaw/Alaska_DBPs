@@ -19,6 +19,7 @@ library(lubridate)
 library(trend)
 library(forecast)
 library(tseries)
+library(zoo)
 Alaska_Data <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 theme_set(theme_bw())
 ```
@@ -29,11 +30,15 @@ theme_set(theme_bw())
 Alaska_Data$DATE <- as.Date(Alaska_Data$DATE, format = "%Y-%m-%d")
 ## Transform Bin column to factor
 Alaska_Data$Bin <- as.factor(Alaska_Data$Bin)
-
+## add rolling mean temperature column
+Alaska_Data <- mutate(Alaska_Data,
+                      TMAX_roll = rollmean(TMAX, 60, fill = NA))
 
 ## create plot of temperature over time for all 10 latitude bins
-ggplot(Alaska_Data, aes(x = DATE, y = TMAX, color = Bin)) +
-  geom_line()
+ggplot(Alaska_Data, aes(x = DATE, y = TMAX)) +
+  geom_line(alpha = 0.8) +
+  facet_wrap(~Bin, nrow = 3, ncol = 3) +
+  labs(y = "Maximum Daily Temperature (F)", x = "Date")
 
 ## try with just bins 1, 5, and 9
 Alaska_Data_259 <- Alaska_Data %>%
@@ -43,6 +48,22 @@ ggplot(Alaska_Data, aes(x = DATE, y = TMAX, color = Bin)) +
   #geom_line() +
   geom_smooth()
 
+## What about average monthly temperature?
+Alaska_Temp_Monthly <- Alaska_Data %>%
+  mutate(Year = year(DATE), Month = month(DATE)) %>%
+  group_by(Year, Month, Bin) %>%
+  summarize(aveTMAX = mean(TMAX, na.omit = T)) %>%
+  mutate(Date = as.yearmon(paste(Year, Month), "%Y %m"))
+
+## try plotting monthly averages, all look bad
+ggplot(Alaska_Temp_Monthly, aes(x = Month, y = aveTMAX, color = Year)) +
+  geom_point(alpha = 0.5) +
+  scale_color_viridis_c() +
+  facet_wrap(~Bin, nrow = 3, ncol = 3)
+
+ggplot(Alaska_Temp_Monthly, aes(x = Date, y = aveTMAX)) +
+  geom_line() +
+  facet_wrap(~Bin, nrow = 3, ncol = 3)
 ```
 
 ```{r}
