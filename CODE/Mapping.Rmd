@@ -1,0 +1,41 @@
+---
+title: "Mapping"
+author: "Walker Grimshaw"
+date: "11/11/2019"
+output: pdf_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+## install packages and read data
+library(tidyverse)
+library(lubridate)
+library(trend)
+library(forecast)
+library(tseries)
+library(zoo)
+library(sf)
+library(maps)
+Alaska_Data <- read.csv("../DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+theme_set(theme_bw())
+```
+
+```{r}
+## this didn't work, need to find another Alaska map
+Alaska_Border <- st_as_sf(map(database = "state", plot = TRUE, fill = TRUE, col = "white")) %>%
+  filter(ID == "alaska")
+
+## create summary dataframe with only site locations
+discharge_sites <- Alaska_Data %>%
+  group_by(site_no) %>%
+  summarize(Bin = first(Bin), )
+
+secchi.spatial <- st_as_sf(secchi.summary, coords = c("long", "lat"), crs = 4326)
+```
+
