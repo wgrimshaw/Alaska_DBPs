@@ -37,6 +37,8 @@ library(lubridate)
 library(trend)
 library(forecast)
 library(tseries)
+
+theme_set(theme_bw())
 ```
 
 
@@ -76,8 +78,12 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 
 ```
 
-```{r Temperature Graph}
-
+```{r Temperature Graph, echo=FALSE, fig.cap= "Daily maximum temperature for the period of record of each latitude bin. There are no obvious trends, and the period of record differs substantially for each site."}
+## create plot of temperature over time for all 10 latitude bins
+ggplot(Alaska_Data, aes(x = DATE, y = TMAX)) +
+  geom_line(alpha = 0.8) +
+  facet_wrap(~Bin, nrow = 3, ncol = 3) +
+  labs(y = "Maximum Daily Temperature (F)", x = "Date")
 ```
 
 ```{r Precipitation}

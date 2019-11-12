@@ -35,10 +35,10 @@ Alaska_Data <- mutate(Alaska_Data,
                       TMAX_roll = rollmean(TMAX, 60, fill = NA))
 
 ## create plot of temperature over time for all 10 latitude bins
-ggplot(Alaska_Data, aes(x = DATE)) +
-  geom_line(aes(y = TMAX)) +
-  geom_line(aes(y = TMAX_roll), color = "red") +
-  facet_wrap(~Bin, nrow = 3, ncol = 3)
+ggplot(Alaska_Data, aes(x = DATE, y = TMAX)) +
+  geom_line(alpha = 0.8) +
+  facet_wrap(~Bin, nrow = 3, ncol = 3) +
+  labs(y = "Maximum Daily Temperature (F)", x = "Date")
 
 ## try with just bins 1, 5, and 9
 Alaska_Data_259 <- Alaska_Data %>%
