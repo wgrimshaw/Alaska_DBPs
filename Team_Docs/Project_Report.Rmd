@@ -86,9 +86,29 @@ ggplot(Alaska_Data, aes(x = DATE, y = TMAX)) +
   labs(y = "Maximum Daily Temperature (F)", x = "Date")
 ```
 
-```{r Precipitation}
 
+
+
+# Full Precipitation Period of Record over Time, divided by Bin 
+```{r, fig.width=10, fig.height=6}
+
+AlaskaTempPrecipDischarge<-read.csv("AlaskaTempPrecipDischarge.csv")
+AlaskaPrecipOnly<-select(AlaskaTempPrecipDischarge, .data$DATE, .data$PRCP, .data$Bin)
+newdata<-na.omit(AlaskaPrecipOnly)
+
+PrecipBoxplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
+  geom_point(alpha=0.5, size=2) +
+labs(title="Full Precipitation Period of Record Measured over Time by Bin", x="Sample Year",
+       y="Precipitation (inches)")+ 
+  scale_x_date(labels=date_format("%y"),
+               breaks=date_breaks("5 years"))+
+  scale_fill_manual(guide=guide_legend(keyheight=unit(4, units="mm")))+
+  gabytheme
+print(PrecipBoxplot)
 ```
+
+
+
 
 ```{r Discharge}
 
