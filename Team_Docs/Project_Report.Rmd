@@ -138,6 +138,7 @@ print(PrecipBoxplot)
 ```
 
 
+Give a general image of how discharge changes over time in different latitudes.
 ```{r Discharge, plot discharge over time for 10 bins}
 #import the data
 AlaskaTempPrecipDischarge <- read.csv("../DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
@@ -220,6 +221,8 @@ A seasonal Mann-Kendall test was used to determine if there was a long-term tren
 
 A seasonal Sen's Slope quantifies the magnitude of the temperature and discharge trends.
 
+
+From general discharge image of 10 bins, Bin 6 seems to have seasonal change. Thus apply smk.test on bin 6 discharge data to see if there's a seasonal trend. adf.test is also applied to see if the data is stationary. If it is, use auto.arima function to find the best fit model to predict the future discharge and plot the graph. 
 ```{r Discharge}
 # Time series for Bin 6
 AlaskaDischarge_6 <- AlaskaDischarge %>% 
