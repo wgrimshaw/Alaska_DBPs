@@ -227,34 +227,34 @@ print(PrecipLinePlot)
 ```
 
 ## Scatterplot of Full Precipitation Period of Record Colored by Bin
-```{r, fig.width=15, fig.height=10}
+```{r, fig.width=10, fig.height=6}
 PrecipBoxplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
-  geom_point(alpha=0.6, size=2) +
+  geom_point(alpha=0.5, size=2) +
 labs(title="Precipitation Measured over Time", x="Sample Year",
-       y="Precipitation (inches ^3)")+ 
+       y="Precipitation (inches)")+ 
   scale_x_date(labels=date_format("%y"),
                breaks=date_breaks("5 years"))+
+  scale_fill_manual(guide=guide_legend(keyheight=unit(4, units="mm")))+
   gabytheme
 print(PrecipBoxplot)
 ```
 
 
-##Add Day of Year Column to complete dataframe
+## Add Day of Year Column to complete dataframe
 ```{r, warning=FALSE, message=FALSE}
 library(dplyr)
 library(lubridate)
-newdata <-mutate(newdata, DOY = yday(DATE))
+newdata <-mutate(newdata, DOY = yday(DATE), Year=year(DATE), Month=month(DATE))
 ```
 
 
 
-###
 ```{r}
 library(dplyr)
+library(plyr)
 
-PrecipMedian <- newdata%>% group_by(Bin, DOY) %>%
-  mutate(PrecipMedian= median(PRCP))
-
+data.spring.median <- data.spring %>% group_by(Bin, DOY) %>%
+  mutate(Dis.Med = median(Discharge))
 
 dis.doy.med <- ggplot(data.spring.median) +
   geom_line(aes(x = DOY, y = Dis.Med, color = as.factor(Bin))) +
@@ -262,10 +262,18 @@ dis.doy.med <- ggplot(data.spring.median) +
   scale_color_viridis_d() +
   theme(legend.position = "top")
 print(dis.doy.med)
-
-
-
 ```
+
+
+
+
+
+
+
+
+
+
+
 
 ##Plot the Median Precipitation by Bin 
 ```{r, fig.width=5}
@@ -274,7 +282,7 @@ library(viridis)
 PrecipMedianPlot<- ggplot(newdata) +
   geom_line(aes(x = DOY, y = PrecipMedian, color = as.factor(Bin))) +
   labs(x = "Day of Year", y = "Median Precipitation") +
-  scale_colour_manual(values=c('#DC143C', '#00CED1','#BA55D3',	'#D2691E', '#32CD32'))
+  scale_colour_manual(values=c('#DC143C', '#00CED1','#BA55D3',	'#D2691E', '#32CD32'))+
   theme(legend.position = "top")+
     theme(legend.key.size = unit(1, "cm"))+
   labs(color="Bin")
