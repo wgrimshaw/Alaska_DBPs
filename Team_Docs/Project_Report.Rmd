@@ -93,12 +93,12 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 
 ```{r Main Wrangling, message=FALSE, warning=FALSE}
 # Import all Data Frames
-NOAATempPrecipBin1 <- read.csv("./DATA/RAW/NOAA_Temp_Bin1.csv")
-NOAATempPrecipBin2 <- read.csv("./DATA/RAW/NOAA_Temp_Bin2.csv")
-NOAATempPrecipBin3 <- read.csv("./DATA/RAW/NOAA_Temp_Bin3.csv")
-NOAATempPrecipBin5 <- read.csv("./DATA/RAW/Bin5TempandPrecip.csv")
+NOAATempPrecipBin1 <- read.csv("../DATA/RAW/NOAA_Temp_Bin1.csv")
+NOAATempPrecipBin2 <- read.csv("../DATA/RAW/NOAA_Temp_Bin2.csv")
+NOAATempPrecipBin3 <- read.csv("../DATA/RAW/NOAA_Temp_Bin3.csv")
+NOAATempPrecipBin5 <- read.csv("../DATA/RAW/Bin5TempandPrecip.csv")
 NOAATempPrecip48910 <- 
-  read.csv("./DATA/RAW/NOAA_Precip_Temp_Bin_4_8_9_10.csv")
+  read.csv("../DATA/RAW/NOAA_Precip_Temp_Bin_4_8_9_10.csv")
 
 ### Add Bin 2 Column to NOAATempPrecipBin2
 NOAATempPrecipBin2$Bin <- 2
@@ -112,7 +112,7 @@ NOAATempPrecip48910$Bin <- revalue(NOAATempPrecip48910$STATION,
 
 ### Upload Bins 6 and 7 
 NOAATempPrecipBin67 <- 
-  read.csv("./DATA/PROCESSED/NOAA_Temp_Precip_Bin_6_7.csv")
+  read.csv("../DATA/PROCESSED/NOAA_Temp_Precip_Bin_6_7.csv")
 
 ### Remove Snow Column from Precip Temp 6 & 7
 NOAATempPrecipBin67 <- select(NOAATempPrecipBin67,-c(8))
@@ -172,7 +172,7 @@ TempPrecip<-rbind(NOAATempPrecipBin1, NOAATempPrecipBin2,
                   NOAATempPrecipBin67, NOAATempPrecip48910)
 
 # Import USGS Discharge Data
-NWIS_Discharge<-read.csv("./DATA/RAW/NWIS_Discharge.csv")
+NWIS_Discharge<-read.csv("../DATA/RAW/NWIS_Discharge.csv")
 
 ### Convert site_no to a factor
 NWIS_Discharge$site_no<-as.factor(NWIS_Discharge$site_no)
@@ -198,10 +198,11 @@ AlaskaTempPrecipDischarge <- TempPrecip %>%
 
 The first step of the analysis process is determining the presence and magnitude of temperature change across the latitude range of Alaska. The daily maximum temperature data show no obvious trends over time for any of the sites. Furthermore, the sites differ substantially in the period of record of their temperature data. Sites with no recent observations may need to be dropped from analysis, unless nearby streams have similar periods of record.
 
+# Temperature
 ```{r Temperature Graph, echo=FALSE, fig.cap= "Daily maximum temperature for the period of record of each latitude bin. There are no obvious trends, and the period of record differs substantially for each site."}
 
 AlaskaTempPrecipDischarge <- 
-  read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+  read.csv("../DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 ## transform date column from factor to date
 AlaskaTempPrecipDischarge$DATE <- as.Date(AlaskaTempPrecipDischarge$DATE,
                                           format = "%Y-%m-%d")
@@ -217,17 +218,25 @@ ggplot(AlaskaTempPrecipDischarge, aes(x = DATE, y = TMAX)) +
 ```
 
 
-```{r, fig.width=10, fig.height=6, echo = FALSE, warning=FALSE, message=FALSE}
+#Precipitation 
+```{r, fig.width=14, fig.height=6, echo = FALSE, warning=FALSE, message=FALSE}
 # Full Precipitation Period of Record over Time, divided by Bin
 
 ## Load Data
 AlaskaTempPrecipDischarge <- 
-  read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+  read.csv("../DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 AlaskaPrecipOnly <- select(AlaskaTempPrecipDischarge, .data$DATE, .data$PRCP, .data$Bin)
 newdata <- na.omit(AlaskaPrecipOnly)
 
-### Create and set theme
-gabytheme <- theme_bw(base_size = 22) + 
+### Ensure Date is a date object and not a factor
+newdata$DATE<-as.Date(newdata$DATE)
+
+
+### Ensure Bin is a factor and not an integer
+newdata$Bin <- as.factor(newdata$Bin)
+
+## Create and set theme
+gabytheme <- theme_bw(base_size = 19) + 
   theme(plot.title=element_text(face="bold", size="26", 
         color="IndianRed3", hjust=0.5),
         axis.title=element_text(size=22, color="black"),
@@ -239,14 +248,12 @@ legend.background = element_rect(fill="white", color="black"),
             legend.key = element_rect(fill="transparent", color="NA"))
 
 
-## Plot Precipitation 
+# Plot Precipitation 
 PrecipBoxplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
   geom_point(alpha=0.5, size=2) +
 labs(title="Full Precipitation Period of Record Measured over Time by Bin", 
      x="Sample Year",
-       y="Precipitation (inches)") + 
-#  scale_x_date(labels=date_format("%y"),
-#            breaks=date_breaks("5 years"))+
+       y="Precipitation (inches)") +
   scale_fill_manual(guide=guide_legend(keyheight=unit(4, units="mm"))) +
   gabytheme
 print(PrecipBoxplot)
@@ -254,15 +261,15 @@ print(PrecipBoxplot)
 ```
 
 
-<<<<<<< HEAD
+
 Give a general image of how discharge changes over time in different latitudes.
-```{r Discharge, plot discharge over time for 10 bins}
-=======
+
+# Discharge 
 ```{r Discharge, plot discharge over time for 10 bins, echo=FALSE}
->>>>>>> 6361a6ebcd717e909f77edcf77a429d25d408d69
+
 #import the data
 AlaskaTempPrecipDischarge <- 
-  read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+  read.csv("../DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 # transform bin into factor
 AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
 #Extract date and discharge data
@@ -287,7 +294,7 @@ Discharge is to be used as a proxy for snowmelt. The data was loaded and wrangle
 
 #Load the data
 AlaskaTempPrecipDischarge <- 
-  read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+  read.csv("../DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 #Convert DATE column to class 'Date'
 AlaskaTempPrecipDischarge$DATE <- ymd(AlaskaTempPrecipDischarge$DATE)
 
@@ -343,17 +350,12 @@ A seasonal Mann-Kendall test was used to determine if there was a long-term tren
 
 A seasonal Sen's Slope quantifies the magnitude of the temperature and discharge trends.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 
 From general discharge image of 10 bins, Bin 6 seems to have seasonal change. Thus apply smk.test on bin 6 discharge data to see if there's a seasonal trend. adf.test is also applied to see if the data is stationary. If it is, use auto.arima function to find the best fit model to predict the future discharge and plot the graph. 
-```{r Discharge}
-=======
-```{r Discharge, echo=FALSE}
->>>>>>> 6361a6ebcd717e909f77edcf77a429d25d408d69
-=======
-```{r Discharge, eval=FALSE}
->>>>>>> bdc358699638beecd27d5c03f59d01de85df7457
+
+
+```{r, echo=FALSE}
+
 # Time series for Bin 6
 AlaskaDischarge_6 <- AlaskaDischarge %>% 
   filter(Bin == 6)%>%
