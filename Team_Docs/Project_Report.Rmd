@@ -40,6 +40,8 @@ library(tseries)
 library(sf)
 library(maps)
 library(dataRetrieval)
+library(viridis)
+library(ggplot2)
 
 theme_set(theme_bw())
 ```
@@ -49,7 +51,7 @@ theme_set(theme_bw())
 
 <Paragraph detailing the rationale for your analysis. What is the significant application and/or interest in this topic? Connect to environmental topic(s)/challenge(s).>
 
-The climate is changing, in large part due to anthropogenic carbon emmissions. These changes have different magnitudes around the world and local impacts of climate change vary as well. Specifically, climate change is already having greater impacts near the poles than many other parts of the globe.
+The climate is changing, in large part due to anthropogenic carbon emmissions. These changes have different magnitudes around the world and local impacts of climate change vary as well. Specifically, climate change is already having greater impacts near the poles than many other parts of the globe. Understanding how climate change is affecting discharge, especially in Alaska, has implications for water management, ecological processes, and the larger global system (if we consider ice-albedo feedback).
 
 ## Research Question
 
@@ -153,55 +155,52 @@ discharge_plot <- ggplot(AlaskaDischarge,aes(x = DATE, y = Discharge))+
 print(discharge_plot)
 ```
 
-```{r Snowmelt Change}
+
+Discharge is to be used as a proxy for snowmelt. The data was loaded and wrangled to include the year, month, day, day of year, and week in order to better analyze if and how the day of first snowmelt is changing. The data was filtered for weeks 1-30 of each year (mid-winter to mid-summer), to minimize the amount of data being plotted in exploratory graphs. The mean discharge for each day of year through time by latitude bin was plotted. This served to provide insight into roughly when the day of firt snowmelt was for each site, and to see how different sites varied. The data was then filtered to look at a single latitude bin, in this case bin 6, and see how discharge changed by the day of year across the period of record. In order to better visual any trend, bin 6 was filtered for data on a ten year frequency for the past fifty years (1979, 1989, 1999, 2009, 2019). After looking at the various exploratory graphs, it was decided to proceed with using peak discharge as a proxy for peak snowmelt, rather than try to determine when the first snowmelt of each year was occuring. 
+
+```{r Snowmelt Change, echo = FALSE}
 
 #Load the data
 AlaskaTempPrecipDischarge <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
-
 #Convert DATE column to class 'Date'
-AlaskaTempPrecipDischarge$DATE <- ymd(Snowmelt.Discharge$DATE)
+AlaskaTempPrecipDischarge$DATE <- ymd(AlaskaTempPrecipDischarge$DATE)
 
 #Add date columns
-Snowmelt.Discharge <- AlaskaTempPrecipDischarge %>% mutate(
-                        YEAR = year(DATE), 
+Snowmelt.Discharge <- AlaskaTempPrecipDischarge %>% mutate(YEAR = year(DATE), 
                         MONTH = month(DATE), 
-                        DAY = day(DATE), 
-                        WEEK = week(DATE), 
+                        DAY = day(DATE), WEEK = week(DATE), 
                         DOY = yday(DATE))
 
-#Filter for weeks 1-30 to deal with less Snowmelt.Discharge
-Snowmelt.Discharge.spring <- Snowmelt.Discharge %>% filter(WEEK < 30)
+Snowmelt.Discharge.Spring <- Snowmelt.Discharge %>% filter(WEEK < 30)
 
-#Dataframes for each bin
-#Filter for only needed columns and bin
-bin1 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 1)
+#Plot mean discharge for each DOY through time by bin
+Snowmelt.Discharge.Mean <- Snowmelt.Discharge.Spring %>% group_by(Bin, DOY) %>%
+  mutate(Dis.Mean = mean(Discharge))
 
-bin2 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 2)
-
-bin3 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 3)
-
-bin4 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 4)
-
-bin5 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 5)
-
-bin6 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 6)
-
-bin7 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 7)
-
-bin8 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 8)
-
-bin9 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 9)
-
-
-Snowmelt.Discharge.spring.median <- Snowmelt.Discharge.spring %>% group_by(Bin, DOY) %>%
-  mutate(Dis.Med = median(Discharge))
-  
-dis.doy.med <- ggplot(Snowmelt.Discharge.spring.median) +
-  geom_line(aes(x = DOY, y = Dis.Med, color = as.factor(Bin))) +
-  labs(x = "Day of Year", y = "Median Discharge", color = "Latitude Bin") +
+dis.doy.mean <- ggplot(Snowmelt.Discharge.Mean) +
+  geom_line(aes(x = DOY, y = Dis.Mean, color = as.factor(Bin))) +
+  labs(x = "Day of Year", y = "Mean Discharge, cfs", color = "Latitude Bin") +
   scale_color_viridis_d() +
   theme(legend.position = "top")
-print(dis.doy.med)
+print(dis.doy.mean)
+
+
+#Make dataframes for bin analysis
+#Filter for only needed columns and bin
+Snowmelt.Discharge.Bin6 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
+  filter(Bin == 6)
+
+#Latitude Bin 6 - discrete years - every 10
+Snowmelt.Discharge.Bin6.10Year <- Snowmelt.Discharge.Bin6 %>% 
+  filter(YEAR == 1979 | YEAR == 1989 | YEAR == 1999 | YEAR == 2009 | YEAR == 2019)
+
+dis.doy.6.10 <- ggplot(Snowmelt.Discharge.Bin6.10Year) +
+  geom_line(aes(x = DOY, y = Discharge, color = as.factor((YEAR)))) +
+  labs(x = "Day of Year", y = "Discharge, cfs", color = "Year") +
+  scale_color_viridis_d() +
+  theme(legend.position = "top")
+print(dis.doy.6.10)
+
 
 ```
 
@@ -252,11 +251,7 @@ ts.plot(AlaskaDischagre_6_ts.Monthly, AlaskaDischagre_6_prediction$pred, lty = c
 
 ## Predictability of snowmelt
 
-Analy
-
-Is there a change over time of the period when snow melts? Perhaps be looking at the date of the greatest increase in discharge.
-
-
+Is there a change over time of the period when snow melts? Peak discharge will be used as a proxy for peak snowmelt. At each latitude bin, the day of year of peak snowmelt will be found for each year in the period of record. If thare are any gaps in the data, it will be addressed through linear interpolation. Once the day of year of peak snowmelt is found, a dataframe of 'Year' and 'Day of Year of Peak Snowmelt' will be created, and a time series will be run to see if there is any significant change at each site in the day of peak snowmelt. 
 
 
 <Include text sections to accompany these R chunks to explain the reasoning behind your workflow, rationale for your approach, and the justification of meeting or failing to meet assumptions of tests.>
