@@ -87,8 +87,6 @@ ggplot(Alaska_Data, aes(x = DATE, y = TMAX)) +
 ```
 
 
-
-
 # Full Precipitation Period of Record over Time, divided by Bin 
 ```{r, fig.width=10, fig.height=6}
 
@@ -109,9 +107,21 @@ print(PrecipBoxplot)
 
 
 
-
-```{r Discharge}
-
+```{r Discharge, plot discharge over time for 10 bins}
+AlaskaTempPrecipDischarge <- read_csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+# transform bin into factor
+AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
+#Extract date and discharge data
+AlaskaDischarge <- AlaskaTempPrecipDischarge%>%
+  select("DATE", "Bin","STATION","NAME", "site_no", "Discharge")
+#drop na
+AlaskaDischarge%>%drop_na()
+# plot discharge over time for 10 latitude bins
+discharge_plot <- ggplot(AlaskaDischarge,aes(x = DATE, y = Discharge))+
+  geom_line()+
+  facet_wrap(~Bin, nrow = 3, ncol = 3)+
+  labs(x = "Date", y =expression("Discharge (ft"^3*"/s)"))
+print(discharge_plot)
 ```
 
 ```{r Snowmelt Change}
@@ -133,8 +143,34 @@ A seasonal Mann-Kendall test was used to determine if there was a long-term tren
 
 A seasonal Sen's Slope quantifies the magnitude of the temperature and discharge trends.
 
-```{r}
+```{r Discharge}
+# Time series for Bin 6
+AlaskaDischagre_6.Monthly <- AlaskaDischarge_6%>%
+  mutate(Year = year(DATE), Month = month(DATE))%>%
+  group_by(Year,Month)%>%
+  summarise(Discharge = mean(Discharge))
 
+AlaskaDischagre_6_ts.Monthly <- ts(AlaskaDischagre_6.Monthly[[3]], frequency = 12)
+
+AlaskaDischagre_6_trend.Monthly <-smk.test(AlaskaDischagre_6_ts.Monthly) 
+AlaskaDischagre_6_trend.Monthly
+summary(AlaskaDischagre_6_trend.Monthly)
+
+# test if the data is stationary
+adf.test(AlaskaDischagre_6_ts.Monthly, alternative = "stationary")
+# since the p-value is 0.01 < 0.05, the data is stationary
+
+#run the arima function and search for best fit
+auto.arima(AlaskaDischagre_6_ts.Monthly, trace = TRUE)
+
+# create an object that defines the best fit model
+fit <- arima(AlaskaDischagre_6_ts.Monthly, c(1, 0, 0),seasonal = list(order = c(1, 1, 0), period = 12)) 
+
+# make a prediction into the future
+AlaskaDischagre_6_prediction <- predict(fit, n.ahead = 10*12)
+
+# plot future predictions
+ts.plot(AlaskaDischagre_6_ts.Monthly, AlaskaDischagre_6_prediction$pred, lty = c(1, 3))
 ```
 
 ## Predictability of snowmelt
