@@ -37,6 +37,9 @@ library(lubridate)
 library(trend)
 library(forecast)
 library(tseries)
+library(sf)
+library(maps)
+library(dataRetrieval)
 
 theme_set(theme_bw())
 ```
@@ -46,11 +49,17 @@ theme_set(theme_bw())
 
 <Paragraph detailing the rationale for your analysis. What is the significant application and/or interest in this topic? Connect to environmental topic(s)/challenge(s).>
 
-## Background
+The climate is changing, in large part due to anthropogenic carbon emmissions. These changes have different magnitudes around the world and local impacts of climate change vary as well. Specifically, climate change is already having greater impacts near the poles than many other parts of the globe.
+
+## Research Question
+
+To what degree does climate change affect discharge in Alaskan streams and rivers?
 
 <Paragraph detailing your research question(s) and goals. What do you want to find out? Include a sentence (or a few) on the dataset you are using to answer this question - just enough to give your reader an idea of where you are going with the analysis.>
 
-## Research Question
+This guiding question encompasses other questions we seek to answer through statistical analyses. If climate change is causing average temperatures to increase, and the magnitude of the increase is greater at higher latitudes, then higher latitude streams should demonstrate greater changes in timing and magnitude of peak flows. This study first seeks to examine if the magnitude of temperature changes increase with increasing latitude in Alaska. By analyzing historical streamflow records, we will investigate whether the magnitude of maximum daily temperature change causes a proportional change in the magnitude and timing of peak streamflow. 
+
+Another aspect of climate change's impacts on streamflow is the potential of melting permafrost or glaciers. This analysis uses cumulative annual streamflow and cumulative annual precipitation to determine if interannual snowpack is melting with increasing average temperatures. If so, we expect the difference between annual precipitation and annual streamflow to increase over time.
 
 \newpage
 
@@ -68,6 +77,18 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 
 <Add a table that summarizes your data structure. This table can be made in markdown text or inserted as a `kable` function in an R chunk. If the latter, do not include the code used to generate your table.>
 
+| Variable | Units (if known) | Type of Variable | Hypothesis | 
+|------:|:-----|---------|:------:|
+| Discharge | Cubic feet per second | Response | 1a, 1b, 1c |
+| Site Number | Latitude/Longitude | Predictor | 1a |
+| Date Time | Year/Month/Day | Predictor | 1c |
+| Date of First Snowmelt | Year/Month/Day | Predictor | 1a, 1b, 1c |
+| Air Temperature | Celsius | Predictor | 1b |
+| Precipitation | Millimeters | Predictor | 1a, 1c |
+| HUC 8 Watershed Size | Square Meters | Predictor | 1a, 1b | 
+| Permafrost Melt | Qualitative | Predictor | 1b | 
+| Glacial Coverage/Melting | Qualitative | Predictor | 1b |
+
 \newpage
 
 # Exploratory Data Analysis and Wrangling
@@ -78,14 +99,23 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 
 ```
 
+The first step of the analysis process is determining the presence and magnitude of temperature change across the latitude range of Alaska. The daily maximum temperature data show no obvious trends over time for any of the sites. Furthermore, the sites differ substantially in the period of record of their temperature data. Sites with no recent observations may need to be dropped from analysis, unless nearby streams have similar periods of record.
+
 ```{r Temperature Graph, echo=FALSE, fig.cap= "Daily maximum temperature for the period of record of each latitude bin. There are no obvious trends, and the period of record differs substantially for each site."}
+
+AlaskaTempPrecipDischarge<-read.csv("AlaskaTempPrecipDischarge.csv")
+## transform date column from factor to date
+AlaskaTempPrecipDischarge$DATE <- as.Date(AlaskaTempPrecipDischarge$DATE,
+                                          format = "%Y-%m-%d")
+## Transform Bin column to factor
+AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
+
 ## create plot of temperature over time for all 10 latitude bins
-ggplot(Alaska_Data, aes(x = DATE, y = TMAX)) +
+ggplot(AlaskaTempPrecipDischarge, aes(x = DATE, y = TMAX)) +
   geom_line(alpha = 0.8) +
   facet_wrap(~Bin, nrow = 3, ncol = 3) +
   labs(y = "Maximum Daily Temperature (F)", x = "Date")
 ```
-
 
 # Full Precipitation Period of Record over Time, divided by Bin 
 ```{r, fig.width=10, fig.height=6}
@@ -104,7 +134,6 @@ labs(title="Full Precipitation Period of Record Measured over Time by Bin", x="S
   gabytheme
 print(PrecipBoxplot)
 ```
-
 
 
 ```{r Discharge, plot discharge over time for 10 bins}
