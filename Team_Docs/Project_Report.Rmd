@@ -11,9 +11,9 @@ author: Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen
 abstract: "Experimental overview. This section should be no longer than 250 words."
 fontsize: 12pt
 mainfont: Times New Roman
+editor_options: 
+  chunk_output_type: inline
 ---
-
-<Information in these brackets are used for annotating the RMarkdown file. They will not appear in the final version of the PDF document>
 
 \newpage
 \tableofcontents 
@@ -23,9 +23,6 @@ mainfont: Times New Roman
 \listoffigures 
 \newpage
 
-<Setup the global options for the R chunks in your document>
-
-<Note: set up autoreferencing for figures and tables in your document>
 
 ```{r setup, include=FALSE, message = FALSE}
 knitr::opts_chunk$set(warning = FALSE)
@@ -42,6 +39,11 @@ library(maps)
 library(dataRetrieval)
 library(viridis)
 library(ggplot2)
+library(dplyr)
+library(plyr)
+library(scales)
+library(stats)
+
 
 theme_set(theme_bw())
 ```
@@ -49,15 +51,11 @@ theme_set(theme_bw())
 
 # Research Question and Rationale
 
-<Paragraph detailing the rationale for your analysis. What is the significant application and/or interest in this topic? Connect to environmental topic(s)/challenge(s).>
-
-The climate is changing, in large part due to anthropogenic carbon emmissions. These changes have different magnitudes around the world and local impacts of climate change vary as well. Specifically, climate change is already having greater impacts near the poles than many other parts of the globe. Understanding how climate change is affecting discharge, especially in Alaska, has implications for water management, ecological processes, and the larger global system (if we consider ice-albedo feedback).
+The climate is changing, in large part due to anthropogenic carbon emmissions. These changes have different magnitudes around the world and local impacts of climate change vary as well. Specifically, climate change is already having greater impacts near the poles than many other parts of the globe. Understanding how climate change is affecting discharge, especially in Alaska, has implications for water management, ecological processes, and the larger global system (if we consider ice-albedo feedback). Many communities rely on a given amount of water from snowmelt to arrive at certain times of the year, so a shift in the quantity or timing could drastically affect downstream users and water managers. Additionally, changing the amount of flow in rivers could affect sensitive biological communities. Furthermore, changes in temperature that result in glacial or permafrost melting could reduce the amount of reflective land cover, thus disrupting larger climate systems.
 
 ## Research Question
 
 To what degree does climate change affect discharge in Alaskan streams and rivers?
-
-<Paragraph detailing your research question(s) and goals. What do you want to find out? Include a sentence (or a few) on the dataset you are using to answer this question - just enough to give your reader an idea of where you are going with the analysis.>
 
 This guiding question encompasses other questions we seek to answer through statistical analyses. If climate change is causing average temperatures to increase, and the magnitude of the increase is greater at higher latitudes, then higher latitude streams should demonstrate greater changes in timing and magnitude of peak flows. This study first seeks to examine if the magnitude of temperature changes increase with increasing latitude in Alaska. By analyzing historical streamflow records, we will investigate whether the magnitude of maximum daily temperature change causes a proportional change in the magnitude and timing of peak streamflow. 
 
@@ -67,8 +65,6 @@ Another aspect of climate change's impacts on streamflow is the potential of mel
 
 # Dataset Information
 
-<Information on how the dataset for this analysis were collected, the data contained in the dataset, and any important pieces of information that are relevant to your analyses. This section should contain much of same information as the README file for the dataset but formatted in a way that is more narrative.>
-
 ## Discharge
 
 Discharge data were collected from NWIS using the Data Retrieval package. The state of Alaska was divided into 10 bins of equal latitude, and daily discharge data was downloaded for the site in each latitude bin with the greatest number of samples. This dataset includes the site location, daily discharge, and county of the site, among other variables not used in the analysis.
@@ -77,7 +73,6 @@ Discharge data were collected from NWIS using the Data Retrieval package. The st
 
 Temperature and precipitation data were downloaded from the National Oceanic and Atmospheric Administration (NOAA) Climate Data Online web portal. As discharge stations do not collect data on temperature and precipitation, the climate data for each latitude bin were downloaded from a station in the same county as each selected discharge station. In each county, daily precipitation, maximum temperature, and minimum temperature, data were downloaded from one station. The criteria for station selection include data extending to the current date, beginning at the earliest date, with at least 80% data coverage. This dataset also includes site location.
 
-<Add a table that summarizes your data structure. This table can be made in markdown text or inserted as a `kable` function in an R chunk. If the latter, do not include the code used to generate your table.>
 
 | Variable | Units (if known) | Type of Variable | Hypothesis | 
 |------:|:-----|---------|:------:|
@@ -95,43 +90,41 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 
 # Exploratory Data Analysis and Wrangling
 
-<Include R chunks for 5+ lines of summary code (display code and output), 3+ exploratory graphs (display graphs only), and any wrangling you do to your dataset(s).> 
 
 ```{r Main Wrangling, message=FALSE, warning=FALSE}
 # Import all Data Frames
-setwd("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/RAW")
-NOAATempPrecipBin1<-read.csv("NOAA_Temp_Bin1.csv")
-NOAATempPrecipBin2<-read.csv("NOAA_Temp_Bin2.csv")
-NOAATempPrecipBin3<-read.csv("NOAA_Temp_Bin3.csv")
-NOAATempPrecipBin5<-read.csv("Bin5TempandPrecip.csv")
-NOAATempPrecip48910<-read.csv("NOAA_Precip_Temp_Bin_4_8_9_10.csv")
+NOAATempPrecipBin1 <- read.csv("./DATA/RAW/NOAA_Temp_Bin1.csv")
+NOAATempPrecipBin2 <- read.csv("./DATA/RAW/NOAA_Temp_Bin2.csv")
+NOAATempPrecipBin3 <- read.csv("./DATA/RAW/NOAA_Temp_Bin3.csv")
+NOAATempPrecipBin5 <- read.csv("./DATA/RAW/Bin5TempandPrecip.csv")
+NOAATempPrecip48910 <- 
+  read.csv("./DATA/RAW/NOAA_Precip_Temp_Bin_4_8_9_10.csv")
 
 ### Add Bin 2 Column to NOAATempPrecipBin2
-NOAATempPrecipBin2$Bin<-2
+NOAATempPrecipBin2$Bin <- 2
 
 ### Remove Tavg Column from Precip 
-library(dplyr)
-NOAATempPrecip48910<-select(NOAATempPrecip48910,-c(8))
+NOAATempPrecip48910 <- select(NOAATempPrecip48910,-c(8))
 
 ### Add Bin Columns with values for 4, 8, and 9
-library(plyr)
-NOAATempPrecip48910$Bin<-revalue(NOAATempPrecip48910$STATION,
-                              c('USW00026510'='4', 'USC00500464'='8','USW00027502'='9'))
+NOAATempPrecip48910$Bin <- revalue(NOAATempPrecip48910$STATION,
+    c('USW00026510'='4', 'USC00500464'='8','USW00027502'='9'))
 
 ### Upload Bins 6 and 7 
-setwd("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/PROCESSED")
-NOAATempPrecipBin67<-read.csv("NOAA_Temp_Precip_Bin_6_7.csv")
+NOAATempPrecipBin67 <- 
+  read.csv("./DATA/PROCESSED/NOAA_Temp_Precip_Bin_6_7.csv")
 
 ### Remove Snow Column from Precip Temp 6 & 7
-NOAATempPrecipBin67<-select(NOAATempPrecipBin67,-c(8))
+NOAATempPrecipBin67 <- select(NOAATempPrecipBin67,-c(8))
 
 # Fix Date Issues in NOAA Bin 1
 
-
 ##Tell R to change factor to a date, in the format Month/day/year
-NOAATempPrecipBin1$DATE <- as.Date(NOAATempPrecipBin1$DATE, format = "%m/%d/%y") 
+NOAATempPrecipBin1$DATE <- as.Date(NOAATempPrecipBin1$DATE, 
+                                   format = "%m/%d/%y") 
 
-# Changes the format of the "datetime" column to a two digit year, a two digit month, and the day as a number
+# Changes the format of the "datetime" column to a two digit year, a two 
+#digit month, and the day as a number
 NOAATempPrecipBin1$DATE <- format(NOAATempPrecipBin1$DATE, "%y%m%d")
 
  
@@ -139,45 +132,57 @@ create.early.dates <- (function(d) {
        paste0(ifelse(d > 181231,"19","20"),d)
        })
 
-### This will input the datetime column into the function we created above for each row of the column
+### This will input the datetime column into the function we created 
+#above for each row of the column
 NOAATempPrecipBin1$DATE<- create.early.dates(NOAATempPrecipBin1$DATE)
 
-### Changes the date time column into a different format to a 4 digit year, a two digit month, and the day as
-NOAATempPrecipBin1$DATE <- as.Date(NOAATempPrecipBin1$DATE, format = "%Y%m%d")
+### Changes the date time column into a different format to a 4 digit year, 
+#a two digit month, and the day as a number
+NOAATempPrecipBin1$DATE <- as.Date(NOAATempPrecipBin1$DATE, 
+                                   format = "%Y%m%d")
 
 # Fix Date Issues in NOAA Bin 5
 
 ## Tell R to change factor to a date, in the format Month/day/year
-NOAATempPrecipBin5$DATE <- as.Date(NOAATempPrecipBin5$DATE, format = "%m/%d/%y") 
+NOAATempPrecipBin5$DATE <- as.Date(NOAATempPrecipBin5$DATE, 
+                                   format = "%m/%d/%y") 
 
-## Changes the format of the "datetime" column to a two digit year, a two digit month, and the day as a number
+## Changes the format of the "datetime" column to a two digit year, 
+#a two digit month, and the day as a number
 NOAATempPrecipBin5$DATE<- format(NOAATempPrecipBin5$DATE, "%y%m%d")
 
-## The 181231 is the last date of 2018. If d is over this value, a 19 is returned, If D<the number, a 20 is returned.
+## The 181231 is the last date of 2018. If d is over this value, 
+#a 19 is returned, If D<the number, a 20 is returned.
 create.early.dates <- (function(d) {
        paste0(ifelse(d > 181231,"19","20"),d)
        })
 
-### This will input the datetime column into the function we created above for each row of the column
+### This will input the datetime column into the function we created above 
+#for each row of the column
 NOAATempPrecipBin5$DATE<- create.early.dates(NOAATempPrecipBin5$DATE)
 
-### Changes the date time column into a different format to a 4 digit year, a two digit month, and the day as
-NOAATempPrecipBin5$DATE <- as.Date(NOAATempPrecipBin5$DATE, format = "%Y%m%d") 
+### Changes the date time column into a different format to a 4 digit year, 
+#a two digit month, and the day as
+NOAATempPrecipBin5$DATE <- as.Date(NOAATempPrecipBin5$DATE, 
+                                   format = "%Y%m%d") 
 
 # RBind all TempPrecip Data
-TempPrecip<-rbind(NOAATempPrecipBin1, NOAATempPrecipBin2, NOAATempPrecipBin3, NOAATempPrecipBin5, NOAATempPrecipBin67, NOAATempPrecip48910)
+TempPrecip<-rbind(NOAATempPrecipBin1, NOAATempPrecipBin2, 
+                  NOAATempPrecipBin3, NOAATempPrecipBin5, 
+                  NOAATempPrecipBin67, NOAATempPrecip48910)
 
 # Import USGS Discharge Data
-setwd("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/RAW")
-NWIS_Discharge<-read.csv("NWIS_Discharge.csv")
+NWIS_Discharge<-read.csv("./DATA/RAW/NWIS_Discharge.csv")
 
 ### Convert site_no to a factor
 NWIS_Discharge$site_no<-as.factor(NWIS_Discharge$site_no)
 
 ## Add Bins to Discharge Data
-library(plyr)
 NWIS_Discharge$Bin<-revalue(NWIS_Discharge$site_no,
-                              c('15297680'='1', '15297610'='2','15072000'='3', '15052500'='4', '15276000'='5', '15304000'='6', '15514000'='7', '15453500'='8', '15908000'='9', '15896000'='10'))
+       c('15297680'='1', '15297610'='2','15072000'='3', 
+         '15052500'='4', '15276000'='5', '15304000'='6', 
+         '15514000'='7', '15453500'='8', '15908000'='9', 
+         '15896000'='10'))
 
 ### Rename "Date" to "DATE" in NWIS_Discharge dataframe so both columns match
 names(NWIS_Discharge)[3]<-"DATE"
@@ -185,10 +190,9 @@ names(NWIS_Discharge)[3]<-"DATE"
 # Join TempPrecip and NWIS_Discharge Data Frames by Date and Bin 
 AlaskaTempPrecipDischarge <- TempPrecip %>%
   merge(NWIS_Discharge, by = c('DATE', 'Bin')) %>%
-  rename(Discharge = X_00060_00003) %>%
+  rename(replace = c("X_00060_00003" = "Discharge")) %>%
   select(DATE:Discharge)
 ```
-
 
 
 
@@ -196,7 +200,8 @@ The first step of the analysis process is determining the presence and magnitude
 
 ```{r Temperature Graph, echo=FALSE, fig.cap= "Daily maximum temperature for the period of record of each latitude bin. There are no obvious trends, and the period of record differs substantially for each site."}
 
-AlaskaTempPrecipDischarge <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+AlaskaTempPrecipDischarge <- 
+  read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 ## transform date column from factor to date
 AlaskaTempPrecipDischarge$DATE <- as.Date(AlaskaTempPrecipDischarge$DATE,
                                           format = "%Y-%m-%d")
@@ -208,40 +213,44 @@ ggplot(AlaskaTempPrecipDischarge, aes(x = DATE, y = TMAX)) +
   geom_line(alpha = 0.8) +
   facet_wrap(~Bin, nrow = 3, ncol = 3) +
   labs(y = "Maximum Daily Temperature (F)", x = "Date")
+
 ```
 
-# Full Precipitation Period of Record over Time, divided by Bin 
-```{r, fig.width=10, fig.height=6, echo = FALSE}
-library(scales)
 
-### Load Data
-AlaskaTempPrecipDischarge <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
-AlaskaPrecipOnly<-select(AlaskaTempPrecipDischarge, .data$DATE, .data$PRCP, .data$Bin)
-newdata<-na.omit(AlaskaPrecipOnly)
+```{r, fig.width=10, fig.height=6, echo = FALSE, warning=FALSE, message=FALSE}
+# Full Precipitation Period of Record over Time, divided by Bin
+
+## Load Data
+AlaskaTempPrecipDischarge <- 
+  read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+AlaskaPrecipOnly <- select(AlaskaTempPrecipDischarge, .data$DATE, .data$PRCP, .data$Bin)
+newdata <- na.omit(AlaskaPrecipOnly)
 
 ### Create and set theme
 gabytheme <- theme_bw(base_size = 22) + 
-  theme(plot.title=element_text(face="bold", size="26", color="IndianRed3", hjust=0.5),
+  theme(plot.title=element_text(face="bold", size="26", 
+        color="IndianRed3", hjust=0.5),
         axis.title=element_text(size=22, color="black"),
 axis.text = element_text(face="bold", size=16, color = "black"), 
 panel.background=element_rect(fill="white", color="darkblue"), 
 panel.border = element_rect(color = "black", size = 2),
-legend.position = "top", legend.background = element_rect(fill="white", color="black"),
+legend.position = "top", 
+legend.background = element_rect(fill="white", color="black"),
             legend.key = element_rect(fill="transparent", color="NA"))
 
-theme_set(gabytheme)
 
-
-### Plot Precipitation 
+## Plot Precipitation 
 PrecipBoxplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
   geom_point(alpha=0.5, size=2) +
-labs(title="Full Precipitation Period of Record Measured over Time by Bin", x="Sample Year",
-       y="Precipitation (inches)")+ 
-  scale_x_date(labels=date_format("%y"),
-            breaks=date_breaks("5 years"))+
-  scale_fill_manual(guide=guide_legend(keyheight=unit(4, units="mm")))+
-  #gabytheme
+labs(title="Full Precipitation Period of Record Measured over Time by Bin", 
+     x="Sample Year",
+       y="Precipitation (inches)") + 
+#  scale_x_date(labels=date_format("%y"),
+#            breaks=date_breaks("5 years"))+
+  scale_fill_manual(guide=guide_legend(keyheight=unit(4, units="mm"))) +
+  gabytheme
 print(PrecipBoxplot)
+
 ```
 
 
@@ -252,20 +261,22 @@ Give a general image of how discharge changes over time in different latitudes.
 ```{r Discharge, plot discharge over time for 10 bins, echo=FALSE}
 >>>>>>> 6361a6ebcd717e909f77edcf77a429d25d408d69
 #import the data
-AlaskaTempPrecipDischarge <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+AlaskaTempPrecipDischarge <- 
+  read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 # transform bin into factor
 AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
 #Extract date and discharge data
 AlaskaDischarge <- AlaskaTempPrecipDischarge%>%
   select("DATE", "Bin","STATION","NAME", "site_no", "Discharge")
 #drop na
-AlaskaDischarge%>%drop_na()
-# plot discharge over time for 10 latitude bins
-discharge_plot <- ggplot(AlaskaDischarge,aes(x = DATE, y = Discharge))+
-  geom_line()+
-  facet_wrap(~Bin, nrow = 3, ncol = 3)+
-  labs(x = "Date", y =expression("Discharge (ft"^3*"/s)"))
-print(discharge_plot)
+AlaskaDischarge <- AlaskaDischarge%>%drop_na()
+## plot discharge over time for 10 latitude bins
+#discharge_plot <- ggplot(AlaskaDischarge,aes(x = DATE, y = Discharge))+
+#  geom_line()+
+#  facet_wrap(~Bin, nrow = 3, ncol = 3)+
+#  labs(x = "Date", y =expression("Discharge (ft"^3*"/s)"))
+#print(discharge_plot)
+
 ```
 
 
@@ -275,7 +286,8 @@ Discharge is to be used as a proxy for snowmelt. The data was loaded and wrangle
 ```{r Snowmelt Change, echo = FALSE}
 
 #Load the data
-AlaskaTempPrecipDischarge <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+AlaskaTempPrecipDischarge <- 
+  read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 #Convert DATE column to class 'Date'
 AlaskaTempPrecipDischarge$DATE <- ymd(AlaskaTempPrecipDischarge$DATE)
 
@@ -287,26 +299,29 @@ Snowmelt.Discharge <- AlaskaTempPrecipDischarge %>% mutate(YEAR = year(DATE),
 
 Snowmelt.Discharge.Spring <- Snowmelt.Discharge %>% filter(WEEK < 30)
 
-#Plot mean discharge for each DOY through time by bin
-Snowmelt.Discharge.Mean <- Snowmelt.Discharge.Spring %>% group_by(Bin, DOY) %>%
-  mutate(Dis.Mean = mean(Discharge))
-
-dis.doy.mean <- ggplot(Snowmelt.Discharge.Mean) +
-  geom_line(aes(x = DOY, y = Dis.Mean, color = as.factor(Bin))) +
-  labs(x = "Day of Year", y = "Mean Discharge, cfs", color = "Latitude Bin") +
-  scale_color_viridis_d() +
-  theme(legend.position = "top")
-print(dis.doy.mean)
+##Plot mean discharge for each DOY through time by bin
+#Snowmelt.Discharge.Median <- Snowmelt.Discharge.Spring %>% group_by(Bin, DOY) %>%
+#  mutate(Dis.Med = median(Discharge))
+#
+#dis.doy.med <- ggplot(Snowmelt.Discharge.Median) +
+#  geom_line(aes(x = DOY, y = Dis.Median, color = as.factor(Bin))) +
+#  labs(x = "Day of Year", y = "Median Discharge, cfs", color = "Latitude Bin") +
+#  scale_color_viridis_d() +
+#  theme(legend.position = "top")
+#print(dis.doy.med)
 
 
 #Make dataframes for bin analysis
 #Filter for only needed columns and bin
-Snowmelt.Discharge.Bin6 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
+Snowmelt.Discharge.Bin6 <- Snowmelt.Discharge.Spring %>% 
+  select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, 
+         NAME, LATITUDE, LONGITUDE, Discharge) %>%
   filter(Bin == 6)
 
 #Latitude Bin 6 - discrete years - every 10
 Snowmelt.Discharge.Bin6.10Year <- Snowmelt.Discharge.Bin6 %>% 
-  filter(YEAR == 1979 | YEAR == 1989 | YEAR == 1999 | YEAR == 2009 | YEAR == 2019)
+  filter(YEAR == 1979 | YEAR == 1989 | YEAR == 1999 | 
+           YEAR == 2009 | YEAR == 2019)
 
 dis.doy.6.10 <- ggplot(Snowmelt.Discharge.Bin6.10Year) +
   geom_line(aes(x = DOY, y = Discharge, color = as.factor((YEAR)))) +
@@ -314,17 +329,13 @@ dis.doy.6.10 <- ggplot(Snowmelt.Discharge.Bin6.10Year) +
   scale_color_viridis_d() +
   theme(legend.position = "top")
 print(dis.doy.6.10)
-
 ```
 
-
-<Include text sections to accompany these R chunks to explain the reasoning behind your workflow, and the rationale for your approach.>
 
 
 \newpage
 
 # Analysis
-<Include R chunks for 3+ statistical tests (display code and output) and 3+ final visualization graphs (display graphs only).>
 
 ## Long-term Temperature and Discharge Trends
 
@@ -333,12 +344,16 @@ A seasonal Mann-Kendall test was used to determine if there was a long-term tren
 A seasonal Sen's Slope quantifies the magnitude of the temperature and discharge trends.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 From general discharge image of 10 bins, Bin 6 seems to have seasonal change. Thus apply smk.test on bin 6 discharge data to see if there's a seasonal trend. adf.test is also applied to see if the data is stationary. If it is, use auto.arima function to find the best fit model to predict the future discharge and plot the graph. 
 ```{r Discharge}
 =======
 ```{r Discharge, echo=FALSE}
 >>>>>>> 6361a6ebcd717e909f77edcf77a429d25d408d69
+=======
+```{r Discharge, eval=FALSE}
+>>>>>>> bdc358699638beecd27d5c03f59d01de85df7457
 # Time series for Bin 6
 AlaskaDischarge_6 <- AlaskaDischarge %>% 
   filter(Bin == 6)%>%
@@ -349,7 +364,8 @@ AlaskaDischarge_6.Monthly <- AlaskaDischarge_6%>%
   group_by(Year,Month)%>%
   summarise(Discharge = mean(Discharge))
 
-AlaskaDischarge_6_ts.Monthly <- ts(AlaskaDischarge_6.Monthly[[3]], frequency = 12)
+AlaskaDischarge_6_ts.Monthly <- ts(AlaskaDischarge_6.Monthly[[3]], 
+                                   frequency = 12)
 
 AlaskaDischarge_6_trend.Monthly <-smk.test(AlaskaDischarge_6_ts.Monthly) 
 AlaskaDischarge_6_trend.Monthly
@@ -364,23 +380,21 @@ adf.test(AlaskaDischarge_6_ts.Monthly, alternative = "stationary")
 auto.arima(AlaskaDischarge_6_ts.Monthly, trace = TRUE)
 
 # create an object that defines the best fit model
-fit <- arima(AlaskaDischarge_6_ts.Monthly, c(1, 0, 0),seasonal = list(order = c(1, 1, 0), period = 12)) 
+fit <- arima(AlaskaDischarge_6_ts.Monthly, c(1, 0, 0),
+             seasonal = list(order = c(1, 1, 0), period = 12)) 
 
 # make a prediction into the future
 AlaskaDischarge_6_prediction <- predict(fit, n.ahead = 10*12)
 
 # plot future predictions
-ts.plot(AlaskaDischarge_6_ts.Monthly, AlaskaDischarge_6_prediction$pred, lty = c(1, 3))
+ts.plot(AlaskaDischarge_6_ts.Monthly, 
+        AlaskaDischarge_6_prediction$pred, lty = c(1, 3))
 
 ```
 
 ## Predictability of snowmelt
 
 Is there a change over time of the period when snow melts? Peak discharge will be used as a proxy for peak snowmelt. At each latitude bin, the day of year of peak snowmelt will be found for each year in the period of record. If thare are any gaps in the data, it will be addressed through linear interpolation. Once the day of year of peak snowmelt is found, a dataframe of 'Year' and 'Day of Year of Peak Snowmelt' will be created, and a time series will be run to see if there is any significant change at each site in the day of peak snowmelt. 
-
-
-<Include text sections to accompany these R chunks to explain the reasoning behind your workflow, rationale for your approach, and the justification of meeting or failing to meet assumptions of tests.>
-
 
 \newpage
 
