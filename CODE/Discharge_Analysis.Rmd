@@ -67,9 +67,10 @@ geom_line(aes(y = Observed, x = Date), size = 0.25) + geom_line(aes(y = trend, x
 ```
 
 ```{r}
+## 1st way to do the monthly time series
 # Generate monthly values from June 1951 to October 2019
 # use linear interpolation
-linearinterpolation <- as.data.frame(approx(AlaskaDischarge_6$Discharge,n = 820, method = "linear"))# don't know why the data ends at 2004, it should be ended at 2019/10
+linearinterpolation <- as.data.frame(approx(AlaskaDischarge_6$Discharge,n = 820, method = "linear"))# don't know why the data ends at 2018/09, it should be ended at 2019/10
 linearinterpolation$x <- as.Date(linearinterpolation$x, origin = "1951-06-15")
 names(linearinterpolation) <-c("Date", "Discharge")
 
@@ -86,6 +87,7 @@ summary(Discharge6_trend)
 
 
 ```{r}
+## 2nd way to do the time series
 # find the monthly change of Bin 6 over time
 AlaskaDischagre_6.Monthly <- AlaskaDischarge_6%>%
   mutate(Year = year(DATE), Month = month(DATE))%>%
@@ -93,6 +95,10 @@ AlaskaDischagre_6.Monthly <- AlaskaDischarge_6%>%
   summarise(Discharge = mean(Discharge))
 
 AlaskaDischagre_6_ts.Monthly <- ts(AlaskaDischagre_6.Monthly[[3]], frequency = 12)
+
+AlaskaDischagre_6_trend.Monthly <-smk.test(AlaskaDischagre_6_ts.Monthly) 
+AlaskaDischagre_6_trend.Monthly
+summary(AlaskaDischagre_6_trend.Monthly)
 
 adf.test(AlaskaDischagre_6_ts.Monthly, alternative = "stationary")
 # since the p-value is 0.01 < 0.05, the data is stationary
