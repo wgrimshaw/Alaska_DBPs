@@ -217,17 +217,27 @@ ggplot(AlaskaTempPrecipDischarge, aes(x = DATE, y = TMAX)) +
 ```
 
 
-```{r, fig.width=10, fig.height=6, echo = FALSE, warning=FALSE, message=FALSE}
+
+```{r, fig.width=14, fig.height=6, echo = FALSE, warning=FALSE, message=FALSE}
 # Full Precipitation Period of Record over Time, divided by Bin
 
 ## Load Data
 AlaskaTempPrecipDischarge <- 
-  read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+  read.csv("../DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 AlaskaPrecipOnly <- select(AlaskaTempPrecipDischarge, .data$DATE, .data$PRCP, .data$Bin)
 newdata <- na.omit(AlaskaPrecipOnly)
 
+### Ensure Date is a date object and not a factor
+newdata$DATE<-as.Date(newdata$DATE)
+
+
+### Ensure Bin is a factor and not an integer
+newdata$Bin <- as.factor(newdata$Bin)
+
+
+
 ### Create and set theme
-gabytheme <- theme_bw(base_size = 22) + 
+gabytheme <- theme_bw(base_size = 19) + 
   theme(plot.title=element_text(face="bold", size="26", 
         color="IndianRed3", hjust=0.5),
         axis.title=element_text(size=22, color="black"),
@@ -244,9 +254,7 @@ PrecipBoxplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
   geom_point(alpha=0.5, size=2) +
 labs(title="Full Precipitation Period of Record Measured over Time by Bin", 
      x="Sample Year",
-       y="Precipitation (inches)") + 
-#  scale_x_date(labels=date_format("%y"),
-#            breaks=date_breaks("5 years"))+
+       y="Precipitation (inches)") +
   scale_fill_manual(guide=guide_legend(keyheight=unit(4, units="mm"))) +
   gabytheme
 print(PrecipBoxplot)
@@ -254,12 +262,12 @@ print(PrecipBoxplot)
 ```
 
 
-<<<<<<< HEAD
+
 Give a general image of how discharge changes over time in different latitudes.
-```{r Discharge, plot discharge over time for 10 bins}
-=======
+
+
 ```{r Discharge, plot discharge over time for 10 bins, echo=FALSE}
->>>>>>> 6361a6ebcd717e909f77edcf77a429d25d408d69
+
 #import the data
 AlaskaTempPrecipDischarge <- 
   read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
