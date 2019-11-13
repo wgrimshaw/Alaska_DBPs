@@ -120,7 +120,7 @@ ggplot(AlaskaTempPrecipDischarge, aes(x = DATE, y = TMAX)) +
 ```
 
 # Full Precipitation Period of Record over Time, divided by Bin 
-```{r, fig.width=10, fig.height=6}
+```{r, fig.width=10, fig.height=6, echo = FALSE}
 
 AlaskaTempPrecipDischarge <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 AlaskaPrecipOnly<-select(AlaskaTempPrecipDischarge, .data$DATE, .data$PRCP, .data$Bin)
@@ -138,9 +138,9 @@ print(PrecipBoxplot)
 ```
 
 
-```{r Discharge, plot discharge over time for 10 bins}
+```{r Discharge, plot discharge over time for 10 bins, echo=FALSE}
 #import the data
-AlaskaTempPrecipDischarge <- read.csv("../DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+AlaskaTempPrecipDischarge <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 # transform bin into factor
 AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
 #Extract date and discharge data
@@ -220,7 +220,7 @@ A seasonal Mann-Kendall test was used to determine if there was a long-term tren
 
 A seasonal Sen's Slope quantifies the magnitude of the temperature and discharge trends.
 
-```{r Discharge}
+```{r Discharge, echo=FALSE}
 # Time series for Bin 6
 AlaskaDischarge_6 <- AlaskaDischarge %>% 
   filter(Bin == 6)%>%
