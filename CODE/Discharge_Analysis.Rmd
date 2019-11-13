@@ -17,7 +17,7 @@ library(dataRetrieval)
 library(trend)
 library(forecast)
 library(tseries)
-
+library(zoo)
 theme_set(theme_classic())
 ```
 
@@ -27,58 +27,99 @@ theme_set(theme_classic())
 AlaskaTempPrecipDischarge <- read_csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 # transform bin into factor
 AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
+#Extract date and discharge data
+AlaskaDischarge <- AlaskaTempPrecipDischarge%>%
+  select("DATE", "Bin","STATION","NAME", "site_no", "Discharge")
 #drop na
-AlaskaTempPrecipDischarge <- AlaskaTempPrecipDischarge$Discharge %>%
-  drop_na()
+AlaskaDischarge%>%drop_na()
 # plot discharge  over time for 10 latitude bins
-discharge_plot <- ggplot(AlaskaTempPrecipDischarge)+
-  geom_line(aes(x = DATE, y = Discharge, color = Bin)) # add a representative line
+discharge_plot <- ggplot(AlaskaDischarge,aes(x = DATE, y = Discharge))+
+  geom_line()+ # add a representative line
+  facet_wrap(~Bin, nrow = 3, ncol = 3)+
+  labs(x = "Date", y =expression("Discharge (ft"^3*"/s)"))
 print(discharge_plot)
   
 ```
 
 ```{r}
-# since bin 3 has the longest period, use 3 as an example
-AlaskaDischarge_3 <- AlaskaTempPrecipDischarge %>%
-  filter(Bin == 3)
+# choose bin 6 as an example
+AlaskaDischarge_6 <- AlaskaDischarge %>%
+  filter(Bin == 6)%>%
+  drop_na()
 
 # dataset decomposition
-AlaskaDischarge_3_ts <- ts(AlaskaDischarge_3[[13]], frequency = 365)
+AlaskaDischarge_6_ts <- ts(AlaskaDischarge_6[[6]], frequency = 365)
 
 # Generate the decomposition
-AlaskaDischarge3_Decomposed <- stl(AlaskaDischarge_3_ts, s.window = "periodic")
-plot(AlaskaDischarge3_Decomposed)
+AlaskaDischarge6_Decomposed <- stl(AlaskaDischarge_6_ts, s.window = "periodic")
+plot(AlaskaDischarge6_Decomposed)
 ```
 
 ```{r}
 # extract the components 
-AlaskaDischarge3_components <- as.data.frame(AlaskaDischarge3_Decomposed$time.series)
-AlaskaDischarge3_components <- mutate (AlaskaDischarge3_components,Observed = AlaskaDischarge_3$Discharge, Date = AlaskaDischarge_3$DATE)
+AlaskaDischarge6_components <- as.data.frame(AlaskaDischarge6_Decomposed$time.series)
+AlaskaDischarge6_components <- mutate (AlaskaDischarge6_components,Observed = AlaskaDischarge_6$Discharge, Date = AlaskaDischarge_6$DATE)
 
 # visualize the trend map onto the data
-ggplot(AlaskaDischarge3_components) +
-geom_line(aes(y = Observed, x = Date), size = 0.25) + geom_line(aes(y = trend, x = Date), color = "#c13d75ff") + geom_hline(yintercept = 0, lty = 2) + ylab(expression("Discharge (ft"^3*"/s)"))
-
-
-
+ggplot(AlaskaDischarge6_components) +
+geom_line(aes(y = Observed, x = Date), size = 0.25) + geom_line(aes(y = trend, x = Date), color = "#c13d75ff") + geom_hline(yintercept = 0, lty = 2) + ylab(expression("Discharge (ft"^3*"/s)"))+
+  labs(title = "Bin 6")
 ```
 
 ```{r}
-# Generate monthly values from June 1915 to October 2019
+## 1st way to do the monthly time series
+# Generate monthly values from June 1951 to October 2019
 # use linear interpolation
-linearinterpolation <- as.data.frame(approx(Alaska_3$Discharge,n = 1252, method = "linear"))# don't know why the data ends at 2004, it should be ended at 2019/10
-linearinterpolation$x <- as.Date(linearinterpolation$x, origin = "1915-06-01")
+linearinterpolation <- as.data.frame(approx(AlaskaDischarge_6$Discharge,n = 820, method = "linear"))# don't know why the data ends at 2018/09, it should be ended at 2019/10
+linearinterpolation$x <- as.Date(linearinterpolation$x, origin = "1951-06-15")
 names(linearinterpolation) <-c("Date", "Discharge")
 
 # Generate time series smk.test
-Discharge3_ts <- ts(linearinterpolation$Discharge, frequency = 12, start = c(1915,6,1), end = c(2004, 9, 14)) 
+Discharge6_ts <- ts(linearinterpolation$Discharge, frequency = 12, start = c(1951,6,15), end = c(2018, 9, 19)) 
 
 # Run SMK test
-Discharge3_trend <- smk.test(Discharge3_ts)
-Discharge3_trend
-summary(Discharge3_trend)
+Discharge6_trend <- smk.test(Discharge6_ts)
+Discharge6_trend
+summary(Discharge6_trend)
 
+# Bin 6 has significant seasonal variance over the period
 ```
+
+
+```{r}
+## 2nd way to do the time series
+# find the monthly change of Bin 6 over time
+AlaskaDischagre_6.Monthly <- AlaskaDischarge_6%>%
+  mutate(Year = year(DATE), Month = month(DATE))%>%
+  group_by(Year,Month)%>%
+  summarise(Discharge = mean(Discharge))
+
+AlaskaDischagre_6_ts.Monthly <- ts(AlaskaDischagre_6.Monthly[[3]], frequency = 12)
+
+AlaskaDischagre_6_trend.Monthly <-smk.test(AlaskaDischagre_6_ts.Monthly) 
+AlaskaDischagre_6_trend.Monthly
+summary(AlaskaDischagre_6_trend.Monthly)
+
+adf.test(AlaskaDischagre_6_ts.Monthly, alternative = "stationary")
+# since the p-value is 0.01 < 0.05, the data is stationary
+```
+
+```{r}
+#run the arima function and search for best fit
+auto.arima(AlaskaDischagre_6_ts.Monthly, trace = TRUE)
+```
+
+```{r}
+# create an object that defines the best fit model
+fit <- arima(AlaskaDischagre_6_ts.Monthly, c(1, 0, 0),seasonal = list(order = c(1, 1, 0), period = 12)) 
+
+# make a prediction into the future
+AlaskaDischagre_6_prediction <- predict(fit, n.ahead = 10*12)
+
+# plot future predictions
+ts.plot(AlaskaDischagre_6_ts.Monthly, AlaskaDischagre_6_prediction$pred, lty = c(1, 3))
+```
+
 2 graphs per person. Choose 6 first
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
