@@ -105,7 +105,7 @@ The first step of the analysis process is determining the presence and magnitude
 
 ```{r Temperature Graph, echo=FALSE, fig.cap= "Daily maximum temperature for the period of record of each latitude bin. There are no obvious trends, and the period of record differs substantially for each site."}
 
-AlaskaTempPrecipDischarge<-read.csv("AlaskaTempPrecipDischarge.csv")
+AlaskaTempPrecipDischarge <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 ## transform date column from factor to date
 AlaskaTempPrecipDischarge$DATE <- as.Date(AlaskaTempPrecipDischarge$DATE,
                                           format = "%Y-%m-%d")
@@ -122,7 +122,7 @@ ggplot(AlaskaTempPrecipDischarge, aes(x = DATE, y = TMAX)) +
 # Full Precipitation Period of Record over Time, divided by Bin 
 ```{r, fig.width=10, fig.height=6}
 
-AlaskaTempPrecipDischarge<-read.csv("AlaskaTempPrecipDischarge.csv")
+AlaskaTempPrecipDischarge <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 AlaskaPrecipOnly<-select(AlaskaTempPrecipDischarge, .data$DATE, .data$PRCP, .data$Bin)
 newdata<-na.omit(AlaskaPrecipOnly)
 
@@ -130,16 +130,16 @@ PrecipBoxplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
   geom_point(alpha=0.5, size=2) +
 labs(title="Full Precipitation Period of Record Measured over Time by Bin", x="Sample Year",
        y="Precipitation (inches)")+ 
-  scale_x_date(labels=date_format("%y"),
-               breaks=date_breaks("5 years"))+
-  scale_fill_manual(guide=guide_legend(keyheight=unit(4, units="mm")))+
-  gabytheme
+  #scale_x_date(labels=date_format("%y"),
+  #             breaks=date_breaks("5 years"))+
+  scale_fill_manual(guide=guide_legend(keyheight=unit(4, units="mm")))
+  #gabytheme
 print(PrecipBoxplot)
 ```
 
 
 ```{r Discharge, plot discharge over time for 10 bins}
-AlaskaTempPrecipDischarge <- read_csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+AlaskaTempPrecipDischarge <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 # transform bin into factor
 AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
 #Extract date and discharge data
@@ -156,7 +156,8 @@ print(discharge_plot)
 ```
 
 
-Discharge is to be used as a proxy for snowmelt. The data was loaded and wrangled to include the year, month, day, day of year, and week in order to better analyze if and how the day of first snowmelt is changing. The data was filtered for weeks 1-30 of each year (mid-winter to mid-summer), to minimize the amount of data being plotted in exploratory graphs. The mean discharge for each day of year through time by latitude bin was plotted. This served to provide insight into roughly when the day of firt snowmelt was for each site, and to see how different sites varied. The data was then filtered to look at a single latitude bin, in this case bin 6, and see how discharge changed by the day of year across the period of record. In order to better visual any trend, bin 6 was filtered for data on a ten year frequency for the past fifty years (1979, 1989, 1999, 2009, 2019). After looking at the various exploratory graphs, it was decided to proceed with using peak discharge as a proxy for peak snowmelt, rather than try to determine when the first snowmelt of each year was occuring. 
+Discharge is to be used as a proxy for snowmelt. The data was loaded and wrangled to include the year, month, day, day of year, and week in order to better analyze if and how the day of first snowmelt is changing. The data was filtered for weeks 1-30 of each year (mid-winter to mid-summer), to minimize the amount of data being plotted in exploratory graphs. The mean discharge for each day of year through time by latitude bin was plotted. This served to provide insight into roughly when the day of first snowmelt was for each site, and to see how different sites varied. The data was then filtered to look at a single latitude bin, in this case bin 6, and see how discharge changed by the day of year across the period of record. In order to better visual any trend, bin 6 was filtered for data on a ten year frequency for the past fifty years (1979, 1989, 1999, 2009, 2019). After looking at the various exploratory graphs, it was decided to proceed with using peak discharge as a proxy for peak snowmelt, rather than try to determine when the first snowmelt of each year was occuring. 
+
 
 ```{r Snowmelt Change, echo = FALSE}
 
@@ -201,7 +202,6 @@ dis.doy.6.10 <- ggplot(Snowmelt.Discharge.Bin6.10Year) +
   theme(legend.position = "top")
 print(dis.doy.6.10)
 
-
 ```
 
 
@@ -221,32 +221,35 @@ A seasonal Sen's Slope quantifies the magnitude of the temperature and discharge
 
 ```{r Discharge}
 # Time series for Bin 6
-AlaskaDischagre_6.Monthly <- AlaskaDischarge_6%>%
+AlaskaDischarge_6 <- AlaskaDischarge %>% filter(Bin == 6)
+
+AlaskaDischarge_6.Monthly <- AlaskaDischarge_6%>%
   mutate(Year = year(DATE), Month = month(DATE))%>%
   group_by(Year,Month)%>%
   summarise(Discharge = mean(Discharge))
 
-AlaskaDischagre_6_ts.Monthly <- ts(AlaskaDischagre_6.Monthly[[3]], frequency = 12)
+AlaskaDischarge_6_ts.Monthly <- ts(AlaskaDischarge_6.Monthly[[3]], frequency = 12)
 
-AlaskaDischagre_6_trend.Monthly <-smk.test(AlaskaDischagre_6_ts.Monthly) 
-AlaskaDischagre_6_trend.Monthly
-summary(AlaskaDischagre_6_trend.Monthly)
+AlaskaDischarge_6_trend.Monthly <-smk.test(AlaskaDischarge_6_ts.Monthly) 
+AlaskaDischarge_6_trend.Monthly
+summary(AlaskaDischarge_6_trend.Monthly)
 
 # test if the data is stationary
-adf.test(AlaskaDischagre_6_ts.Monthly, alternative = "stationary")
+adf.test(AlaskaDischarge_6_ts.Monthly, alternative = "stationary")
 # since the p-value is 0.01 < 0.05, the data is stationary
 
 #run the arima function and search for best fit
-auto.arima(AlaskaDischagre_6_ts.Monthly, trace = TRUE)
+auto.arima(AlaskaDischarge_6_ts.Monthly, trace = TRUE)
 
 # create an object that defines the best fit model
-fit <- arima(AlaskaDischagre_6_ts.Monthly, c(1, 0, 0),seasonal = list(order = c(1, 1, 0), period = 12)) 
+fit <- arima(AlaskaDischarge_6_ts.Monthly, c(1, 0, 0),seasonal = list(order = c(1, 1, 0), period = 12)) 
 
 # make a prediction into the future
-AlaskaDischagre_6_prediction <- predict(fit, n.ahead = 10*12)
+AlaskaDischarge_6_prediction <- predict(fit, n.ahead = 10*12)
 
 # plot future predictions
-ts.plot(AlaskaDischagre_6_ts.Monthly, AlaskaDischagre_6_prediction$pred, lty = c(1, 3))
+ts.plot(AlaskaDischarge_6_ts.Monthly, AlaskaDischarge_6_prediction$pred, lty = c(1, 3))
+
 ```
 
 ## Predictability of snowmelt
