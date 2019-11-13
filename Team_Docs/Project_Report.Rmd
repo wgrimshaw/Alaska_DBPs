@@ -126,6 +126,54 @@ print(discharge_plot)
 
 ```{r Snowmelt Change}
 
+#Load the data
+AlaskaTempPrecipDischarge <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+
+#Convert DATE column to class 'Date'
+AlaskaTempPrecipDischarge$DATE <- ymd(Snowmelt.Discharge$DATE)
+
+#Add date columns
+Snowmelt.Discharge <- AlaskaTempPrecipDischarge %>% mutate(
+                        YEAR = year(DATE), 
+                        MONTH = month(DATE), 
+                        DAY = day(DATE), 
+                        WEEK = week(DATE), 
+                        DOY = yday(DATE))
+
+#Filter for weeks 1-30 to deal with less Snowmelt.Discharge
+Snowmelt.Discharge.spring <- Snowmelt.Discharge %>% filter(WEEK < 30)
+
+#Dataframes for each bin
+#Filter for only needed columns and bin
+bin1 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 1)
+
+bin2 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 2)
+
+bin3 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 3)
+
+bin4 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 4)
+
+bin5 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 5)
+
+bin6 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 6)
+
+bin7 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 7)
+
+bin8 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 8)
+
+bin9 <- Snowmelt.Discharge.spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>% filter(Bin == 9)
+
+
+Snowmelt.Discharge.spring.median <- Snowmelt.Discharge.spring %>% group_by(Bin, DOY) %>%
+  mutate(Dis.Med = median(Discharge))
+  
+dis.doy.med <- ggplot(Snowmelt.Discharge.spring.median) +
+  geom_line(aes(x = DOY, y = Dis.Med, color = as.factor(Bin))) +
+  labs(x = "Day of Year", y = "Median Discharge", color = "Latitude Bin") +
+  scale_color_viridis_d() +
+  theme(legend.position = "top")
+print(dis.doy.med)
+
 ```
 
 
@@ -175,11 +223,10 @@ ts.plot(AlaskaDischagre_6_ts.Monthly, AlaskaDischagre_6_prediction$pred, lty = c
 
 ## Predictability of snowmelt
 
+Analy
+
 Is there a change over time of the period when snow melts? Perhaps be looking at the date of the greatest increase in discharge.
 
-```{r}
-
-```
 
 
 
