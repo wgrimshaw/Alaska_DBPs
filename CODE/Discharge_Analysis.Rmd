@@ -27,11 +27,14 @@ theme_set(theme_classic())
 AlaskaTempPrecipDischarge <- read_csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 # transform bin into factor
 AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
+
+AlaskaTempPrecipDischarge$DATE <- as.Date(AlaskaTempPrecipDischarge$DATE,
+                                          format = "%Y-%m-%d")
 #Extract date and discharge data
 AlaskaDischarge <- AlaskaTempPrecipDischarge%>%
   select("DATE", "Bin","STATION","NAME", "site_no", "Discharge")
 #drop na
-AlaskaDischarge%>%drop_na()
+AlaskaDischarge<-AlaskaDischarge%>%drop_na()
 # plot discharge  over time for 10 latitude bins
 discharge_plot <- ggplot(AlaskaDischarge,aes(x = DATE, y = Discharge))+
   geom_line()+ # add a representative line
@@ -89,11 +92,17 @@ summary(Discharge6_trend)
 ```{r}
 ## 2nd way to do the time series
 # find the monthly change of Bin 6 over time
-AlaskaDischagre_6.Monthly <- AlaskaDischarge_6%>%
-  mutate(Year = year(DATE), Month = month(DATE))%>%
-  group_by(Year,Month)%>%
-  summarise(Discharge = mean(Discharge))
 
+AlaskaDischagre_6.Monthly <- AlaskaDischarge_6 %>%
+  mutate(Year = year(DATE), Month = month(DATE))
+
+AlaskaDischagre_6.Monthly$Year<- as.factor(AlaskaDischagre_6.Monthly$Year) 
+AlaskaDischagre_6.Monthly$Month<- as.factor(AlaskaDischagre_6.Monthly$Month) 
+
+AlaskaDischagre_6.Monthly<-AlaskaDischagre_6.Monthly%>%
+  group_by(Year, Month)%>%
+  summarise(Discharge = mean(Discharge))
+  
 AlaskaDischagre_6_ts.Monthly <- ts(AlaskaDischagre_6.Monthly[[3]], frequency = 12)
 
 AlaskaDischagre_6_trend.Monthly <-smk.test(AlaskaDischagre_6_ts.Monthly) 
