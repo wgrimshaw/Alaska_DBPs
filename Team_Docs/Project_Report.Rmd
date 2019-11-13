@@ -139,7 +139,8 @@ print(PrecipBoxplot)
 
 
 ```{r Discharge, plot discharge over time for 10 bins}
-AlaskaTempPrecipDischarge <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+#import the data
+AlaskaTempPrecipDischarge <- read.csv("../DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 # transform bin into factor
 AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
 #Extract date and discharge data
@@ -221,7 +222,9 @@ A seasonal Sen's Slope quantifies the magnitude of the temperature and discharge
 
 ```{r Discharge}
 # Time series for Bin 6
-AlaskaDischarge_6 <- AlaskaDischarge %>% filter(Bin == 6)
+AlaskaDischarge_6 <- AlaskaDischarge %>% 
+  filter(Bin == 6)%>%
+  drop_na()
 
 AlaskaDischarge_6.Monthly <- AlaskaDischarge_6%>%
   mutate(Year = year(DATE), Month = month(DATE))%>%
@@ -233,6 +236,7 @@ AlaskaDischarge_6_ts.Monthly <- ts(AlaskaDischarge_6.Monthly[[3]], frequency = 1
 AlaskaDischarge_6_trend.Monthly <-smk.test(AlaskaDischarge_6_ts.Monthly) 
 AlaskaDischarge_6_trend.Monthly
 summary(AlaskaDischarge_6_trend.Monthly)
+# p-value = 0.0001581 < 0.05, which means bin 6 has obvious seasonal change
 
 # test if the data is stationary
 adf.test(AlaskaDischarge_6_ts.Monthly, alternative = "stationary")
