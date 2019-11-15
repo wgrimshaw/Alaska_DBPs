@@ -81,6 +81,7 @@ plot(Alaska5_Decomposed)
 
 ```{r}
 ## Seasonal Mann-Kendall for whether temperature is changing at each site
+## try creating monthly dataset for temperature
 # first create new dataset using linear interpolation
 range(Alaska_Data_5$DATE)
 # run smk on time series
