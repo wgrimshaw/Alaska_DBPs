@@ -107,5 +107,6 @@ summary(Alaska5_Monthly_Trend)
 
 sea.sens.slope(Alaska_Temp_Monthly_5_ts)
 ## do I run this for each month separately?
+## No
 ```
-There is a statistically significant change in temperature over time for bin 5. Using Sen's slope, the magnitude of this trend is 0.044, with unknown units. Maybe degrees F per year?
+There is a statistically significant change in temperature over time for bin 5. Using Sen's slope, the magnitude of this trend is 0.044 degrees F per year. Compare that to 
