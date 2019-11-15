@@ -82,12 +82,30 @@ plot(Alaska5_Decomposed)
 ```{r}
 ## Seasonal Mann-Kendall for whether temperature is changing at each site
 ## try creating monthly dataset for temperature
-# first create new dataset using linear interpolation
-range(Alaska_Data_5$DATE)
-# run smk on time series
-Alaska5Trend <- smk.test(Alaska_Data_5_ts)
-Alaska5Trend
-summary(Alaska5Trend)
-sea.sens.slope(Alaska_Data_5_ts) # gives an error, but not sure why
+Alaska_Temp_Monthly <- Alaska_Data %>%
+  mutate(Year = year(DATE), Month = month(DATE)) %>%
+  group_by(Year, Month, Bin) %>%
+  summarize(aveTMAX = mean(TMAX, na.rm = T)) %>%
+  mutate(Date = as.yearmon(paste(Year, Month), "%Y %m"))
+
+## Test seasonal mann kendall on bin 5 by filtering then creating ts object
+Alaska_Temp_Monthly_5 <- filter(Alaska_Temp_Monthly,
+                                Bin == 5)
+## remove incomplete years before running sen's slope
+## create count of monthly averages for each year
+Alaska_Temp_Monthly_5 <- Alaska_Temp_Monthly_5 %>%
+  group_by(Year) %>%
+  add_count(Year) %>%
+  filter(n == 12)
+
+Alaska_Temp_Monthly_5_ts <- ts(Alaska_Temp_Monthly_5[[4]], frequency = 12)
+  
+## SMK Test for trend
+Alaska5_Monthly_Trend <- smk.test(Alaska_Temp_Monthly_5_ts)
+Alaska5_Monthly_Trend
+summary(Alaska5_Monthly_Trend)
+
+sea.sens.slope(Alaska_Temp_Monthly_5_ts)
+## do I run this for each month separately?
 ```
-There is a statistically significant change in temperature over time for bin 5. Using Sen's slope, the magnitude of this trend is 
+There is a statistically significant change in temperature over time for bin 5. Using Sen's slope, the magnitude of this trend is 0.044, with unknown units. Maybe degrees F per year?
