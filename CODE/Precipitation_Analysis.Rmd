@@ -234,7 +234,8 @@ labs(title="Precipitation Measured over Time", x="Sample Year",
        y="Precipitation (inches)")+ 
   scale_x_date(labels=date_format("%y"),
                breaks=date_breaks("5 years"))+
-  scale_fill_manual(guide=guide_legend(keyheight=unit(4, units="mm")))+
+  theme(legend.position="top",
+        legend.key.width=unit(1.5, "cm"))+
   gabytheme
 print(PrecipBoxplot)
 ```
