@@ -1,0 +1,301 @@
+---
+title: "Snowmelt"
+author: "Tristen Townsend"
+date: "11/15/2019"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+library(pracma)
+
+```
+
+```{r}
+
+#Load the data
+AlaskaTempPrecipDischarge <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+
+#Convert DATE column to class 'Date'
+AlaskaTempPrecipDischarge$DATE <- ymd(AlaskaTempPrecipDischarge$DATE)
+
+#Add date columns
+Snowmelt.Discharge <- AlaskaTempPrecipDischarge %>% mutate(YEAR = year(DATE), MONTH = month(DATE), 
+                        DAY = day(DATE), WEEK = week(DATE), 
+                        DOY = yday(DATE))
+
+Snowmelt.Discharge.Spring <- Snowmelt.Discharge %>% filter(WEEK < 30)
+
+```
+
+
+```{r}
+
+#Make dataframes for bin analysis
+#Filter for only needed columns and bin
+Snowmelt.Discharge.Bin1 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
+  filter(Bin == 1)
+
+Snowmelt.Discharge.Bin2 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
+  filter(Bin == 2)
+
+Snowmelt.Discharge.Bin3 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
+  filter(Bin == 3)
+
+Snowmelt.Discharge.Bin4 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
+  filter(Bin == 4)
+
+Snowmelt.Discharge.Bin5 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
+  filter(Bin == 5)
+
+Snowmelt.Discharge.Bin6 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
+  filter(Bin == 6)
+
+Snowmelt.Discharge.Bin7 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
+  filter(Bin == 7)
+
+Snowmelt.Discharge.Bin8 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
+  filter(Bin == 8)
+
+Snowmelt.Discharge.Bin9 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
+  filter(Bin == 9)
+
+```
+
+
+```{r}
+
+#Plot mean discharge for each DOY through time by bin
+Snowmelt.Discharge.Mean <- Snowmelt.Discharge.Spring %>% group_by(as.factor(Bin), as.factor(DOY)) %>%
+  mutate(Dis.Mean = mean(Discharge))
+
+dis.doy.mean <- ggplot(Snowmelt.Discharge.Mean) +
+  geom_line(aes(x = DOY, y = Dis.Mean, color = as.factor(Bin))) +
+  labs(x = "Day of Year", y = "Mean Discharge", color = "Latitude Bin") +
+  scale_color_viridis_d() +
+  theme(legend.position = "top")
+print(dis.doy.mean)
+
+```
+
+```{r}
+
+#Latitude Bin 6 
+dis.doy.6 <- ggplot(Snowmelt.Discharge.Bin6) +
+  geom_line(aes(x = DOY, y = Discharge, color = (YEAR)), 
+            show.legend = FALSE) +
+  labs(x = "Day of Year", y = "Discharge, cfs", color = "Year") +
+  scale_color_viridis_c() +
+  theme(legend.position = "top")
+print(dis.doy.6)
+
+#Latitude Bin 6 - discrete years - every 10
+Snowmelt.Discharge.Bin6.10Year <- Snowmelt.Discharge.Bin6 %>% 
+  filter(YEAR == 1969 | YEAR == 1979 | YEAR == 1989 | YEAR == 1999 | YEAR == 2009 | YEAR == 2019)
+
+
+dis.doy.6.10 <- ggplot(Snowmelt.Discharge.Bin6.10Year) +
+  geom_line(aes(x = DOY, y = Discharge, color = as.factor((YEAR)))) +
+  labs(x = "Day of Year", y = "Discharge, cfs", color = "Year") +
+  scale_color_viridis_d() +
+  theme(legend.position = "top")
+print(dis.doy.6.10)
+
+```
+
+
+```{r Bin 1}
+
+Snowmelt.Discharge.Peaks1 <- Snowmelt.Discharge.Bin1 %>% 
+  filter(!is.na(Discharge)) %>% 
+  group_by(YEAR) %>%
+  mutate(Is.Peak = case_when(Discharge == max(Discharge) ~ TRUE, 
+                             Discharge != max(Discharge) ~ FALSE), 
+         Is.First.Peak = cumsum(Is.Peak)) %>%
+  filter(Is.First.Peak == 1 & Is.Peak == TRUE) %>%
+  select(YEAR, DOY)
+
+#DOY vs Year
+DOY.Time1 <-
+ggplot(Snowmelt.Discharge.Peaks1, aes(x = YEAR, y = DOY)) +
+  geom_point() +
+  geom_smooth(method = lm)
+print(DOY.Time1) #later (but very few data points)
+
+```
+
+
+```{r Bin 2}
+
+Snowmelt.Discharge.Peaks2 <- Snowmelt.Discharge.Bin2 %>% 
+  filter(!is.na(Discharge)) %>% 
+  group_by(YEAR) %>%
+  mutate(Is.Peak = case_when(Discharge == max(Discharge) ~ TRUE, 
+                             Discharge != max(Discharge) ~ FALSE), 
+         Is.First.Peak = cumsum(Is.Peak)) %>%
+  filter(Is.First.Peak == 1 & Is.Peak == TRUE) %>%
+  select(YEAR, DOY)
+
+#DOY vs Year
+DOY.Time2 <-
+ggplot(Snowmelt.Discharge.Peaks2, aes(x = YEAR, y = DOY)) +
+  geom_point() +
+  geom_smooth(method = lm)
+print(DOY.Time2) #literally the same?????
+
+```
+
+
+```{r Bin 3}
+
+Snowmelt.Discharge.Peaks3 <- Snowmelt.Discharge.Bin3 %>% 
+  filter(!is.na(Discharge)) %>% 
+  group_by(YEAR) %>%
+  mutate(Is.Peak = case_when(Discharge == max(Discharge) ~ TRUE, 
+                             Discharge != max(Discharge) ~ FALSE), 
+         Is.First.Peak = cumsum(Is.Peak)) %>%
+  filter(Is.First.Peak == 1 & Is.Peak == TRUE) %>%
+  select(YEAR, DOY)
+
+#DOY vs Year
+DOY.Time3 <-
+ggplot(Snowmelt.Discharge.Peaks3, aes(x = YEAR, y = DOY)) +
+  geom_point() +
+  geom_smooth(method = lm)
+print(DOY.Time3) #earlier (barely)
+
+```
+
+
+```{r Bin 4}
+
+Snowmelt.Discharge.Peaks4 <- Snowmelt.Discharge.Bin4 %>% 
+  filter(!is.na(Discharge)) %>% 
+  group_by(YEAR) %>%
+  mutate(Is.Peak = case_when(Discharge == max(Discharge) ~ TRUE, 
+                             Discharge != max(Discharge) ~ FALSE), 
+         Is.First.Peak = cumsum(Is.Peak)) %>%
+  filter(Is.First.Peak == 1 & Is.Peak == TRUE) %>%
+  select(YEAR, DOY)
+
+#DOY vs Year
+DOY.Time4 <-
+ggplot(Snowmelt.Discharge.Peaks4, aes(x = YEAR, y = DOY)) +
+  geom_point() +
+  geom_smooth(method = lm)
+print(DOY.Time4) #later (barely)
+
+```
+
+
+```{r Bin 5}
+
+Snowmelt.Discharge.Peaks5 <- Snowmelt.Discharge.Bin5 %>% 
+  filter(!is.na(Discharge)) %>% 
+  group_by(YEAR) %>%
+  mutate(Is.Peak = case_when(Discharge == max(Discharge) ~ TRUE, 
+                             Discharge != max(Discharge) ~ FALSE), 
+         Is.First.Peak = cumsum(Is.Peak)) %>%
+  filter(Is.First.Peak == 1 & Is.Peak == TRUE) %>%
+  select(YEAR, DOY)
+
+#DOY vs Year
+DOY.Time5 <-
+ggplot(Snowmelt.Discharge.Peaks5, aes(x = YEAR, y = DOY)) +
+  geom_point() +
+  geom_smooth(method = lm)
+print(DOY.Time5) #earlier
+
+```
+
+
+```{r Bin 6}
+
+# Could potentially try to make a day of year peak snowmelt vs magnitude
+
+Snowmelt.Discharge.Peaks6 <- Snowmelt.Discharge.Bin6 %>% 
+  filter(!is.na(Discharge)) %>% 
+  group_by(YEAR) %>%
+  mutate(Is.Peak = case_when(Discharge == max(Discharge) ~ TRUE, 
+                             Discharge != max(Discharge) ~ FALSE), 
+         Is.First.Peak = cumsum(Is.Peak)) %>%
+  filter(Is.First.Peak == 1 & Is.Peak == TRUE) %>%
+  select(YEAR, DOY)
+
+#DOY vs Year
+DOY.Time6 <-
+ggplot(Snowmelt.Discharge.Peaks6, aes(x = YEAR, y = DOY)) +
+  geom_point() +
+  geom_smooth(method = lm)
+print(DOY.Time6) #earlier
+
+#Test for if variance has changed over time?
+
+```
+
+```{r Bin 7}
+
+Snowmelt.Discharge.Peaks7 <- Snowmelt.Discharge.Bin7 %>% 
+  filter(!is.na(Discharge)) %>% 
+  group_by(YEAR) %>%
+  mutate(Is.Peak = case_when(Discharge == max(Discharge) ~ TRUE, 
+                             Discharge != max(Discharge) ~ FALSE), 
+         Is.First.Peak = cumsum(Is.Peak)) %>%
+  filter(Is.First.Peak == 1 & Is.Peak == TRUE) %>%
+  select(YEAR, DOY)
+
+#DOY vs Year
+DOY.Time7 <-
+ggplot(Snowmelt.Discharge.Peaks7, aes(x = YEAR, y = DOY)) +
+  geom_point() +
+  geom_smooth(method = lm)
+print(DOY.Time7) #later
+
+```
+
+```{r Bin 8}
+
+Snowmelt.Discharge.Peaks8 <- Snowmelt.Discharge.Bin8 %>% 
+  filter(!is.na(Discharge)) %>% 
+  group_by(YEAR) %>%
+  mutate(Is.Peak = case_when(Discharge == max(Discharge) ~ TRUE, 
+                             Discharge != max(Discharge) ~ FALSE), 
+         Is.First.Peak = cumsum(Is.Peak)) %>%
+  filter(Is.First.Peak == 1 & Is.Peak == TRUE) %>%
+  select(YEAR, DOY)
+
+#DOY vs Year
+DOY.Time8 <-
+ggplot(Snowmelt.Discharge.Peaks8, aes(x = YEAR, y = DOY)) +
+  geom_point() +
+  geom_smooth(method = lm)
+print(DOY.Time8) #earlier
+
+```
+
+```{r Bin 9}
+
+Snowmelt.Discharge.Peaks9 <- Snowmelt.Discharge.Bin9 %>% 
+  filter(!is.na(Discharge)) %>% 
+  group_by(YEAR) %>%
+  mutate(Is.Peak = case_when(Discharge == max(Discharge) ~ TRUE, 
+                             Discharge != max(Discharge) ~ FALSE), 
+         Is.First.Peak = cumsum(Is.Peak)) %>%
+  filter(Is.First.Peak == 1 & Is.Peak == TRUE) %>%
+  select(YEAR, DOY)
+
+#DOY vs Year
+DOY.Time9 <-
+ggplot(Snowmelt.Discharge.Peaks9, aes(x = YEAR, y = DOY)) +
+  geom_point() +
+  geom_smooth(method = lm)
+print(DOY.Time9) #earlier
+
+```
+
