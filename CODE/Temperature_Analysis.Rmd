@@ -25,35 +25,10 @@ theme_set(theme_bw())
 ```
 
 ```{r}
-## Data wrangling
-## transform date column from factor to date
-Alaska_Data$DATE <- as.Date(Alaska_Data$DATE, format = "%Y-%m-%d")
-## Transform Bin column to factor
-Alaska_Data$Bin <- as.factor(Alaska_Data$Bin)
+## OLD CODE NOT NEEDED
 ## add rolling mean temperature column
 Alaska_Data <- mutate(Alaska_Data,
                       TMAX_roll = rollmean(TMAX, 60, fill = NA))
-
-## create plot of temperature over time for all 10 latitude bins
-ggplot(Alaska_Data, aes(x = DATE, y = TMAX)) +
-  geom_line(alpha = 0.8) +
-  facet_wrap(~Bin, nrow = 3, ncol = 3) +
-  labs(y = "Maximum Daily Temperature (F)", x = "Date")
-
-## try with just bins 1, 5, and 9
-Alaska_Data_259 <- Alaska_Data %>%
-  filter(Bin %in% c(2,5,9))
-
-ggplot(Alaska_Data, aes(x = DATE, y = TMAX, color = Bin)) +
-  #geom_line() +
-  geom_smooth()
-
-## What about average monthly temperature?
-Alaska_Temp_Monthly <- Alaska_Data %>%
-  mutate(Year = year(DATE), Month = month(DATE)) %>%
-  group_by(Year, Month, Bin) %>%
-  summarize(aveTMAX = mean(TMAX, na.omit = T)) %>%
-  mutate(Date = as.yearmon(paste(Year, Month), "%Y %m"))
 
 ## try plotting monthly averages, all look bad
 ggplot(Alaska_Temp_Monthly, aes(x = Month, y = aveTMAX, color = Year)) +
@@ -61,9 +36,22 @@ ggplot(Alaska_Temp_Monthly, aes(x = Month, y = aveTMAX, color = Year)) +
   scale_color_viridis_c() +
   facet_wrap(~Bin, nrow = 3, ncol = 3)
 
-ggplot(Alaska_Temp_Monthly, aes(x = Date, y = aveTMAX)) +
-  geom_line() +
-  facet_wrap(~Bin, nrow = 3, ncol = 3)
+```
+
+
+```{r}
+## Data wrangling
+## transform date column from factor to date
+Alaska_Data$DATE <- as.Date(Alaska_Data$DATE, format = "%Y-%m-%d")
+## Transform Bin column to factor
+Alaska_Data$Bin <- as.factor(Alaska_Data$Bin)
+
+## create plot of temperature over time for all 10 latitude bins
+ggplot(Alaska_Data, aes(x = DATE, y = TMAX)) +
+  geom_line(alpha = 0.8) +
+  facet_wrap(~Bin, nrow = 3, ncol = 3) +
+  labs(y = "Maximum Daily Temperature (F)", x = "Date")
+
 ```
 
 ```{r}
@@ -79,33 +67,55 @@ Alaska5_Decomposed <- stl(Alaska_Data_5_ts, s.window = "periodic")
 plot(Alaska5_Decomposed)
 ```
 
+For each latitude bin, the monthly average maximum temperature was calculated. If there were large gaps of multiple years in the period of record, only the more recent data were used. However, if there were shorter data gaps of less than one year in length, linear interpolation was used to estimate the average monthly temperature for any months with missing data. For each latitude bin, a seasonal Mann-Kendall test was performed on the monthly time series to determine if there had been a change in temperature over the period of record. If there had been a change over the period of record, the seasonal sen's slope test was used to determine the average magnitude of the change.
+
 ```{r}
 ## Seasonal Mann-Kendall for whether temperature is changing at each site
-## try creating monthly dataset for temperature
+## Create monthly dataset for temperature
 Alaska_Temp_Monthly <- Alaska_Data %>%
   mutate(Year = year(DATE), Month = month(DATE)) %>%
   group_by(Year, Month, Bin) %>%
   summarize(aveTMAX = mean(TMAX, na.rm = T)) %>%
   mutate(Date = as.yearmon(paste(Year, Month), "%Y %m"))
 
-## Test seasonal mann kendall on bin 5 by filtering then creating ts object
-Alaska_Temp_Monthly_5 <- filter(Alaska_Temp_Monthly,
-                                Bin == 5)
-## remove incomplete years before running sen's slope
-## create count of monthly averages for each year
-Alaska_Temp_Monthly_5 <- Alaska_Temp_Monthly_5 %>%
+Temp_Change <- rep(0, 9)
+
+Site_bin <- 2
+
+## Where for loop will start
+
+## Step 1: filter data by site
+Alaska_Temp_Monthly_Site <- Alaska_Temp_Monthly %>%
+  filter(Bin == Site_bin) %>%
+## Step 2: Remove incomplete years if first or last year
+  ## interpolate values if missing months internally
   group_by(Year) %>%
   add_count(Year) %>%
   filter(n == 12)
 
-Alaska_Temp_Monthly_5_ts <- ts(Alaska_Temp_Monthly_5[[4]], frequency = 12)
+## number of data points for interpolation
+n_months = as.numeric(nrow(Alaska_Temp_Monthly_Site))
+
+Alaska_Temp_Monthly_Interp <- Alaska_Temp_Monthly_Site %>%
+  ungroup() %>%
+  select(Date, aveTMAX)
+
+## Interpolate using neighboring months, will return original data frame if complete
+Alaska_Temp_Monthly_Interp <- as.data.frame(approx(Alaska_Temp_Monthly_Interp,
+                                                 n = n_months,
+                                                 method = "linear")) %>%
+  rename(Date = x, aveTMAX = y)
+
+## create time series object from interpolated temp data
+Alaska_Temp_Monthly_ts <- ts(Alaska_Temp_Monthly_Interp[[2]], frequency = 12)
   
 ## SMK Test for trend
-Alaska5_Monthly_Trend <- smk.test(Alaska_Temp_Monthly_5_ts)
-Alaska5_Monthly_Trend
-summary(Alaska5_Monthly_Trend)
+Alaska_Monthly_Trend <- smk.test(Alaska_Temp_Monthly_ts)
+Alaska_Monthly_Trend
+summary(Alaska_Monthly_Trend)
 
-sea.sens.slope(Alaska_Temp_Monthly_5_ts)
+Slope <- sea.sens.slope(Alaska_Temp_Monthly_ts)
+Temp_Change[Site_bin] <- Slope
 ## do I run this for each month separately?
 ## No
 ```
