@@ -55,7 +55,7 @@ theme_set(theme_bw())
 
 ## Background
 
-The climate is changing, in large part due to anthropogenic carbon emmissions. These changes have different magnitudes around the world and local impacts of climate change vary as well. Specifically, climate change is already having greater impacts near the poles than many other parts of the globe. Understanding how climate change is affecting discharge, especially in Alaska, has implications for water management, ecological processes, and the larger global system (if we consider ice-albedo feedback). Many communities rely on a given amount of water from snowmelt to arrive at certain times of the year, so a shift in the quantity or timing could drastically affect downstream users and water managers. Additionally, changing the amount of flow in rivers could affect sensitive biological communities. Furthermore, changes in temperature that result in glacial or permafrost melting could reduce the amount of reflective land cover, thus disrupting larger climate systems.
+The climate is changing, in large part due to anthropogenic carbon emmissions. These changes have different magnitudes around the world and local impacts of climate change vary as well. Specifically, climate change is already having greater impacts near the poles than many other parts of the globe, a process known as polar amplification or arctic amplification (Serreze et al 2009). Understanding how climate change is affecting discharge, especially in Alaska, has implications for water management, ecological processes, and the larger global system (if we consider ice-albedo feedback). Many communities rely on a given amount of water from snowmelt to arrive at certain times of the year, so a shift in the quantity or timing could drastically affect downstream users and water managers. Additionally, changing the amount of flow in rivers could affect sensitive biological communities. Furthermore, changes in temperature that result in glacial or permafrost melting could reduce the amount of reflective land cover, thus disrupting larger climate systems.
 
 <At the end of your rationale, introduce a numbered list of your questions (or an overarching question and sub-questions). Each question should be accompanied by one or more working hypotheses, inserted beneath each question.>
 
@@ -120,7 +120,7 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 ## Question 2: 
 
 
-
+The Climate Science Special Report estimates that maximum temperature increases in Alaska since between the first half of the 20th century and the past 30 years have been 1.43 degrees F (https://science2017.globalchange.gov/chapter/6/).
 
 \newpage
 
@@ -131,3 +131,4 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 
 # References
 <add references here> 
+Serreze, M. C., Barrett, A. P., Stroeve, J. C., Kindig, D. N., and Holland, M. M.: The emergence of surface-based Arctic amplification, The Cryosphere, 3, 11–19, https://doi.org/10.5194/tc-3-11-2009, 2009.
