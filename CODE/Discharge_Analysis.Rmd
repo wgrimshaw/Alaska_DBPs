@@ -124,13 +124,14 @@ write.csv(Sens_Slope_Discharge, "./Data/PROCESSED/Discharge_Change.csv")
 
 ```{r}
 # plot bin 2-9 to see if there's an obvious gap in original dataset
-AlaskaDischarge_7 <- AlaskaDischarge %>%
-  filter(Bin == 7)%>%
-  drop_na()
-
-discharge_7_plot <-ggplot(AlaskaDischarge_7, aes(x = DATE, y = Discharge))+
-  geom_line()
-print(discharge_7_plot)
+AlaskaDischarge_4 <- AlaskaDischarge %>%
+  filter(Bin == 4)
+  
+AlaskaDischarge_4_2 <-na.interp(AlaskaDischarge_4)
+discharge_4_plot <-ggplot()+
+  geom_line(AlaskaDischarge_4, aes(x = DATE, y = Discharge,series= 'Original' ))+
+  geom_line(AlaskaDischarge_4_2, aes(x = DATE, y = Discharge, series= 'Interpolated'))+
+print(discharge_4_plot)
 ```
 
 for bin 2, choose dataset from time 1995, for bin 3 choose dataset from 1948, for bin 4, use linear interplotation to fill the missing data from 1994-10 to 1996-10
