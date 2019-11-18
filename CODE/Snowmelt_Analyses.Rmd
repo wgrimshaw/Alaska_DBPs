@@ -15,6 +15,7 @@ library(ggplot2)
 library(lubridate)
 library(pracma)
 library(tseries)
+library(cowplot)
 
 ```
 
@@ -100,7 +101,6 @@ print(dis.doy.6)
 Snowmelt.Discharge.Bin6.10Year <- Snowmelt.Discharge.Bin6 %>% 
   filter(YEAR == 1969 | YEAR == 1979 | YEAR == 1989 | YEAR == 1999 | YEAR == 2009 | YEAR == 2019)
 
-
 dis.doy.6.10 <- ggplot(Snowmelt.Discharge.Bin6.10Year) +
   geom_line(aes(x = DOY, y = Discharge, color = as.factor((YEAR)))) +
   labs(x = "Day of Year", y = "Discharge, cfs", color = "Year") +
@@ -127,7 +127,7 @@ DOY.Time1 <-
 ggplot(Snowmelt.Discharge.Peaks1, aes(x = YEAR, y = DOY)) +
   geom_point() +
  geom_smooth(method = lm, se = FALSE, color = "#c13d75ff") +
-  labs(x = "", y = expression("Day of Year of Peak Discharge")) + 
+  labs(x = "", y = "") + 
   theme(plot.title = element_text(margin = margin(b = -10), size = 12), 
        axis.title.x = element_blank())
 print(DOY.Time1) #later (but very few data points)
@@ -154,7 +154,7 @@ DOY.Time2 <-
 ggplot(Snowmelt.Discharge.Peaks2, aes(x = YEAR, y = DOY)) +
   geom_point() +
   geom_smooth(method = lm, se = FALSE, color = "#c13d75ff") +
-  labs(x = "", y = expression("Day of Year of Peak Discharge")) + 
+  labs(x = "", y = "") + 
   theme(plot.title = element_text(margin = margin(b = -10), size = 12), 
        axis.title.x = element_blank())
 print(DOY.Time2) #literally the same?????
@@ -181,7 +181,7 @@ DOY.Time3 <-
 ggplot(Snowmelt.Discharge.Peaks3, aes(x = YEAR, y = DOY)) +
   geom_point() +
   geom_smooth(method = lm, se = FALSE, color = "#c13d75ff") +
-  labs(x = "", y = expression("Day of Year of Peak Discharge")) + 
+  labs(x = "", y = "") + 
   theme(plot.title = element_text(margin = margin(b = -10), size = 12), 
        axis.title.x = element_blank())
 print(DOY.Time3) #earlier (barely)
@@ -208,7 +208,7 @@ DOY.Time4 <-
 ggplot(Snowmelt.Discharge.Peaks4, aes(x = YEAR, y = DOY)) +
   geom_point() +
   geom_smooth(method = lm, se = FALSE, color = "#c13d75ff") +
-  labs(x = "", y = expression("Day of Year of Peak Discharge")) + 
+  labs(x = "", y = "Day of Year of Peak Discharge") + 
   theme(plot.title = element_text(margin = margin(b = -10), size = 12), 
        axis.title.x = element_blank())
 print(DOY.Time4) #later (barely)
@@ -235,7 +235,7 @@ DOY.Time5 <-
 ggplot(Snowmelt.Discharge.Peaks5, aes(x = YEAR, y = DOY)) +
   geom_point() +
  geom_smooth(method = lm, se = FALSE, color = "#c13d75ff") +
-  labs(x = "", y = expression("Day of Year of Peak Discharge")) + 
+  labs(x = "", y = "") + 
   theme(plot.title = element_text(margin = margin(b = -10), size = 12), 
        axis.title.x = element_blank())
 print(DOY.Time5) #earlier
@@ -264,14 +264,10 @@ DOY.Time6 <-
 ggplot(Snowmelt.Discharge.Peaks6, aes(x = YEAR, y = DOY)) +
   geom_point() +
   geom_smooth(method = lm, se = FALSE, color = "#c13d75ff") +
-  labs(x = "", y = expression("Day of Year of Peak Discharge")) + 
+  labs(x = "", y = "") + 
   theme(plot.title = element_text(margin = margin(b = -10), size = 12), 
        axis.title.x = element_blank())
 print(DOY.Time6) #earlier
-
-adf.test(Snowmelt.Discharge.Peaks6$DOY, alternative = "stationary")
-Bin6_ts <- ts(Snowmelt.Discharge.Peaks6[[2]], frequency = 1)
-Bin6_Decomposed <- stl(Bin6_ts, s.window = 7)
 
 bin6.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks6)
 summary(bin6.lm) 
@@ -296,7 +292,7 @@ DOY.Time7 <-
 ggplot(Snowmelt.Discharge.Peaks7, aes(x = YEAR, y = DOY)) +
   geom_point() +
  geom_smooth(method = lm, se = FALSE, color = "#c13d75ff") +
-  labs(x = "", y = expression("Day of Year of Peak Discharge")) + 
+  labs(x = "", y = "") + 
   theme(plot.title = element_text(margin = margin(b = -10), size = 12), 
        axis.title.x = element_blank())
 print(DOY.Time7) #later
@@ -322,7 +318,7 @@ DOY.Time8 <-
 ggplot(Snowmelt.Discharge.Peaks8, aes(x = YEAR, y = DOY)) +
   geom_point() +
   geom_smooth(method = lm, se = FALSE, color = "#c13d75ff") +
-  labs(x = "", y = expression("Day of Year of Peak Discharge")) + 
+  labs(x = "", y = "") + 
   theme(plot.title = element_text(margin = margin(b = -10), size = 12), 
        axis.title.x = element_blank())
 print(DOY.Time8) #earlier
@@ -348,7 +344,7 @@ DOY.Time9 <-
 ggplot(Snowmelt.Discharge.Peaks9, aes(x = YEAR, y = DOY)) +
   geom_point() +
   geom_smooth(method = lm, se = FALSE, color = "#c13d75ff") +
-  labs(x = "", y = expression("Day of Year of Peak Discharge")) + 
+  labs(x = "", y = "") + 
   theme(plot.title = element_text(margin = margin(b = -10), size = 12), 
        axis.title.x = element_blank())
 print(DOY.Time9) #earlier
@@ -358,12 +354,20 @@ summary(bin9.lm)
 
 ```
 
+```{r}
+
+plot_grid(DOY.Time1, DOY.Time2, DOY.Time3, DOY.Time4, DOY.Time5, DOY.Time6, DOY.Time7,
+          DOY.Time8, DOY.Time9, ncol = 3)
+
+```
+
+
 
 ```{r Bin summary}
 
 Snowmelt_BinSummary <- data.frame(Bin = c("1", "2", "3", "4", "5", "6", "7", "8", "9"),
                 Change.DOY = c(NA, NA, NA, NA, -0.4504, NA, NA, NA, NA))
 
-#write.csv(Snowmelt_BinSummary, "./DATA/PROCESSED/Snowmelt_BinSummary.csv")
+#write.csv(Snowmelt_BinSummary, "./DATA/PROCESSED/Snowmelt_BinSummary.csv", row.names = FALSE)
 
 ```
