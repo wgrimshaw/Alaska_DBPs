@@ -63,7 +63,7 @@ Alaska_Data_5 <- Alaska_Data %>%
 Alaska_Data_5_ts <- ts(Alaska_Data_5[[9]], frequency = 365)
 
 ## decomposition
-Alaska5_Decomposed <- stl(Alaska_Data_5_ts, s.window = "periodic")
+Alaska_Decomposed <- stl(Alaska_Temp_Monthly_ts, s.window = "periodic")
 plot(Alaska5_Decomposed)
 ```
 
@@ -80,11 +80,15 @@ Alaska_Temp_Monthly <- Alaska_Data %>%
 
 Temp_Change <- rep(0, 9)
 
-Site_bin <- 9
+## Initialize Final Dataframe of monthly data for plotting
+Alaska_Temp_Monthly_Model <- data.frame(Date = numeric(),
+                                        aveTMAX = numeric(),
+                                        Bin = factor())
 
 ## Where for loop will start
+Site_bin <- 7
 
-for(i in 1:9){
+for(Site_bin in 1:9){
   
   ## Step 1: filter data by site
   Alaska_Temp_Monthly_Site <- Alaska_Temp_Monthly %>%
@@ -106,8 +110,8 @@ for(i in 1:9){
     Alaska_Temp_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year > 1995)
   } else if(Site_bin == 6) {
     Alaska_Temp_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year > 1995)
-  } else if(Site_bin == 7) {
-    Alaska_Temp_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year < 2006)
+  #} else if(Site_bin == 7) {
+  #  Alaska_Temp_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year < 2006)
   } else if(Site_bin == 8) {
     Alaska_Temp_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year < 2018)
   } 
@@ -140,10 +144,35 @@ for(i in 1:9){
     Slope <- sea.sens.slope(Alaska_Temp_Monthly_ts)
     Temp_Change[Site_bin] <- Slope
   }
+  
+  ## Add Bin column to interpolated data frame
+  Alaska_Temp_Monthly_Interp_Bin <- Alaska_Temp_Monthly_Interp %>%
+    mutate(Bin = Site_bin)
+  ## rbind Interpolated dataframe to final monthly dataframe for plotting
+  Alaska_Temp_Monthly_Model <- rbind(Alaska_Temp_Monthly_Model,
+                                     Alaska_Temp_Monthly_Interp_Bin)
 }
+## coerce Bin column to class factor
+Alaska_Temp_Monthly_Model$Bin <- as.factor(Alaska_Temp_Monthly_Model$Bin)
+
 Bin <- seq(1,9)
 Sens_Slope_Temp <- as.data.frame(cbind(Bin, Temp_Change))
-write.csv(Sens_Slope_Temp, "./Data/PROCESSED/Temperature_Change.csv")
+write.csv(Sens_Slope_Temp, "./Data/PROCESSED/Temperature_Change.csv",
+          row.names = F)
 
+```
+
+```{r}
+## Final Temp plot, maybe with trend lines
+ggplot(Alaska_Temp_Monthly_Model, aes(x = Date, y = aveTMAX)) +
+  geom_line(alpha = 0.8) +
+  geom_smooth(method = lm) +
+  facet_wrap(~Bin, nrow = 3, ncol = 3) +
+  labs(y = "Maximum Daily Temperature (F)", x = "Date")
+
+## Plot of Temp change for each bin
+ggplot(Sens_Slope_Temp, aes(x = Bin, y = Temp_Change)) +
+  geom_point() #+
+  #geom_smooth(method = lm, se = FALSE)
 ```
 
