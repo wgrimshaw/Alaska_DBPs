@@ -5,17 +5,15 @@ output:
     fig_caption: yes
     number_sections: yes
 geometry: margin=2.54cm
-title: "Insert title of project here"
-subtitle: "Web address for GitHub repository"
-author: "Insert names of team members here"
+title: "Climatic Trend Impact on Alaskan Stream Discharge"
+subtitle: "https://github.com/wgrimshaw/Alaska_DBPs.git"
+author: "Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen"
 fontsize: 12pt
 mainfont: Times New Roman
 
 ---
 
 \newpage
-
-<Arrow brackets are used for annotating the RMarkdown files. Text within these brackets should not appear in the final version of the PDF document>
 
 <**General Guidelines**>
 <1. Write in scientific style> 
@@ -40,11 +38,15 @@ library(viridis)
 library(ggplot2)
 library(scales)
 library(stats)
+library(kableExtra)
 
 # Set your ggplot theme
 theme_set(theme_bw())
 
 # Load your datasets
+
+AlaskaTempPrecipDischarge <- 
+  read.csv("../DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 
 ```
 
@@ -53,9 +55,10 @@ theme_set(theme_bw())
 
 <Write 1-2 paragraph(s) detailing the rationale for your study. This should include both the context of the topic as well as a rationale for your choice of dataset (reason for location, variables, etc.) A few citations should be included to give context for your topic. You may choose to configure autoreferencing for your citations or add these manually.>
 
+
 ## Background
 
-The climate is changing, in large part due to anthropogenic carbon emmissions. These changes have different magnitudes around the world and local impacts of climate change vary as well. Specifically, climate change is already having greater impacts near the poles than many other parts of the globe, a process known as polar amplification or arctic amplification (Serreze et al 2009). Understanding how climate change is affecting discharge, especially in Alaska, has implications for water management, ecological processes, and the larger global system (if we consider ice-albedo feedback). Many communities rely on a given amount of water from snowmelt to arrive at certain times of the year, so a shift in the quantity or timing could drastically affect downstream users and water managers. Additionally, changing the amount of flow in rivers could affect sensitive biological communities. Furthermore, changes in temperature that result in glacial or permafrost melting could reduce the amount of reflective land cover, thus disrupting larger climate systems.
+The climate is changing, in large part due to anthropogenic carbon emissions. These changes have different magnitudes around the world and local impacts of climate change vary as well. Specifically, climate change is already having greater impacts near the poles than many other parts of the globe, a process known as polar amplification or arctic amplification (Serreze et al 2009). Understanding how climate change is affecting discharge, especially in Alaska, has implications for water management, ecological processes, and the larger global system (if we consider ice-albedo feedback). Many communities rely on a given amount of water from snowmelt to arrive at certain times of the year, so a shift in the quantity or timing could drastically affect downstream users and water managers. Additionally, changing the amount of flow in rivers could affect sensitive biological communities. Furthermore, changes in temperature that result in glacial or permafrost melting could reduce the amount of reflective land cover, thus disrupting larger climate systems.
 
 <At the end of your rationale, introduce a numbered list of your questions (or an overarching question and sub-questions). Each question should be accompanied by one or more working hypotheses, inserted beneath each question.>
 
@@ -107,6 +110,57 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 
 <Each figure should be accompanied by a caption, and each figure should be referenced within the text>
 
+```{r Snowmelt Day of Year Exploratory Graphs and Code, fig.cap= c("Day of Year vs. Mean Discharge. This figure shows mean discharge across all nine latitude bins for each day of the year. This graph served to illustrate variation across sites as to when first day of snowmelt and peak snowmelt would occur.", "Day of Year vs. Discharge. This figure shows how discharge changes with day of year across the period of record for Bin 6. This provided a visual cue as to whether snowmelt was occuring earlier and during what time of the year the shift was occuring.", "Day of Year vs Discharge. This figure shows how  discharge changes with day of year across the every ten years across the period of record for fifty years. This provided a visual cue as to whether snowmelt was occuring earlier and during what time of the year the shift was occuring.")}
+ 
+#Convert DATE column to class 'Date'
+AlaskaTempPrecipDischarge$DATE <- ymd(AlaskaTempPrecipDischarge$DATE)
+
+#Add date columns
+Snowmelt.Discharge <- AlaskaTempPrecipDischarge %>% mutate(YEAR = year(DATE), MONTH = month(DATE), 
+                        DAY = day(DATE), WEEK = week(DATE), 
+                        DOY = yday(DATE))
+
+Snowmelt.Discharge.Spring <- Snowmelt.Discharge %>% filter(WEEK < 30)
+
+Snowmelt.Discharge.Bin6 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
+  filter(Bin == 6)
+
+#Plot mean discharge for each DOY through time by bin
+Snowmelt.Discharge.Mean <- Snowmelt.Discharge.Spring %>% group_by(as.factor(Bin), as.factor(DOY)) %>%
+  mutate(Dis.Mean = mean(Discharge))
+
+#GRAPH 1
+dis.doy.mean <- ggplot(Snowmelt.Discharge.Mean) +
+  geom_line(aes(x = DOY, y = Dis.Mean, color = as.factor(Bin))) +
+  labs(x = "Day of Year", y = "Mean Discharge", color = "Latitude Bin") +
+  scale_color_viridis_d() +
+  theme(legend.position = "top")
+print(dis.doy.mean)
+
+#GRAPH 2
+dis.doy.6 <- ggplot(Snowmelt.Discharge.Bin6) +
+  geom_line(aes(x = DOY, y = Discharge, color = (YEAR)), 
+            show.legend = FALSE) +
+  labs(x = "Day of Year", y = "Discharge, cfs", color = "Year") +
+  scale_color_viridis_c() +
+  theme(legend.position = "top")
+print(dis.doy.6)
+
+#GRAPH 3 - Latitude Bin 6 - discrete years - every 10
+Snowmelt.Discharge.Bin6.10Year <- Snowmelt.Discharge.Bin6 %>% 
+  filter(YEAR == 1969 | YEAR == 1979 | YEAR == 1989 | YEAR == 1999 | YEAR == 2009 | YEAR == 2019)
+
+dis.doy.6.10 <- ggplot(Snowmelt.Discharge.Bin6.10Year) +
+  geom_line(aes(x = DOY, y = Discharge, color = as.factor((YEAR)))) +
+  labs(x = "Day of Year", y = "Discharge, cfs", color = "Year") +
+  scale_color_viridis_d() +
+  theme(legend.position = "top")
+print(dis.doy.6.10)
+
+```
+
+
+
 \newpage
 
 # Analysis
@@ -114,6 +168,56 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 <Insert visualizations and text describing your main analyses. Format your R chunks so that graphs are displayed but code and other output is not displayed. Instead, describe the results of any statistical tests in the main text (e.g., "Variable x was significantly different among y groups (ANOVA; df = 300, F = 5.55, p < 0.0001)"). Each paragraph, accompanied by one or more visualizations, should describe the major findings and how they relate to the question and hypotheses. Divide this section into subsections, one for each research question.>
 
 <Each figure should be accompanied by a caption, and each figure should be referenced within the text>
+
+```{r, fig.cap = "Year vs. Day of Year of Peak Discharge. This is the only Latitude Bin with a significant change in the day of year of peak discharge (p = 0.02353). There is a decreasing trend in the data, indicating the day of peak snowmelt is happening sooner across 1952-2018."}
+
+Snowmelt.Discharge.Bin5 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
+  filter(Bin == 5)
+
+Snowmelt.Discharge.Peaks5 <- Snowmelt.Discharge.Bin5 %>% 
+  filter(!is.na(Discharge)) %>% 
+  group_by(YEAR) %>%
+  mutate(Is.Peak = case_when(Discharge == max(Discharge) ~ TRUE, 
+                             Discharge != max(Discharge) ~ FALSE), 
+         Is.First.Peak = cumsum(Is.Peak)) %>%
+  filter(Is.First.Peak == 1 & Is.Peak == TRUE) %>%
+  select(YEAR, DOY)
+
+#DOY vs Year
+DOY.Time5 <-
+ggplot(Snowmelt.Discharge.Peaks5, aes(x = YEAR, y = DOY)) +
+  geom_point() +
+ geom_smooth(method = lm, se = FALSE, color = "#c13d75ff") +
+  labs(x = "", y = "Day of Year of Peak Discharge") + 
+  theme(plot.title = element_text(margin = margin(b = -10), size = 12), 
+       axis.title.x = element_blank())
+print(DOY.Time5) #earlier
+
+bin5.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks5)
+summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
+
+
+```
+
+
+```{r}
+
+Snowmelt_BinSummary <- 
+  read.csv("../DATA/PROCESSED/Snowmelt_BinSummary.csv")
+
+kable(Snowmelt_BinSummary, format = "latex", 
+      row.names = FALSE, 
+      #col.names = c("Latitude Bin", "Change in Day of Year"),
+      align = "c") %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"),
+                full_width = FALSE,
+                font_size = 15) %>%
+  column_spec(column = 1, bold = TRUE) %>%  #columns must be specified by number
+  row_spec(row = 0, color = "#660033") %>%  #row = 0 allows us to format the header
+  row_spec(row = 5, color = "#104e8b", background = "#d3d3d3") 
+
+```
+
 
 ## Question 1: <insert specific question here and add additional subsections for additional questions below>
 
