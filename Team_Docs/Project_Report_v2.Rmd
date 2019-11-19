@@ -160,6 +160,76 @@ print(dis.doy.6.10)
 ```
 
 
+```{r Precipitation Day of Year Exploratory Graphs and Code}
+
+### Ensure Date is a date object and not a factor
+newdata$DATE<-as.Date(newdata$DATE)
+
+### Ensure Bin is a factor and not an integer
+newdata$Bin <- as.factor(newdata$Bin)
+
+### Add Day of Year, Year, Week,and Month Column
+newdata <-mutate(newdata, DOY = yday(DATE), Year=year(DATE), Month=month(DATE), WEEK = week(DATE))
+  
+
+# Subset the Data by Bin
+Bin1Precip<-filter(newdata, Bin== 1)
+Bin2Precip<-filter(newdata, Bin== 2)
+Bin3Precip<-filter(newdata, Bin == 3)
+Bin4Precip<-filter(newdata, Bin == 4)
+Bin5Precip<-filter(newdata, Bin == 5)
+Bin6Precip<-filter(newdata, Bin == 6)
+Bin7Precip<-filter(newdata, Bin == 7)
+Bin8Precip<-filter(newdata, Bin == 8)
+Bin9Precip<-filter(newdata, Bin == 9)
+
+
+```
+
+# Scatterplot of Full Precipitation Period of Record Colored by Bin
+```{r, fig.width=10, fig.height=6}
+PrecipScatterplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
+  geom_point(alpha=0.5, size=2) +
+labs(title="Precipitation Measured over Time", x="Sample Year",
+       y="Precipitation (inches)")+ 
+  scale_x_date(labels=date_format("%y"),
+               breaks=date_breaks("5 years"))+
+  theme(legend.position="top",
+        legend.key.width=unit(1.5, "cm"))+
+  gabytheme
+print(PrecipScatterplot)
+```
+
+# Plot mean discharge for each DOY through time by bin
+```{r}
+newdata$Bin<-as.factor(newdata$Bin)
+
+Precip.Mean.Spring<-newdata%>%
+  group_by(Bin,DOY)%>%
+  mutate(MeanPRCP=mean(PRCP))%>%
+  filter(WEEK < 30)
+            
+Precip.Mean.Bin6 <- Precip.Mean.Spring %>% 
+  filter(Bin == 6)
+
+#GRAPH 1
+PrecipMeanSpringPlot<- ggplot(Precip.Mean.Spring) +
+  geom_line(aes(x = DOY, y = MeanPRCP, color = Bin)) +
+  labs(x = "Day of Year", y = "Mean Precipitation (inches)", color = "Latitude Bin") +
+  scale_color_viridis_d() +
+  theme(legend.position = "top")
+print(PrecipMeanSpringPlot)
+
+#GRAPH 2
+PrecipSpringBin6Plot<- ggplot(Precip.Mean.Bin6 ) +
+  geom_line(aes(x = DOY, y = PRCP, color = (Year)), 
+            show.legend = FALSE) +
+  labs(x = "Day of Year", y = "Precipitation (inches)", color = "Year") +
+  scale_color_viridis_c() +
+  theme(legend.position = "top")
+print(PrecipSpringBin6Plot)
+
+```
 
 \newpage
 
