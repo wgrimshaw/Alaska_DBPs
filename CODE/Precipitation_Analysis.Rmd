@@ -382,6 +382,30 @@ summary(Bin1SeasonalTrend)
 ```
 
 
->Do Seasonal Mann Kendall test for the 9 stations 
->Moving average from coding challenge
+# Calculate the cumulative annual precip for each year by site and then multiply by drainage area (in NWIS_SiteInfo.csv under raw data) to get a volume of water for each year? We can compare with some cumulative discharge. 
+
+# Calculate Cumulative Annual Precipitation for each year by Site and Create Dataframe
+```{r}
+CumAnnualPrecip<- AlaskaTempPrecipDischarge%>%
+  mutate(Year = year(DATE)) %>%
+  group_by(site_no, Year)%>%
+  summarize(CumPrecip=sum(PRCP, na.rm=TRUE))
+         
+```
+
+### Load in NWIS_SiteInfo.csv which has Drainage Areas for each Station
+```{r}
+NWIS_SiteInfo<- read.csv("../DATA/RAW/NWIS_SiteInfo.csv")
+```
+
+## Join NWIS_SiteInfo and CumAnnual Precip by Site Number and multiplt cumulative precip for each station and year by drainage area to determine water volume for each year and station
+```{r}
+PrecipVolume<-CumAnnualPrecip%>%
+  merge(NWIS_SiteInfo, by='site_no')%>%
+  mutate(Water_Volume=CumPrecip*drain_area_va)%>%
+  select(site_no:dec_long_va, drain_area_va, Water_Volume )
+```
+
+
+
 
