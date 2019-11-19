@@ -45,95 +45,6 @@ print(discharge_plot)
   
 ```
 
-```{r}
-Alaska_Discharge_Monthly <- AlaskaDischarge %>%
-  mutate(Year = year(DATE), Month = month(DATE)) %>%
-  group_by(Year, Month, Bin) %>%
-  summarize(Discharge = mean(Discharge)) %>%
-  mutate(Date = as.yearmon(paste(Year, Month), "%Y %m"))%>%
-  drop_na()
-
-Discharge_Change <- rep(0, 9)
-
-Site_bin <- 9
-
-## Where for loop will start
-
-for(i in 1:9){
-  
-  ## Step 1: filter data by site
-  Alaska_Discharge_Monthly_Site <- Alaska_Discharge_Monthly %>%
-    filter(Bin == Site_bin) %>%
-  ## Step 2: Remove incomplete years if first or last year
-    ## interpolate values if missing months internally
-    group_by(Year) %>%
-    add_count(Year) %>%
-    filter(n == 12)
-  
-  ## Use only latest data points when there are large gaps in the data record
-  ## identified through examination
-  ## would like better way to handle smaller gaps in bins 3, 4, 6, 7
-  if(Site_bin == 2){
-    Alaska_Discharge_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year > 1990)
-  } else if(Site_bin == 3) {
-    Alaska_Discharge_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year > 1985)
-  } else if(Site_bin == 4) {
-    Alaska_Discharge_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year > 1995)
-  } else if(Site_bin == 6) {
-    Alaska_Discharge_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year > 1995)
-  } else if(Site_bin == 7) {
-    Alaska_Discharge_Monthly_Site <- filter(Alaska_Temp_Monthly_Site)
-  } else if(Site_bin == 8) {
-    Alaska_Discharge_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year < 2018)
-  } 
-  
-  ## number of data points for interpolation
-  n_months = 12 * (max(Alaska_Discharge_Monthly_Site$Year) -
-                     min(Alaska_Discharge_Monthly_Site$Year) + 1)
-  
-  Alaska_Discharge_Monthly_Interp <- Alaska_Discharge_Monthly_Site %>%
-    ungroup() %>%
-    select(Date,Discharge )
-  
-  ## Interpolate using neighboring months, will return original data frame if complete
-  Alaska_Discharge_Monthly_Interp <- as.data.frame(approx(Alaska_Discharge_Monthly_Interp,
-                                                   n = n_months,
-                                                   method = "linear")) %>%
-    rename(Date = x, Discharge = y)
-  
-  ## create time series object from interpolated temp data
-  Alaska_Discharge_Monthly_ts <- ts(Alaska_Discharge_Monthly_Interp[[2]], frequency = 12)
-    
-  ## SMK Test for trend
-  Alaska_Monthly_Trend <- smk.test(Alaska_Discharge_Monthly_ts)
-  
-  ## if significant trend, add slope to slope vector
-  ## else add 0 to slope vector
-  if (Alaska_Monthly_Trend$p.value > 0.05){
-    Discharge_Change[Site_bin] <- NA
-  } else {
-    Slope <- sea.sens.slope(Alaska_Discharge_Monthly_ts)
-    Discharge_Change[Site_bin] <- Slope
-  }
-}
-Bin <- seq(1,9)
-Sens_Slope_Discharge <- as.data.frame(cbind(Bin, Discharge_Change))
-write.csv(Sens_Slope_Discharge, "./Data/PROCESSED/Discharge_Change.csv")
-```
-
-
-```{r}
-# plot bin 2-9 to see if there's an obvious gap in original dataset
-AlaskaDischarge_4 <- AlaskaDischarge %>%
-  filter(Bin == 4)
-  
-AlaskaDischarge_4_2 <-na.interp(AlaskaDischarge_4)
-discharge_4_plot <-ggplot()+
-  geom_line(AlaskaDischarge_4, aes(x = DATE, y = Discharge,series= 'Original' ))+
-  geom_line(AlaskaDischarge_4_2, aes(x = DATE, y = Discharge, series= 'Interpolated'))+
-print(discharge_4_plot)
-```
-
 for bin 2, choose dataset from time 1995, for bin 3 choose dataset from 1948, for bin 4, use linear interplotation to fill the missing data from 1994-10 to 1996-10
 ```{r}
 # bin 2: choose >1995
@@ -146,44 +57,47 @@ AlaskaDischarge_1.Monthly <- AlaskaDischarge %>%
   mutate(Year = year(DATE), Month = month(DATE))%>%
   group_by(Year, Month)%>%
   summarise(Discharge = mean(Discharge))%>%
-  drop_na()
+  filter(Year>=1968 & Year <= 1973)
 
+ 
 #Bin 2
 AlaskaDischarge_2.Monthly <- AlaskaDischarge %>%
   filter(Bin == 2)%>%
   mutate(Year = year(DATE), Month = month(DATE))%>%
   group_by(Year, Month)%>%
   summarise(Discharge = mean(Discharge))%>%
-  filter(Year >= 1995)%>%
-  drop_na()
-    
+  filter(Year >= 1996 & Year <= 2018)
+
+
 #Bin 3
 AlaskaDischarge_3.Monthly <- AlaskaDischarge %>%
   filter(Bin == 3 )%>%
   mutate(Year = year(DATE), Month = month(DATE))%>%
   group_by(Year, Month)%>%
   summarise(Discharge = mean(Discharge))%>%
-  filter(Year >=1949)%>%
-  drop_na()
+  filter(Year >=1989 & Year <= 2018)
+  
 
 #Bin 4
-AlaskaDischarge_4 <- AlaskaDischarge%>%
-  filter(Bin == 4)%>%
-  drop_na()
-
-linearinterpolation_4 <- as.data.frame(approx(AlaskaDischarge_4$Discharge,n = 631, method = "linear"))
-
-linearinterpolation_4$x <- as.Date(linearinterpolation_4$x, origin = "1965-05-05")
-names(linearinterpolation_4) <-c("Date", "Discharge")
-
-
- # the end date is 2017, how to fix that?
-
-AlaskaDischarge_4.Monthly <- linearinterpolation_4%>%
-  mutate(Year = year(Date), Month = month(Date))%>%
+AlaskaDischarge_4_ori.Monthly <- AlaskaDischarge %>%
+  filter(Bin == 4 )%>%
+  mutate(Year = year(DATE), Month = month(DATE))%>%
   group_by(Year, Month)%>%
   summarise(Discharge = mean(Discharge))%>%
-  drop_na()
+  filter(Year >=1966 & Year <= 2018)
+
+AlaskaDischarge_4_mean <- AlaskaDischarge_4_ori.Monthly%>%
+  group_by(Month)%>%
+  summarise(Discharge = mean(Discharge))
+
+AlaskaDischarge_4_1994 <- data.frame(Year = 1994, Month =c(10,11,12) , Discharge = AlaskaDischarge_4_mean$Discharge[10:12])
+AlaskaDischarge_4_1995 <- data.frame(Year = 1995, Month =c(1,2,3,4,5,6,7,8,9,10,11,12) , Discharge = AlaskaDischarge_4_mean$Discharge[1:12])
+AlaskaDischarge_4_1996 <- data.frame(Year = 1996, Month =c(1,2,3,4,5,6,7,8,9) , Discharge = AlaskaDischarge_4_mean$Discharge[1:9])
+
+AlaskaDischarge_4_add <- rbind(AlaskaDischarge_4_1994, AlaskaDischarge_4_1995, AlaskaDischarge_4_1996)
+
+AlaskaDischarge_4.Monthly <-rbind(data.frame(AlaskaDischarge_4_ori.Monthly), data.frame(AlaskaDischarge_4_add))
+
 
 # Bin 5 
 AlaskaDischarge_5.Monthly <- AlaskaDischarge %>%
@@ -191,31 +105,72 @@ AlaskaDischarge_5.Monthly <- AlaskaDischarge %>%
   mutate(Year = year(DATE), Month = month(DATE))%>%
   group_by(Year, Month)%>%
   summarise(Discharge = mean(Discharge))%>%
-  drop_na()
+  filter(Year >= 1954 & Year <= 2018)
+  
 
 # Bin 6 
-AlaskaDischarge_6.Monthly <- AlaskaDischarge %>%
+AlaskaDischarge_6_ori.Monthly <- AlaskaDischarge %>%
   filter(Bin ==6)%>%
   mutate(Year = year(DATE), Month = month(DATE))%>%
   group_by(Year, Month)%>%
   summarise(Discharge = mean(Discharge))%>%
-  drop_na()
+  filter(Year >= 1952 & Year <= 2018)
+
+AlaskaDischarge_6_mean <- AlaskaDischarge_6_ori.Monthly%>%
+  group_by(Month)%>%
+  summarise(Discharge = mean(Discharge))
+
+AlaskaDischarge_6_1994 <- data.frame(Year = 1994, Month =c(10,11,12) , Discharge = AlaskaDischarge_6_mean$Discharge[10:12])
+AlaskaDischarge_6_1995 <- data.frame(Year = 1995, Month =c(1,2,3,4,5,6,7,8,9) , Discharge = AlaskaDischarge_6_mean$Discharge[1:9])
+
+AlaskaDischarge_6_add <- rbind(AlaskaDischarge_6_1994, AlaskaDischarge_6_1995)
+
+AlaskaDischarge_6.Monthly <-rbind(data.frame(AlaskaDischarge_6_ori.Monthly), data.frame(AlaskaDischarge_6_add))
+  
 
 #Bin 7
-AlaskaDischarge_7.Monthly <- AlaskaDischarge %>%
+AlaskaDischarge_7_ori.Monthly <- AlaskaDischarge %>%
   filter(Bin ==7)%>%
   mutate(Year = year(DATE), Month = month(DATE))%>%
   group_by(Year, Month)%>%
   summarise(Discharge = mean(Discharge))%>%
-  drop_na()
+  filter(Year >= 1950 & Year <= 2018)
+
+AlaskaDischarge_7_mean <- AlaskaDischarge_7_ori.Monthly%>%
+  group_by(Month)%>%
+  summarise(Discharge = mean(Discharge))
+
+AlaskaDischarge_7_1966 <- data.frame(Year = 1966, Month =7 , Discharge = AlaskaDischarge_7_mean$Discharge[7])
+AlaskaDischarge_7_2006 <- data.frame(Year = 2006, Month =c(7,8,9) , Discharge = AlaskaDischarge_7_mean$Discharge[7:9])
+AlaskaDischarge_7_2007 <- data.frame(Year = 2007, Month =12 , Discharge = AlaskaDischarge_7_mean$Discharge[12])
+AlaskaDischarge_7_2008 <- data.frame(Year = 2008, Month =6 , Discharge = AlaskaDischarge_7_mean$Discharge[6])
+AlaskaDischarge_7_2013 <- data.frame(Year = 2013, Month =8 , Discharge = AlaskaDischarge_7_mean$Discharge[8])
+
+AlaskaDischarge_7_add <- rbind(AlaskaDischarge_7_1966, AlaskaDischarge_7_2006, AlaskaDischarge_7_2007,AlaskaDischarge_7_2008, AlaskaDischarge_7_2013)
+
+AlaskaDischarge_7.Monthly <-rbind(data.frame(AlaskaDischarge_7_ori.Monthly), data.frame(AlaskaDischarge_7_add))
 
 #Bin 8
-AlaskaDischarge_8.Monthly <- AlaskaDischarge %>%
-  filter(Bin ==8)%>%
+AlaskaDischarge_8_ori.Monthly <- AlaskaDischarge %>%
+  filter(Bin == 8)%>%
   mutate(Year = year(DATE), Month = month(DATE))%>%
   group_by(Year, Month)%>%
   summarise(Discharge = mean(Discharge))%>%
-  drop_na()
+  filter(Year >= 1977 & Year <= 2018)
+
+AlaskaDischarge_8_mean <- AlaskaDischarge_8_ori.Monthly%>%
+  group_by(Month)%>%
+  summarise(Discharge = mean(Discharge))
+
+AlaskaDischarge_8_1995 <- data.frame(Year = 1995, Month =10 , Discharge = AlaskaDischarge_8_mean$Discharge[10])
+AlaskaDischarge_8_1999 <- data.frame(Year = 1999, Month =c(9,10,11,12) , Discharge = AlaskaDischarge_8_mean$Discharge[9:12])
+AlaskaDischarge_8_2009 <- data.frame(Year = 2009, Month =c(4,5,7,8) , Discharge =c( AlaskaDischarge_8_mean$Discharge[4:5], AlaskaDischarge_8_mean$Discharge[7:8]))
+AlaskaDischarge_8_2016 <- data.frame(Year = 2016, Month =c(8,10,11,12) , Discharge =c( AlaskaDischarge_8_mean$Discharge[8],AlaskaDischarge_8_mean$Discharge[10:12]))
+AlaskaDischarge_8_2017 <- data.frame(Year = 2017, Month =c(1,7,8,11) , Discharge = c(AlaskaDischarge_8_mean$Discharge[1],AlaskaDischarge_8_mean$Discharge[7:8],AlaskaDischarge_8_mean$Discharge[11]))
+
+AlaskaDischarge_8_add <- rbind(AlaskaDischarge_8_1995, AlaskaDischarge_8_1999, AlaskaDischarge_8_2009,AlaskaDischarge_8_2016, AlaskaDischarge_8_2017)
+
+AlaskaDischarge_8.Monthly <-rbind(data.frame(AlaskaDischarge_8_ori.Monthly), data.frame(AlaskaDischarge_8_add))
 
 #Bin 9
 AlaskaDischarge_9.Monthly <- AlaskaDischarge %>%
@@ -223,9 +178,7 @@ AlaskaDischarge_9.Monthly <- AlaskaDischarge %>%
   mutate(Year = year(DATE), Month = month(DATE))%>%
   group_by(Year, Month)%>%
   summarise(Discharge = mean(Discharge))%>%
-  drop_na()
-
-
+  filter(Year >=1983 & Year <= 2018)
 ```
 
 ```{r}
@@ -243,81 +196,74 @@ AlaskaDischarge_9_ts.Monthly <- ts(AlaskaDischarge_9.Monthly[[3]], frequency = 1
 
 ```{r}
 # run smk.test
-#Bin 1 p = 0.09799
-AlaskaDischarge_1_trend.Monthly <-smk.test(AlaskaDischarge_1_ts.Monthly) 
-AlaskaDischarge_1_trend.Monthly
+#Bin 1 p = 0.1752
+AlaskaDischarge_1_trend <-smk.test(AlaskaDischarge_1_ts.Monthly) 
+AlaskaDischarge_1_trend
 
-#Bin 2 p = 0.00178
-AlaskaDischarge_2_trend.Monthly <-smk.test(AlaskaDischarge_2_ts.Monthly) 
-AlaskaDischarge_2_trend.Monthly
+#Bin 2 p = 0.03216
+AlaskaDischarge_2_trend <-smk.test(AlaskaDischarge_2_ts.Monthly) 
+AlaskaDischarge_2_trend
 
-#Bin 3 p = 0.1952
-AlaskaDischarge_3_trend.Monthly <-smk.test(AlaskaDischarge_3_ts.Monthly) 
-AlaskaDischarge_3_trend.Monthly
+#Bin 3 p = 0.8167
+AlaskaDischarge_3_trend <-smk.test(AlaskaDischarge_3_ts.Monthly) 
+AlaskaDischarge_3_trend
 
-#Bin 4 p = 0.4855
-AlaskaDischarge_4_trend.Monthly <-smk.test(AlaskaDischarge_4_ts.Monthly) 
-AlaskaDischarge_4_trend.Monthly
+#Bin 4 p = 1.78e_12
+AlaskaDischarge_4_trend <-smk.test(AlaskaDischarge_4_ts.Monthly) 
+AlaskaDischarge_4_trend
 
-#Bin 5 p = 4.604e-14
-AlaskaDischarge_5_trend.Monthly <-smk.test(AlaskaDischarge_5_ts.Monthly) 
-AlaskaDischarge_5_trend.Monthly
+#Bin 5 p = 2.2e-16
+AlaskaDischarge_5_trend <-smk.test(AlaskaDischarge_5_ts.Monthly) 
+AlaskaDischarge_5_trend
 
-#Bin 6 p =0.0001581
-AlaskaDischarge_6_trend.Monthly <-smk.test(AlaskaDischarge_6_ts.Monthly) 
-AlaskaDischarge_6_trend.Monthly
+#Bin 6 p =0.0001661
+AlaskaDischarge_6_trend <-smk.test(AlaskaDischarge_6_ts.Monthly) 
+AlaskaDischarge_6_trend
 
-#Bin 7 p =0.7437
-AlaskaDischarge_7_trend.Monthly <-smk.test(AlaskaDischarge_7_ts.Monthly) 
-AlaskaDischarge_7_trend.Monthly
+#Bin 7 p =0.452
+AlaskaDischarge_7_trend <-smk.test(AlaskaDischarge_7_ts.Monthly) 
+AlaskaDischarge_7_trend
 
-#Bin 8 p =0.3637
-AlaskaDischarge_8_trend.Monthly <-smk.test(AlaskaDischarge_8_ts.Monthly) 
-AlaskaDischarge_8_trend.Monthly
+#Bin 8 p =0.6013
+AlaskaDischarge_8_trend <-smk.test(AlaskaDischarge_8_ts.Monthly) 
+AlaskaDischarge_8_trend
 
-#Bin 9 p =2.2e-16
-AlaskaDischarge_9_trend.Monthly <-smk.test(AlaskaDischarge_9_ts.Monthly) 
-AlaskaDischarge_9_trend.Monthly
+#Bin 9 p<2.2e-16
+AlaskaDischarge_9_trend <-smk.test(AlaskaDischarge_9_ts.Monthly) 
+AlaskaDischarge_9_trend
 ```
-
 
 ```{r}
 # run sea.sens.slope
-sea.sens.slope(AlaskaDischarge_1_ts.Monthly)
-sea.sens.slope(AlaskaDischarge_2_ts.Monthly)
-sea.sens.slope(AlaskaDischarge_3_ts.Monthly)
-sea.sens.slope(AlaskaDischarge_4_ts.Monthly)
-sea.sens.slope(AlaskaDischarge_5_ts.Monthly)
-sea.sens.slope(AlaskaDischarge_6_ts.Monthly)
-sea.sens.slope(AlaskaDischarge_7_ts.Monthly)
-sea.sens.slope(AlaskaDischarge_8_ts.Monthly)
-sea.sens.slope(AlaskaDischarge_9_ts.Monthly)
+slope_1 <- sea.sens.slope(AlaskaDischarge_1_ts.Monthly)
+slope_2 <- sea.sens.slope(AlaskaDischarge_2_ts.Monthly)
+slope_3 <- sea.sens.slope(AlaskaDischarge_3_ts.Monthly)
+slope_4 <- sea.sens.slope(AlaskaDischarge_4_ts.Monthly)
+slope_5 <- sea.sens.slope(AlaskaDischarge_5_ts.Monthly)
+slope_6 <- sea.sens.slope(AlaskaDischarge_6_ts.Monthly)
+slope_7 <- sea.sens.slope(AlaskaDischarge_7_ts.Monthly)
+slope_8 <- sea.sens.slope(AlaskaDischarge_8_ts.Monthly)
+slope_9 <- sea.sens.slope(AlaskaDischarge_9_ts.Monthly)
 ```
-
 
 ```{r}
-AlaskaDischagre_9.Monthly <- AlaskaDischarge_9 %>%
-  mutate(Year = year(DATE), Month = month(DATE))%>%
-  group_by(Year, Month)%>%
-  summarise(Discharge = mean(Discharge))
+Discharge_Trend <- data.frame(Bin = c(1,2,3,4,5,6,7,8,9),Slope = c(slope_1,slope_2,slope_3,slope_4,slope_5,slope_6,slope_7,slope_8,slope_9), Trend = c(AlaskaDischarge_1_trend$p.value, AlaskaDischarge_2_trend$p.value,AlaskaDischarge_3_trend$p.value,AlaskaDischarge_4_trend$p.value,AlaskaDischarge_5_trend$p.value,AlaskaDischarge_6_trend$p.value, AlaskaDischarge_7_trend$p.value, AlaskaDischarge_8_trend$p.value, AlaskaDischarge_9_trend$p.value))
 
-AlaskaDischagre_9_ts.Monthly <- ts(AlaskaDischagre_9.Monthly[[3]], frequency = 12)
+for (i in 1:9){
+  if (Discharge_Trend$Trend[i] > 0.05){
+    Discharge_Trend$Slope[i] <- NA
+  } else {
+    Discharge_Trend$Slope[i] <- Discharge_Trend$Slope[i]
+  }
+}
 
-AlaskaDischagre_9_trend.Monthly <-smk.test(AlaskaDischagre_9_ts.Monthly) 
-AlaskaDischagre_9_trend.Monthly
-summary(AlaskaDischagre_9_trend.Monthly)
+Discharge_Change <- Discharge_Trend[c(1,2)]
+write.csv(Discharge_Change, "./Data/PROCESSED/Discharge_Change.csv",
+          row.names = F)
 
-sea.sens.slope(AlaskaDischagre_9_ts.Monthly)
 ```
-bin 1: 0.01
-bin 2: 0.01
-bin 3: 0.01
-bin 4: 0.01
-bin 5: 0.01
-bin 6: 0.01
-bin 7: 0.01
-bin 8: 0.01
-bin 9: 0.01
+
+
 
 ```{r}
 # add linear interplotation data for missing month for each bin
@@ -420,3 +366,6 @@ ts.plot(AlaskaDischagre_6_ts.Monthly, AlaskaDischagre_6_prediction$pred, lty = c
 2 graphs per person. Choose 6 first
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```
+
