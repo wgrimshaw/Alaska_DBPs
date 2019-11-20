@@ -36,7 +36,7 @@ AlaskaDischarge <- AlaskaTempPrecipDischarge%>%
 #drop na
 AlaskaDischarge<-AlaskaDischarge%>%drop_na()
 
-# plot discharge  over time for 10 latitude bins
+# plot discharge  over time for 9 latitude bins
 discharge_plot <- ggplot(AlaskaDischarge,aes(x = DATE, y = Discharge))+
   geom_line()+ # add a representative line
   facet_wrap(~Bin, nrow = 3, ncol = 3)+
@@ -45,12 +45,9 @@ print(discharge_plot)
   
 ```
 
-for bin 2, choose dataset from time 1995, for bin 3 choose dataset from 1948, for bin 4, use linear interplotation to fill the missing data from 1994-10 to 1996-10
-```{r}
-# bin 2: choose >1995
-# bin 3: choose>1949
-# bin 4: missing 1994-10 to 1996-10 
 
+```{r}
+## choose the optimal range of dataset of each bin. For missing monthly data, using mean value of that month data to fill the gap. Make sure the number of month is the same for each year in each bin.
 #Bin 1
 AlaskaDischarge_1.Monthly <- AlaskaDischarge %>%
   filter(Bin ==1)%>%
@@ -221,6 +218,7 @@ slope_9 <- sea.sens.slope(AlaskaDischarge_9_ts.Monthly)
 ```
 
 ```{r}
+## create the dataframe of bin and sens.slope
 Discharge_Trend <- data.frame(Bin = c(1,2,3,4,5,6,7,8,9),Slope = c(slope_1,slope_2,slope_3,slope_4,slope_5,slope_6,slope_7,slope_8,slope_9), Trend = c(AlaskaDischarge_1_trend$p.value, AlaskaDischarge_2_trend$p.value,AlaskaDischarge_3_trend$p.value,AlaskaDischarge_4_trend$p.value,AlaskaDischarge_5_trend$p.value,AlaskaDischarge_6_trend$p.value, AlaskaDischarge_7_trend$p.value, AlaskaDischarge_8_trend$p.value, AlaskaDischarge_9_trend$p.value))
 
 for (i in 1:9){
@@ -231,6 +229,7 @@ for (i in 1:9){
   }
 }
 
+# write csv file
 Discharge_Change <- Discharge_Trend[c(1,2)]
 write.csv(Discharge_Change, "./Data/PROCESSED/Discharge_Change.csv",
           row.names = F)
