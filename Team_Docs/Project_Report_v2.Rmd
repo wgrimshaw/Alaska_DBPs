@@ -22,7 +22,7 @@ mainfont: Times New Roman
 
 ```{r setup, include=FALSE}
 ## Global options to not print warning or messages
-knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
 # Set your working directory
 
 # Load your packages
@@ -38,7 +38,7 @@ library(viridis)
 library(ggplot2)
 library(scales)
 library(stats)
-library(kableExtra)
+#library(kableExtra)
 
 # Set your ggplot theme
 theme_set(theme_bw())
@@ -162,72 +162,72 @@ print(dis.doy.6.10)
 
 ```{r Precipitation Day of Year Exploratory Graphs and Code}
 
-### Ensure Date is a date object and not a factor
-newdata$DATE<-as.Date(newdata$DATE)
-
-### Ensure Bin is a factor and not an integer
-newdata$Bin <- as.factor(newdata$Bin)
-
-### Add Day of Year, Year, Week,and Month Column
-newdata <-mutate(newdata, DOY = yday(DATE), Year=year(DATE), Month=month(DATE), WEEK = week(DATE))
-  
-
-# Subset the Data by Bin
-Bin1Precip<-filter(newdata, Bin== 1)
-Bin2Precip<-filter(newdata, Bin== 2)
-Bin3Precip<-filter(newdata, Bin == 3)
-Bin4Precip<-filter(newdata, Bin == 4)
-Bin5Precip<-filter(newdata, Bin == 5)
-Bin6Precip<-filter(newdata, Bin == 6)
-Bin7Precip<-filter(newdata, Bin == 7)
-Bin8Precip<-filter(newdata, Bin == 8)
-Bin9Precip<-filter(newdata, Bin == 9)
+# ### Ensure Date is a date object and not a factor
+# newdata$DATE<-as.Date(newdata$DATE)
+# 
+# ### Ensure Bin is a factor and not an integer
+# newdata$Bin <- as.factor(newdata$Bin)
+# 
+# ### Add Day of Year, Year, Week,and Month Column
+# newdata <-mutate(newdata, DOY = yday(DATE), Year=year(DATE), Month=month(DATE), WEEK = week(DATE))
+#   
+# 
+# # Subset the Data by Bin
+# Bin1Precip<-filter(newdata, Bin== 1)
+# Bin2Precip<-filter(newdata, Bin== 2)
+# Bin3Precip<-filter(newdata, Bin == 3)
+# Bin4Precip<-filter(newdata, Bin == 4)
+# Bin5Precip<-filter(newdata, Bin == 5)
+# Bin6Precip<-filter(newdata, Bin == 6)
+# Bin7Precip<-filter(newdata, Bin == 7)
+# Bin8Precip<-filter(newdata, Bin == 8)
+# Bin9Precip<-filter(newdata, Bin == 9)
 
 
 ```
 
 # Scatterplot of Full Precipitation Period of Record Colored by Bin
 ```{r, fig.width=10, fig.height=6}
-PrecipScatterplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
-  geom_point(alpha=0.5, size=2) +
-labs(title="Precipitation Measured over Time", x="Sample Year",
-       y="Precipitation (inches)")+ 
-  scale_x_date(labels=date_format("%y"),
-               breaks=date_breaks("5 years"))+
-  theme(legend.position="top",
-        legend.key.width=unit(1.5, "cm"))+
-  gabytheme
-print(PrecipScatterplot)
+# PrecipScatterplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
+#   geom_point(alpha=0.5, size=2) +
+# labs(title="Precipitation Measured over Time", x="Sample Year",
+#        y="Precipitation (inches)")+ 
+#   scale_x_date(labels=date_format("%y"),
+#                breaks=date_breaks("5 years"))+
+#   theme(legend.position="top",
+#         legend.key.width=unit(1.5, "cm"))+
+#   gabytheme
+# print(PrecipScatterplot)
 ```
 
 # Plot mean discharge for each DOY through time by bin
 ```{r}
-newdata$Bin<-as.factor(newdata$Bin)
-
-Precip.Mean.Spring<-newdata%>%
-  group_by(Bin,DOY)%>%
-  mutate(MeanPRCP=mean(PRCP))%>%
-  filter(WEEK < 30)
-            
-Precip.Mean.Bin6 <- Precip.Mean.Spring %>% 
-  filter(Bin == 6)
-
-#GRAPH 1
-PrecipMeanSpringPlot<- ggplot(Precip.Mean.Spring) +
-  geom_line(aes(x = DOY, y = MeanPRCP, color = Bin)) +
-  labs(x = "Day of Year", y = "Mean Precipitation (inches)", color = "Latitude Bin") +
-  scale_color_viridis_d() +
-  theme(legend.position = "top")
-print(PrecipMeanSpringPlot)
-
-#GRAPH 2
-PrecipSpringBin6Plot<- ggplot(Precip.Mean.Bin6 ) +
-  geom_line(aes(x = DOY, y = PRCP, color = (Year)), 
-            show.legend = FALSE) +
-  labs(x = "Day of Year", y = "Precipitation (inches)", color = "Year") +
-  scale_color_viridis_c() +
-  theme(legend.position = "top")
-print(PrecipSpringBin6Plot)
+# newdata$Bin<-as.factor(newdata$Bin)
+# 
+# Precip.Mean.Spring<-newdata%>%
+#   group_by(Bin,DOY)%>%
+#   mutate(MeanPRCP=mean(PRCP))%>%
+#   filter(WEEK < 30)
+#             
+# Precip.Mean.Bin6 <- Precip.Mean.Spring %>% 
+#   filter(Bin == 6)
+# 
+# #GRAPH 1
+# PrecipMeanSpringPlot<- ggplot(Precip.Mean.Spring) +
+#   geom_line(aes(x = DOY, y = MeanPRCP, color = Bin)) +
+#   labs(x = "Day of Year", y = "Mean Precipitation (inches)", color = "Latitude Bin") +
+#   scale_color_viridis_d() +
+#   theme(legend.position = "top")
+# print(PrecipMeanSpringPlot)
+# 
+# #GRAPH 2
+# PrecipSpringBin6Plot<- ggplot(Precip.Mean.Bin6 ) +
+#   geom_line(aes(x = DOY, y = PRCP, color = (Year)), 
+#             show.legend = FALSE) +
+#   labs(x = "Day of Year", y = "Precipitation (inches)", color = "Year") +
+#   scale_color_viridis_c() +
+#   theme(legend.position = "top")
+# print(PrecipSpringBin6Plot)
 
 ```
 
@@ -272,19 +272,19 @@ summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 
 ```{r}
 
-Snowmelt_BinSummary <- 
-  read.csv("../DATA/PROCESSED/Snowmelt_BinSummary.csv")
-
-kable(Snowmelt_BinSummary, format = "latex", 
-      row.names = FALSE, 
-      #col.names = c("Latitude Bin", "Change in Day of Year"),
-      align = "c") %>%
-  kable_styling(bootstrap_options = c("striped", "condensed"),
-                full_width = FALSE,
-                font_size = 15) %>%
-  column_spec(column = 1, bold = TRUE) %>%  #columns must be specified by number
-  row_spec(row = 0, color = "#660033") %>%  #row = 0 allows us to format the header
-  row_spec(row = 5, color = "#104e8b", background = "#d3d3d3") 
+# Snowmelt_BinSummary <- 
+#   read.csv("../DATA/PROCESSED/Snowmelt_BinSummary.csv")
+# 
+# kable(Snowmelt_BinSummary, format = "latex", 
+#       row.names = FALSE, 
+#       #col.names = c("Latitude Bin", "Change in Day of Year"),
+#       align = "c") %>%
+#   kable_styling(bootstrap_options = c("striped", "condensed"),
+#                 full_width = FALSE,
+#                 font_size = 15) %>%
+#   column_spec(column = 1, bold = TRUE) %>%  #columns must be specified by number
+#   row_spec(row = 0, color = "#660033") %>%  #row = 0 allows us to format the header
+#   row_spec(row = 5, color = "#104e8b", background = "#d3d3d3") 
 
 ```
 
