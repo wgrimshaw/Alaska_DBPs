@@ -95,7 +95,8 @@ AlaskaDischarge_4_add <- rbind(AlaskaDischarge_4_1994, AlaskaDischarge_4_1995, A
 
 AlaskaDischarge_4.Monthly <-rbind(data.frame(AlaskaDischarge_4_ori.Monthly), data.frame(AlaskaDischarge_4_add))
 
-
+AlaskaDischarge_4.Monthly <- arrange(AlaskaDischarge_4.Monthly, Year, Month)
+  
 # Bin 5 
 AlaskaDischarge_5.Monthly <- AlaskaDischarge %>%
   filter(Bin ==5)%>%
@@ -123,7 +124,8 @@ AlaskaDischarge_6_1995 <- data.frame(Year = 1995, Month =c(1,2,3,4,5,6,7,8,9) , 
 AlaskaDischarge_6_add <- rbind(AlaskaDischarge_6_1994, AlaskaDischarge_6_1995)
 
 AlaskaDischarge_6.Monthly <-rbind(data.frame(AlaskaDischarge_6_ori.Monthly), data.frame(AlaskaDischarge_6_add))
-  
+
+AlaskaDischarge_6.Monthly <- arrange(AlaskaDischarge_6.Monthly, Year, Month)  
 
 #Bin 7
 AlaskaDischarge_7_ori.Monthly <- AlaskaDischarge %>%
@@ -147,6 +149,8 @@ AlaskaDischarge_7_add <- rbind(AlaskaDischarge_7_1966, AlaskaDischarge_7_2006, A
 
 AlaskaDischarge_7.Monthly <-rbind(data.frame(AlaskaDischarge_7_ori.Monthly), data.frame(AlaskaDischarge_7_add))
 
+AlaskaDischarge_7.Monthly <- arrange(AlaskaDischarge_7.Monthly, Year, Month)
+
 #Bin 8
 AlaskaDischarge_8_ori.Monthly <- AlaskaDischarge %>%
   filter(Bin == 8)%>%
@@ -168,6 +172,8 @@ AlaskaDischarge_8_2017 <- data.frame(Year = 2017, Month =c(1,7,8,11) , Discharge
 AlaskaDischarge_8_add <- rbind(AlaskaDischarge_8_1995, AlaskaDischarge_8_1999, AlaskaDischarge_8_2009,AlaskaDischarge_8_2016, AlaskaDischarge_8_2017)
 
 AlaskaDischarge_8.Monthly <-rbind(data.frame(AlaskaDischarge_8_ori.Monthly), data.frame(AlaskaDischarge_8_add))
+
+AlaskaDischarge_8.Monthly <- arrange(AlaskaDischarge_8.Monthly, Year, Month)
 
 #Bin 9
 AlaskaDischarge_9.Monthly <- AlaskaDischarge %>%
@@ -245,6 +251,15 @@ ggplot(Discharge_Change, aes(x = Bin, y = Slope )) +
   labs(y = "Discharge Slope")
 ```
 
+```{r}
+# plot bin 8 discharge
+AlaskaDischarge_9 <- AlaskaDischarge%>%
+  filter(Bin == 9)
+
+ggplot(AlaskaDischarge_9, aes(x = DATE, y = Discharge))+
+  geom_line()
+  
+```
 
 
 
