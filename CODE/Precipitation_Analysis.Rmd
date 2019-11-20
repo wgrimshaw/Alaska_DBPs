@@ -4,23 +4,25 @@ author: "Gaby Garcia"
 date: "11/11/2019"
 output: pdf_document
 ---
-# Load in Complete Cleaned Dataset
+# Load in relevant packages and complete Cleaned Alaska Dataset
 ```{r, message=FALSE, warning=FALSE}
-
+library(tidyverse)
+library(ggplot2)
+library(scales)
+library(trend)
 setwd("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/PROCESSED")
 AlaskaTempPrecipDischarge<-read.csv("AlaskaTempPrecipDischarge.csv")
 ```
 
 
-### Create Precip only Dataframe with Bins
+### Create Precipitation only Dataframe with Bins included
 ```{r, message=FALSE, warning=FALSE}
-library(dplyr)
 AlaskaPrecipOnly<-select(AlaskaTempPrecipDischarge, .data$DATE, .data$PRCP, .data$Bin)
 ```
 
 ### Check number of Precipitation NA's and remove them
 ```{r}
-newdata<-na.omit(AlaskaPrecipOnly)
+newdata<-AlaskaPrecipOnly
 ```
 
 ### Ensure Date is a date object and not a factor
@@ -35,9 +37,6 @@ newdata$Bin <- as.factor(newdata$Bin)
 
 # Subset the Data by Bin
 ```{r}
-library(plyr)
-
-
 Bin1Precip<-filter(newdata, Bin== 1)
 Bin2Precip<-filter(newdata, Bin== 2)
 Bin3Precip<-filter(newdata, Bin == 3)
@@ -47,14 +46,11 @@ Bin6Precip<-filter(newdata, Bin == 6)
 Bin7Precip<-filter(newdata, Bin == 7)
 Bin8Precip<-filter(newdata, Bin == 8)
 Bin9Precip<-filter(newdata, Bin == 9)
-
-
 ```
 
 
 ### Set Personal Theme
 ```{r}
-library(ggplot2)
 gabytheme <- theme_bw(base_size = 22) + 
   theme(plot.title=element_text(face="bold", size="26", color="IndianRed3", hjust=0.5),
         axis.title=element_text(size=22, color="black"),
@@ -70,14 +66,12 @@ theme_set(gabytheme)
 
 
 # Plot Bin 1 Precip
-```{r, fig.width=9, fig.height=3}
-library(scales)
-library(ggplot2)
+```{r, fig.width=12, fig.height=6}
 Bin1PrecipPlot<- 
   ggplot(Bin1Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
-  ggtitle("Alaska Precipitation over Time") +
-  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  ggtitle("Alaska Precipitation over Time in Latitude Bin 1") +
+  labs(x = "", y = expression("Precipitation (in)"))+
   scale_x_date(labels=date_format("%Y"),
                breaks=date_breaks("1 year"))+
   gabytheme
@@ -86,13 +80,11 @@ print(Bin1PrecipPlot)
 ```
 
 # Plot Bin 2 Precip over Time
-```{r, fig.width=12}
-library(scales)
-library(ggplot2)
+```{r, fig.width=14, fig.height=6}
 Bin2PrecipPlot<- 
   ggplot(Bin2Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
-  ggtitle("Alaska Precipitation over Time") +
+  ggtitle("Alaska Precipitation over Time in Latitude Bin 2") +
   labs(x = "", y = expression("Precipitation (in)"))+
   scale_x_date(labels=date_format("%y"),
                breaks=date_breaks("1 year"))+
@@ -102,16 +94,14 @@ print(Bin2PrecipPlot)
 >There is a gap in precipitation data collection for Bin 2 from 1986-12-31 to 1995-10-01
 
 # Plot Bin 3 Precip over Time
-```{r, fig.width=17}
-library(scales)
-library(ggplot2)
+```{r, fig.width=30, fig.height=9}
 Bin3PrecipPlot<- 
   ggplot(Bin3Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
-  ggtitle("Alaska Precipitation over Time") +
-  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  ggtitle("Alaska Precipitation over Time in Latitude Bin 3") +
+  labs(x = "", y = expression("Precipitation (in)"))+
   scale_x_date(labels=date_format("%y"),
-               breaks=date_breaks("1 year"))+
+               breaks=date_breaks("2 years"))+
   gabytheme
 print(Bin3PrecipPlot)
 
@@ -119,14 +109,12 @@ print(Bin3PrecipPlot)
 >Much higher range in precip values-->more rain and snowfall?
 
 # Plot Bin 4 Precip over Time
-```{r, fig.width=17}
-library(scales)
-library(ggplot2)
+```{r, fig.width=24, fig.height=6}
 Bin4PrecipPlot<- 
   ggplot(Bin4Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
-  ggtitle("Alaska Precipitation over Time") +
-  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  ggtitle("Alaska Precipitation over Time in Latitude Bin 4") +
+  labs(x = "", y = expression("Precipitation (in)"))+
   scale_x_date(labels=date_format("%y"),
                breaks=date_breaks("1 year"))+
   gabytheme
@@ -135,14 +123,14 @@ print(Bin4PrecipPlot)
 ```
 
 # Plot Bin 5 Precip over Time
-```{r, fig.width=17}
+```{r, fig.width=24, fig.height=6}
 library(scales)
 library(ggplot2)
 Bin5PrecipPlot<- 
   ggplot(Bin5Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
-  ggtitle("Alaska Precipitation over Time") +
-  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  ggtitle("Alaska Precipitation over Time in Latitude Bin 5") +
+  labs(x = "", y = expression("Precipitation (in)"))+
   scale_x_date(labels=date_format("%y"),
                breaks=date_breaks("1 year"))+
   gabytheme
@@ -151,14 +139,14 @@ print(Bin5PrecipPlot)
 ```
 
 # Plot Bin 6 Precip over Time
-```{r, fig.width=17}
+```{r, fig.width=24, fig.height=6}
 library(scales)
 library(ggplot2)
 Bin6PrecipPlot<- 
   ggplot(Bin6Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
-  ggtitle("Alaska Precipitation over Time") +
-  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  ggtitle("Alaska Precipitation over Time in Latitude Bin 6") +
+  labs(x = "", y = expression("Precipitation (in)"))+
   scale_x_date(labels=date_format("%y"),
                breaks=date_breaks("1 year"))+
   gabytheme
@@ -168,14 +156,14 @@ print(Bin6PrecipPlot)
 
 
 # Plot Bin 7 Precip over time
-```{r, fig.width=17}
+```{r, fig.width=26, fig.height=6}
 library(scales)
 library(ggplot2)
 Bin7PrecipPlot<- 
   ggplot(Bin7Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
-  ggtitle("Alaska Precipitation over Time") +
-  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  ggtitle("Alaska Precipitation over Time in Latitude Bin 7") +
+  labs(x = "", y = expression("Precipitation (in)"))+
   scale_x_date(labels=date_format("%y"),
                breaks=date_breaks("1 year"))+
   gabytheme
@@ -184,14 +172,14 @@ print(Bin7PrecipPlot)
 
 
 # Plot Bin 8 Precip over time
-```{r, fig.width=17}
+```{r, fig.width=18}
 library(scales)
 library(ggplot2)
 Bin8PrecipPlot<- 
   ggplot(Bin8Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
-  ggtitle("Alaska Precipitation over Time") +
-  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  ggtitle("Alaska Precipitation over Time in Latitude Bin 8") +
+  labs(x = "", y = expression("Precipitation (in)"))+
   scale_x_date(labels=date_format("%y"),
                breaks=date_breaks("1 year"))+
   gabytheme
@@ -199,27 +187,28 @@ print(Bin8PrecipPlot)
 ```
 
 # Plot Bin 9 Precip over time
-```{r, fig.width=17}
+```{r, fig.width=18}
 library(scales)
 library(ggplot2)
 Bin9PrecipPlot<- 
   ggplot(Bin9Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
-  ggtitle("Alaska Precipitation over Time") +
-  labs(x = "", y = expression("Precipitation (in"^3*"/s)"))+
+  ggtitle("Alaska Precipitation over Time in Latitude Bin 9") +
+  labs(x = "", y = expression("Precipitation (in)"))+
   scale_x_date(labels=date_format("%y"),
                breaks=date_breaks("1 year"))+
   gabytheme
+  
 print(Bin9PrecipPlot)
 ```
->A lot less precip at highest latitude 
 
-# Attempt a Precip Line Graph but with geom_smooth
-```{r, fig.width=13, warning=FALSE, message=FALSE}
+
+# Precip Line Graph but with geom_smooth
+```{r, fig.width=13, fig.height=6, warning=FALSE, message=FALSE}
 PrecipLinePlot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
   geom_smooth() +
 labs(title="Precipitation Measured over Time", x="Sample Year",
-       y="Precipitation (inches ^3)")+ 
+       y="Precipitation (inches)")+ 
   scale_x_date(labels=date_format("%y"),
                breaks=date_breaks("5 years"))+
   gabytheme
@@ -228,7 +217,7 @@ print(PrecipLinePlot)
 
 ## Scatterplot of Full Precipitation Period of Record Colored by Bin
 ```{r, fig.width=10, fig.height=6}
-PrecipBoxplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
+PrecipScatterplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
   geom_point(alpha=0.5, size=2) +
 labs(title="Precipitation Measured over Time", x="Sample Year",
        y="Precipitation (inches)")+ 
@@ -237,7 +226,7 @@ labs(title="Precipitation Measured over Time", x="Sample Year",
   theme(legend.position="top",
         legend.key.width=unit(1.5, "cm"))+
   gabytheme
-print(PrecipBoxplot)
+print(PrecipScatterplot)
 ```
 
 
@@ -250,138 +239,317 @@ newdata <-mutate(newdata, DOY = yday(DATE), Year=year(DATE), Month=month(DATE))
 
 
 
+# Run a Seasonal Mann-Kendall Test for each Bin
+
+>In many environmental datasets (especially climate and hydrology), we might not expect a linear trend in the response variable over time. In this case, we will need to employ a nonparametric test to determine whether there is a monotonic trend (i.e., consistent increase or decrease but not necessarily linear) over time. We will illustrate a few examples of nonparametric trend tests today with the `trend` package. 
+A Mann-Kendall test will analyze whether there is a monotonic trend in the response variable over time. Like a **Mann-Kendall Test**, the **Seasonal Mann-Kendall Test**, or **Hirsch-Slack Test**, analyzes trends in response variables over time. It replaces the traditional Mann-Kendall when there are seasonal trends in a dataset that obscure the overall direction of the trend. It is important to note that "seasonal" does not necessarily equate to actual seasons but can represent any time period within which there are oscillating temporal trends. The test needs at least two distinct seasons to operate.
+
+
+# Seasonal Mann Kendall Test for Bin 1 Precip
 ```{r}
-library(dplyr)
-library(plyr)
+# Run a linear interpolation of the dataset to fill in gaps
+Bin1Precip.interpolated <- approx(Bin1Precip$DATE,
+                                     Bin1Precip$PRCP, 
+                                      method = "linear", n = 2492)
+# Turn the interpolated dataset into a proper dataframe
 
-data.spring.median <- data.spring %>% group_by(Bin, DOY) %>%
-  mutate(Dis.Med = median(Discharge))
-
-dis.doy.med <- ggplot(data.spring.median) +
-  geom_line(aes(x = DOY, y = Dis.Med, color = as.factor(Bin))) +
-  labs(x = "Day of Year", y = "Median Discharge") +
-  scale_color_viridis_d() +
-  theme(legend.position = "top")
-print(dis.doy.med)
-```
+Bin1Precip.interpolated  <- do.call(cbind.data.frame, Bin1Precip.interpolated) ##gets us back to data frame
+names(Bin1Precip.interpolated ) <- c("DATE", "PRCP")   ###have to rename the columns
+Bin1Precip.interpolated$DATE<- as.Date(Bin1Precip.interpolated$DATE, ##have to respecify the Date column as a date. Need to specify the origin too. 
+                                            origin = "1970/01/01")
 
 
+# Convert interpolated dataframe into a time series object for Seasonal Mann-Kendall test
 
+Bin1Precip.timeseries <- ts(Bin1Precip.interpolated$PRCP, 
+                                start = c(1967, 11) ,frequency = 12)
 
+### Telling time series to go in a frequency of 12 months per year (monthly), and start in the 11th month of 1967 where the Bin 1 data starts
 
+# Run a Seasonal Mann-Kendall test for Bin 1
 
+Bin1Precip.smktest <- smk.test(Bin1Precip.timeseries)
+Bin1Precip.smktest  ###gives us overall trend with a zscore of-.09, p-value of 0.36. So we do not see an increasing trend over time becuse the zscore is negative, but  we have a lot of varability(varsS)
 
-
-
-
-
-
-##Plot the Median Precipitation by Bin 
-```{r, fig.width=5}
-library(viridis)
-
-PrecipMedianPlot<- ggplot(newdata) +
-  geom_line(aes(x = DOY, y = PrecipMedian, color = as.factor(Bin))) +
-  labs(x = "Day of Year", y = "Median Precipitation") +
-  scale_colour_manual(values=c('#DC143C', '#00CED1','#BA55D3',	'#D2691E', '#32CD32'))+
-  theme(legend.position = "top")+
-    theme(legend.key.size = unit(1, "cm"))+
-  labs(color="Bin")
-
-print(PrecipMedianPlot)
+summary(Bin1Precip.smktest)
 
 ```
+>No seasons here are significant. 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Run a Mann-Kendall test for each Bin
->A Mann-Kendall test will analyze whether there is a monotonic trend in the response variable over time. 
-
-## Mann Kendall for Bin 1
+# Seasonal Mann Kendall Test for Bin 2 Precip
 ```{r}
-library(trend)
-Bin1Precip$PRCP<-as.numeric(Bin1Precip$PRCP)
-mk.test(Bin1Precip$PRCP)
+# Run a linear interpolation of the dataset to fill in gaps
+Bin2Precip.interpolated <- approx(Bin2Precip$DATE,
+                                     Bin2Precip$PRCP, 
+                                      method = "linear", n = 10717)
+# Turn the interpolated dataset into a proper dataframe
+
+Bin2Precip.interpolated  <- do.call(cbind.data.frame, Bin2Precip.interpolated) ##gets us back to data frame
+names(Bin2Precip.interpolated ) <- c("DATE", "PRCP")   ###have to rename the columns
+Bin2Precip.interpolated$DATE<- as.Date(Bin2Precip.interpolated$DATE, ##have to respecify the Date column as a date. Need to specify the origin too. 
+                                            origin = "1970/01/01")
+
+
+# Convert interpolated dataframe into a time series object for Seasonal Mann-Kendall test
+
+Bin2Precip.timeseries <- ts(Bin2Precip.interpolated$PRCP, 
+                                start = c(1981, 10) ,frequency = 12)
+
+### Telling it to go in a frequency of 12 months per year (monthly), and start in the 10th month of 1981 where the Bin 2 data starts
+
+## Run a Seasonal Mann-Kendall test for Bin 2
+
+Bin2Precip.smktest <- smk.test(Bin2Precip.timeseries)
+Bin2Precip.smktest  ###gives us overall trend with a zscore of-.09, p-value of 0.36. So we do not see an increasing trend over time becuse the zscore is negative, but  we have a lot of varability(varsS)
+
+summary(Bin2Precip.smktest)
+
 ```
->We see a negative trend in precipitation over time. z is the direction and magnitude of the trend. p=0.203 so we reject the null hypothesis
 
 
-### Pettitt's Test
-Pettitt's test is also included in the `trend` package. This nonparametric test will determine whether there is a shift in the central tendency of the time series and will tell us at what point the changepoint occurs (if it detects one). Note: Pettitt's Test will only test for one changepoint, and further tests must be run if multiple change points are suspected.
-
+# Seasonal Mann Kendall Test for Bin 3 Precip
 ```{r}
-# Test for change point
-pettitt.test(Bin1Precip$PRCP)
+# Run a linear interpolation of the dataset to fill in gaps
+Bin3Precip.interpolated <- approx(Bin3Precip$DATE,
+                                     Bin3Precip$PRCP, 
+                                      method = "linear", n = 33461)
+# Turn the interpolated dataset into a proper dataframe
 
+Bin3Precip.interpolated  <- do.call(cbind.data.frame, Bin3Precip.interpolated) ##gets us back to data frame
+names(Bin3Precip.interpolated ) <- c("DATE", "PRCP")   ###have to rename the columns
+Bin3Precip.interpolated$DATE<- as.Date(Bin3Precip.interpolated$DATE, ##have to respecify the Date column as a date. Need to specify the origin too. 
+                                            origin = "1970/01/01")
+
+
+# Convert interpolated dataframe into a time series object for Seasonal Mann-Kendall test
+
+Bin3Precip.timeseries <- ts(Bin3Precip.interpolated$PRCP, 
+                                start = c(1915, 6) ,frequency = 12)
+
+### Telling it to go in a frequency of 12 months per year (monthly), and start in the 6th month of 1915 where the Bin 3 data starts
+
+## Run a Seasonal Mann-Kendall test for Bin 3
+
+Bin3Precip.smktest <- smk.test(Bin3Precip.timeseries)
+Bin3Precip.smktest  ###gives us overall trend with a zscore of-5.12, p-value of 3.1e-7. So we do not see an increasing trend over time becuse the zscore is negative, but  we have a lot of varability(varsS)
+
+summary(Bin3Precip.smktest)
 ```
->Is our p-value <0.05? IF SO THEN OUR CHANGE POINT IS SIGNIFICANT. 
-It is 0.029, so we'll have to go into our data set and look at where change point happened
-change point is 910, so scroll down to place 910 in data set. It happened in 1970-04-28. 
 
 
-## Run separate Mann-Kendall for each change point
+
+# Seasonal Mann Kendall Test for Bin 4 Precip
 ```{r}
-mk.test(Bin1Precip$PRCP[1:909])
-mk.test(Bin1Precip$PRCP[910:2492])
+# Run a linear interpolation of the dataset to fill in gaps
+Bin4Precip.interpolated <- approx(Bin4Precip$DATE,
+                                     Bin4Precip$PRCP, 
+                                      method = "linear", n = 19164)
 
+# Turn the interpolated dataset into a proper dataframe
+Bin4Precip.interpolated  <- do.call(cbind.data.frame, Bin4Precip.interpolated) ##gets us back to data frame
+names(Bin4Precip.interpolated ) <- c("DATE", "PRCP")   ###have to rename the columns
+Bin4Precip.interpolated$DATE<- as.Date(Bin4Precip.interpolated$DATE, ##have to respecify the Date column as a date. Need to specify the origin too. 
+                                            origin = "1970/01/01")
+
+
+# Convert interpolated dataframe into a time series object for Seasonal Mann-Kendall test
+Bin4Precip.timeseries <- ts(Bin4Precip.interpolated$PRCP, 
+                                start = c(1965, 5) ,frequency = 12)
+### Telling it to go in a frequency of 12 months per year (monthly), and start in the 5th month of 1965 where the Bin 4 data starts
+
+
+## Run a Seasonal Mann-Kendall test for Bin 4
+
+Bin4Precip.smktest <- smk.test(Bin4Precip.timeseries)
+Bin4Precip.smktest  ###gives us overall trend with a zscore of 1.793, p-value of 0.07. So we do see an increasing trend over time becuse the zscore is positive, but it is not significant. We do have a lot of varability(varsS)
+
+summary(Bin4Precip.smktest)
 ```
 
-## Is there a second change point?
+# Seasonal Mann Kendall Test for Bin 5 Precip
 ```{r}
-pettitt.test(Bin1Precip$PRCP[910:2492])  
-```
->910+858=1768, so look at 1768 row in datatable to see second change point. 1972-09-02
+# Run a linear interpolation of the dataset to fill in gaps
+Bin5Precip.interpolated <- approx(Bin5Precip$DATE,
+                                     Bin5Precip$PRCP, 
+                                      method = "linear", n = 24312)
 
-### Check to see if Second Change Point is significant
+# Turn the interpolated dataset into a proper dataframe
+Bin5Precip.interpolated  <- do.call(cbind.data.frame, Bin5Precip.interpolated) ##gets us back to data frame
+
+names(Bin5Precip.interpolated ) <- c("DATE", "PRCP")   ###have to rename the columns
+Bin5Precip.interpolated$DATE<- as.Date(Bin5Precip.interpolated$DATE, ##have to respecify the Date column as a date. Need to specify the origin too. 
+                                            origin = "1970/01/01")
+
+
+# Convert interpolated dataframe into a time series object for Seasonal Mann-Kendall test
+Bin5Precip.timeseries <- ts(Bin5Precip.interpolated$PRCP, 
+                                start = c(1952, 4) ,frequency = 12)
+### Telling it to go in a frequency of 12 months per year (monthly), and start in the 4th month of 1952 where the Bin 4 data starts
+
+
+## Run a Seasonal Mann-Kendall test for Bin 5
+
+Bin5Precip.smktest <- smk.test(Bin5Precip.timeseries)
+Bin5Precip.smktest  ###gives us overall trend with a zscore of 3.35, p-value of 0.0007. So we do see an significant increasing trend over time becuse the zscore is positive. We do have a lot of varability(varsS)
+
+summary(Bin5Precip.smktest)
+```
+
+# Seasonal Mann Kendall Test for Bin 6 Precip
 ```{r}
-mk.test(Bin1Precip$PRCP[910:1767])   
-mk.test(Bin1Precip$PRCP[1768:2492])
+# Run a linear interpolation of the dataset to fill in gaps
+Bin6Precip.interpolated <- approx(Bin6Precip$DATE,
+                                     Bin6Precip$PRCP, 
+                                      method = "linear", n = 24583)
+
+# Turn the interpolated dataset into a proper dataframe
+Bin6Precip.interpolated  <- do.call(cbind.data.frame, Bin6Precip.interpolated) ##gets us back to data frame
+
+names(Bin6Precip.interpolated ) <- c("DATE", "PRCP")   ###have to rename the columns
+Bin6Precip.interpolated$DATE<- as.Date(Bin6Precip.interpolated$DATE, ##have to respecify the Date column as a date. Need to specify the origin too. 
+                                            origin = "1970/01/01")
+
+
+# Convert interpolated dataframe into a time series object for Seasonal Mann-Kendall test
+Bin6Precip.timeseries <- ts(Bin6Precip.interpolated$PRCP, 
+                                start = c(1951, 6) ,frequency = 12)
+### Telling it to go in a frequency of 12 months per year (monthly), and start in the 6th month of 1951 where the Bin 6 data starts
+
+
+## Run a Seasonal Mann-Kendall test for Bin 6
+
+Bin6Precip.smktest <- smk.test(Bin6Precip.timeseries)
+Bin6Precip.smktest  ###gives us overall trend with a zscore of 4.46, p-value of 0.000008. So we do see an significant increasing trend over time becuse the zscore is positive. We do have a lot of varability(varsS)
+
+summary(Bin6Precip.smktest)
 ```
 
 
-# Seasonal Mann Kendall for Bin 1 Precip
 
-## Create a time series object
+# Seasonal Mann Kendall Test for Bin 7 Precip
 ```{r}
-Bin1TimeSeries<- ts(Bin1Precip$PRCP, 
-                                frequency = 365)
+# Run a linear interpolation of the dataset to fill in gaps
+Bin7Precip.interpolated <- approx(Bin7Precip$DATE,
+                                     Bin7Precip$PRCP, 
+                                      method = "linear", n = 25586)
+
+# Turn the interpolated dataset into a proper dataframe
+Bin7Precip.interpolated  <- do.call(cbind.data.frame, Bin7Precip.interpolated) ##gets us back to data frame
+
+names(Bin7Precip.interpolated ) <- c("DATE", "PRCP")   ###have to rename the columns
+Bin7Precip.interpolated$DATE<- as.Date(Bin7Precip.interpolated$DATE, ##have to respecify the Date column as a date. Need to specify the origin too. 
+                                            origin = "1970/01/01")
+
+
+# Convert interpolated dataframe into a time series object for Seasonal Mann-Kendall test
+Bin7Precip.timeseries <- ts(Bin7Precip.interpolated$PRCP, 
+                                start = c(1948, 5) ,frequency = 12)
+### Telling it to go in a frequency of 12 months per year (monthly), and start in the 6th month of 1951 where the Bin 7 data starts
+
+
+## Run a Seasonal Mann-Kendall test for Bin 7
+
+Bin7Precip.smktest <- smk.test(Bin7Precip.timeseries)
+Bin7Precip.smktest  ###gives us overall trend with a zscore of 2.95, p-value of 0.0031. So we do see an significant increasing trend over time becuse the zscore is positive. We do have a lot of varability(varsS)
+
+summary(Bin7Precip.smktest)
 ```
 
-### Decomposition
+# Seasonal Mann Kendall Test for Bin 8 Precip
 ```{r}
-Bin1Decomposed <- stl(Bin1TimeSeries, s.window = "periodic")
-plot(Bin1Decomposed)
+# Run a linear interpolation of the dataset to fill in gaps
+Bin8Precip.interpolated <- approx(Bin8Precip$DATE,
+                                     Bin8Precip$PRCP, 
+                                      method = "linear", n = 15169)
+
+# Turn the interpolated dataset into a proper dataframe
+Bin8Precip.interpolated  <- do.call(cbind.data.frame, Bin8Precip.interpolated) ##gets us back to data frame
+
+names(Bin8Precip.interpolated ) <- c("DATE", "PRCP")   ###have to rename the columns
+Bin8Precip.interpolated$DATE<- as.Date(Bin8Precip.interpolated$DATE, ##have to respecify the Date column as a date. Need to specify the origin too. 
+                                            origin = "1970/01/01")
+
+
+# Convert interpolated dataframe into a time series object for Seasonal Mann-Kendall test
+Bin8Precip.timeseries <- ts(Bin8Precip.interpolated$PRCP, 
+                                start = c(1976, 10) ,frequency = 12)
+### Telling it to go in a frequency of 12 months per year (monthly), and start in the 10th month of 1976 where the Bin 8 data starts
+
+
+## Run a Seasonal Mann-Kendall test for Bin 8
+
+Bin8Precip.smktest <- smk.test(Bin8Precip.timeseries)
+Bin8Precip.smktest  ###gives us overall trend with a zscore of -1.16, p-value of 0.246. So we do see non significant trend over time. We do have a lot of varability(varsS)
+
+summary(Bin8Precip.smktest)
 ```
 
-## Perform Seasonal Mann Kendall Test
+# Seasonal Mann Kendall Test for Bin 9 Precip
 ```{r}
-Bin1SeasonalTrend <- smk.test(Bin1TimeSeries)
+# Run a linear interpolation of the dataset to fill in gaps
+Bin9Precip.interpolated <- approx(Bin9Precip$DATE,
+                                     Bin9Precip$PRCP, 
+                                      method = "linear", n = 13577)
 
-summary(Bin1SeasonalTrend)
+# Turn the interpolated dataset into a proper dataframe
+Bin9Precip.interpolated  <- do.call(cbind.data.frame, Bin9Precip.interpolated) ##gets us back to data frame
+
+names(Bin9Precip.interpolated ) <- c("DATE", "PRCP")   ###have to rename the columns
+Bin9Precip.interpolated$DATE<- as.Date(Bin9Precip.interpolated$DATE, ##have to respecify the Date column as a date. Need to specify the origin too. 
+                                            origin = "1970/01/01")
+
+
+# Convert interpolated dataframe into a time series object for Seasonal Mann-Kendall test
+Bin9Precip.timeseries <- ts(Bin9Precip.interpolated$PRCP, 
+                                start = c(1982, 9) ,frequency = 12)
+### Telling it to go in a frequency of 12 months per year (monthly), and start in the 9th month of 1982 where the Bin 9 data starts
+
+
+## Run a Seasonal Mann-Kendall test for Bin 9
+
+Bin9Precip.smktest <- smk.test(Bin9Precip.timeseries)
+Bin9Precip.smktest  ###gives us overall trend with a zscore of 10.53, p-value of 2.2e-16. So we do see an increasing significant trend over time. We do have a lot of varability(varsS)
+
+summary(Bin9Precip.smktest)
+```
+
+>Interpreting results of the Seasonal Mann-Kendall Test: 
+
+>  + Overall z score and p-value: test the alternative hypothesis that the true change in response variable over time is not equal to zero
+  
+>  + Monthly z score and p-value: test the alternative hypothesis that the true change in response variable over time for a given month is not equal to zero
+  
+>  + S: reports trend. A positive value indicates response variable increased over time, and a negative value indicates response variable decreased over time
+  
+
+
+
+
+
+#Determine Water Volume of Precipitation by Bin and Site
+
+# Calculate Cumulative Annual Precipitation for each year by Site and Create Dataframe
+```{r}
+CumAnnualPrecip<- AlaskaTempPrecipDischarge%>%
+  mutate(Year = year(DATE)) %>%
+  group_by(site_no, Year)%>%
+  summarize(CumPrecip=sum(PRCP, na.rm=TRUE))
+         
+```
+
+### Load in NWIS_SiteInfo.csv which has Drainage Areas for each Station
+```{r}
+NWIS_SiteInfo<- read.csv("../DATA/RAW/NWIS_SiteInfo.csv")
+```
+
+## Join NWIS_SiteInfo and CumAnnual Precip by Site Number and multiplt cumulative precip for each station and year by drainage area to determine water volume for each year and station
+```{r}
+PrecipVolume<-CumAnnualPrecip%>%
+  merge(NWIS_SiteInfo, by='site_no')%>%
+  mutate(Water_Volume=CumPrecip*drain_area_va)%>%
+  select(site_no:dec_long_va, drain_area_va, Water_Volume)
 ```
 
 
->Do Seasonal Mann Kendall test for the 9 stations 
->Moving average from coding challenge
 
