@@ -11,7 +11,7 @@ author: "Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen"
 fontsize: 12pt
 mainfont: Times New Roman
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 \newpage
@@ -480,34 +480,14 @@ ggplot(Snowmelt.Discharge.Peaks5, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time5) #earlier
 
-bin5.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks5)
+bin5.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks5)
 summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 ```
 
-
-<<<<<<< HEAD
-```{r}
-
-# Snowmelt_BinSummary <- 
-#   read.csv("../DATA/PROCESSED/Snowmelt_BinSummary.csv")
-# 
-# kable(Snowmelt_BinSummary, format = "latex", 
-#       row.names = FALSE, 
-#       #col.names = c("Latitude Bin", "Change in Day of Year"),
-#       align = "c") %>%
-#   kable_styling(bootstrap_options = c("striped", "condensed"),
-#                 full_width = FALSE,
-#                 font_size = 15) %>%
-#   column_spec(column = 1, bold = TRUE) %>%  #columns must be specified by number
-#   row_spec(row = 0, color = "#660033") %>%  #row = 0 allows us to format the header
-#   row_spec(row = 5, color = "#104e8b", background = "#d3d3d3") 
-
-```
-
 # Calculate Cumulative Annual Precipitation and Discharge Water Volume for each year by Site
-=======
+
 # Calculate Cumulative Annual Precipitation for each year by Site
->>>>>>> dfb6c8aa743b1264eb599038a4061410c50c7f69
+
 ```{r}
 ## Calculate Cumulative Annual Precipitation for each year by Site and Create Dataframe
 CumAnnualPrecip<- AlaskaTempPrecipDischarge%>%
@@ -561,14 +541,11 @@ summary(PrecipDischargeLM)
 
 
 
-
-
-
 ```{r, summary table}
 ## read in output files
-Discharge_output <- read.csv("./DATA/PROCESSED/Discharge_Change.csv")
-Snowmelt_output <- read.csv("./DATA/PROCESSED/Snowmelt_BinSummary.csv")
-Temp_output <- read.csv("./DATA/PROCESSED/Temperature_Change.csv")
+Discharge_output <- read.csv("../DATA/PROCESSED/Discharge_Change.csv")
+Snowmelt_output <- read.csv("../DATA/PROCESSED/Snowmelt_BinSummary.csv")
+Temp_output <- read.csv("../DATA/PROCESSED/Temperature_Change.csv")
 
 ## join by bin
 Output_Summary <- Temp_output %>%
