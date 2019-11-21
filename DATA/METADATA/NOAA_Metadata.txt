@@ -1,0 +1,27 @@
+# NOAA Temperature and Precipitation Datasets
+
+## Summary
+
+Temperature and precipitation data were downloaded from the National Oceanic and Atmospheric Administration (NOAA) Climate Data Online web portal. As discharge stations do not collect data on temperature and precipitation, the climate data for each latitude bin were downloaded from a station in the same county as each selected discharge station. In each county, daily precipitation, maximum temperature, and minimum temperature, data were downloaded from one station. The criteria for station selection include data extending to the current date, beginning at the earliest date, with at least 80% data coverage. This dataset also includes site location.
+
+## Database Information
+
+Data were collected from the National Oceanic and Atmospheric Administration (NOAA) Climate Data Online web portal: https://www.ncdc.noaa.gov/cdo-web/
+
+The Search Tool was used and the following options were selected:
+* Select Weather Observation Type/Dataset = Daily Summaries
+* Date Range = 1900-01-01 to 2019-11-01
+* Search For = Counties
+* The county locations of the discharge sites was used to search for each climate site
+
+For each latitude bin, the site was selected that had the longest period of record with at least 80% data coverage. When possible, sites were selected that also had periods of record extending to the present.
+
+## Data Content Information
+
+Daily data were downloaded for the following variables:
+* Maximum Temperature in degrees fahrenheit
+* Minimum Temperature in degrees fahrenheit
+* Total Precipitation in inches
+* Site Latitutde
+* Site Longitude
+

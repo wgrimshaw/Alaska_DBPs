@@ -24,6 +24,7 @@ Alaska_Data <- read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 theme_set(theme_bw())
 ```
 
+
 ```{r}
 ## OLD CODE NOT NEEDED
 ## add rolling mean temperature column
@@ -51,6 +52,12 @@ ggplot(Alaska_Data, aes(x = DATE, y = TMAX)) +
   geom_line(alpha = 0.8) +
   facet_wrap(~Bin, nrow = 3, ncol = 3) +
   labs(y = "Maximum Daily Temperature (F)", x = "Date")
+
+## create  NA rows where there are data gaps so lines don't connect
+Bin2NA <- matrix(rep(NA, 13))
+names(Bin2NA) <- names(Alaska_Data)
+Bin2NA(DATE) = as.Date("1990-01-01", format = "%Y-%m-%d")
+  
 
 ```
 
