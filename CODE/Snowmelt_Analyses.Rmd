@@ -133,7 +133,7 @@ ggplot(Snowmelt.Discharge.Peaks1, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time1) #later (but very few data points)
 
-bin1.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks1)
+bin1.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks1)
 summary(bin1.lm)
 
 ```
@@ -160,7 +160,7 @@ ggplot(Snowmelt.Discharge.Peaks2, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time2) #literally the same?????
 
-bin2.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks2)
+bin2.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks2)
 summary(bin2.lm)
 
 ```
@@ -187,7 +187,7 @@ ggplot(Snowmelt.Discharge.Peaks3, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time3) #earlier (barely)
 
-bin3.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks3)
+bin3.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks3)
 summary(bin3.lm)
 
 ```
@@ -214,7 +214,7 @@ ggplot(Snowmelt.Discharge.Peaks4, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time4) #later (barely)
 
-bin4.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks4)
+bin4.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks4)
 summary(bin4.lm)
 
 ```
@@ -241,7 +241,7 @@ ggplot(Snowmelt.Discharge.Peaks5, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time5) #earlier
 
-bin5.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks5)
+bin5.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks5)
 summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 
 ```
@@ -270,7 +270,7 @@ ggplot(Snowmelt.Discharge.Peaks6, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time6) #earlier
 
-bin6.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks6)
+bin6.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks6)
 summary(bin6.lm) 
 
 #Test for if variance has changed over time?
@@ -298,7 +298,7 @@ ggplot(Snowmelt.Discharge.Peaks7, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time7) #later
 
-bin7.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks7)
+bin7.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks7)
 summary(bin7.lm)
 
 ```
@@ -324,7 +324,7 @@ ggplot(Snowmelt.Discharge.Peaks8, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time8) #earlier
 
-bin8.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks8)
+bin8.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks8)
 summary(bin8.lm)
 
 ```
@@ -350,7 +350,7 @@ ggplot(Snowmelt.Discharge.Peaks9, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time9) #earlier
 
-bin9.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks9)
+bin9.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks9)
 summary(bin9.lm)
 
 ```
@@ -367,7 +367,7 @@ plot_grid(DOY.Time1, DOY.Time2, DOY.Time3, DOY.Time4, DOY.Time5, DOY.Time6, DOY.
 ```{r Bin summary}
 
 Snowmelt_BinSummary <- data.frame(Bin = c("1", "2", "3", "4", "5", "6", "7", "8", "9"),
-                Change.DOY = c(NA, NA, NA, NA, -0.4504, NA, NA, NA, NA))
+                Change.DOY = c(NA, NA, NA, NA, -0.16969, NA, NA, NA, NA))
 
 #write.csv(Snowmelt_BinSummary, "./DATA/PROCESSED/Snowmelt_BinSummary.csv", row.names = FALSE)
 
