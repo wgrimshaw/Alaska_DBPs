@@ -11,7 +11,7 @@ author: "Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen"
 fontsize: 12pt
 mainfont: Times New Roman
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 \newpage
@@ -503,20 +503,59 @@ summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 
 ```
 
-# Calculate Cumulative Annual Precipitation for each year by Site
+# Calculate Cumulative Annual Precipitation and Discharge Water Volume for each year by Site
 ```{r}
-## Create Year and Cumulative Precipitation columns in a new dataframe
-CumAnnualPrecip<- AlaskaTempPrecipDischarge%>% mutate(Year = year(DATE)) %>% group_by(site_no, Year)%>% summarize(CumPrecip=sum(PRCP, na.rm=TRUE))
+## Calculate Cumulative Annual Precipitation for each year by Site and Create Dataframe
+CumAnnualPrecip<- AlaskaTempPrecipDischarge%>%
+  mutate(Year = year(DATE)) %>%
+  group_by(site_no, Year)%>%
+  summarize(CumPrecip=sum(PRCP, na.rm=TRUE))
 
 ### Load in NWIS_SiteInfo.csv which has Drainage Areas for each Station
 NWIS_SiteInfo<- read.csv("../DATA/RAW/NWIS_SiteInfo.csv")
 
-# Join NWIS_SiteInfo and CumAnnual Precip by Site Number and multiply cumulative precipitation for each station and year by drainage area to determine water volume for each year and station
+## Join NWIS_SiteInfo and CumAnnual Precip by Site Number and multiply cumulative precip for each station and year by drainage area to determine water volume for each year and station
 PrecipVolume<-CumAnnualPrecip%>%
-merge(NWIS_SiteInfo, by='site_no')%>% mutate(Water_Volume=CumPrecip*drain_area_va)%>% select(site_no:dec_long_va, drain_area_va, Water_Volume )
+  merge(NWIS_SiteInfo, by='site_no')%>%
+  mutate(Water_Volume_Precip=CumPrecip*drain_area_va*5280*5280/12)%>%
+  select(site_no:dec_long_va, drain_area_va, Water_Volume_Precip)
+### cum precip * drainage area(sq miles)* 5280 *5280/12=cubic feet per year 
+
+# Determine Water Volume of Discharge by Bin and Site 
+
+## Calculate Cumulative AnnualDischarge for each year by Site and Create Dataframe
+CumAnnualDischarge<- AlaskaTempPrecipDischarge%>%
+  mutate(Year = year(DATE)) %>%
+  group_by(site_no, Year)%>%
+  summarize(CumDischarge=sum(Discharge, na.rm=TRUE))
+
+## Join NWIS_SiteInfo and CumAnnual Precip by Site Number and multiply cumulative precip for each station and year by drainage area to determine water volume for each year and station
+library(dplyr)
+DischargeVolume<-CumAnnualDischarge%>%
+  merge(NWIS_SiteInfo, by='site_no')%>%
+  mutate(Water_Volume_Discharge=CumDischarge*3600*24)%>%
+  select(site_no:dec_long_va, drain_area_va, Water_Volume_Discharge)
+#### Discharge is in cubic feet per second *3600 *24 to get discharge volume in cubic feet per year
+
+
+## Join Discharge Volume and Precip Volume Data Frames and Create Ratio Column
+PrecipDischargeVolume<-PrecipVolume%>%
+  merge(DischargeVolume, by=c('site_no', 'Year'))%>%
+  mutate(Precip_Discharge_Ratio=Water_Volume_Precip/Water_Volume_Discharge)
+
 
 
 ```
+>We have the most confidence in our data for Bin 5, and it has a long period of record.
+
+# Create Linear Model of Year vs. the Precip: Discharge Water Volume Ratio
+```{r}
+PrecipDischargeLM<-lm(Precip_Discharge_Ratio~Year, data=PrecipDischargeVolume)
+summary(PrecipDischargeLM)
+```
+
+
+
 
 
 ## Question 1: <insert specific question here and add additional subsections for additional questions below>
