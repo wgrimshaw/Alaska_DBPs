@@ -1,0 +1,9 @@
+Alaska Discharge Datasets
+
+Summary
+This dataset was prepared for discharge analysis of Alaska climate change project in Hydrologic Data Analysis course at Duke University, Fall 2019.
+
+Dataset Information
+Data were collected from NWIS using the Data Retrieval package
+
+Discharge data were collected from NWIS using the Data Retrieval package. The state of Alaska was divided into 10 bins of equal latitude, and daily discharge data was downloaded for the site in each latitude bin with the greatest number of samples. This dataset includes the site location, daily discharge, and county of the site, among other variables not used in the analysis.
