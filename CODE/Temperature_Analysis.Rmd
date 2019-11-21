@@ -47,18 +47,26 @@ Alaska_Data$DATE <- as.Date(Alaska_Data$DATE, format = "%Y-%m-%d")
 ## Transform Bin column to factor
 Alaska_Data$Bin <- as.factor(Alaska_Data$Bin)
 
+## create  NA rows where there are data gaps so lines don't connect
+Bin2NA <- c(as.Date("1990-01-01", format = "%Y-%m-%d"), 2, rep(NA, 11))
+Bin3NA <- c(as.Date("1945-01-01", format = "%Y-%m-%d"), 3, rep(NA, 11))
+Bin3NA_2 <- c(as.Date("1936-01-01", format = "%Y-%m-%d"), 3, rep(NA, 11))
+Bin4NA <- c(as.Date("1996-01-01", format = "%Y-%m-%d"), 4, rep(NA, 11))
+Bin6NA <- c(as.Date("1995-01-01", format = "%Y-%m-%d"), 6, rep(NA, 11))
+
+## rbind missing date vectors
+MissingDates <- as.data.frame(rbind(Bin2NA, Bin3NA, Bin3NA_2, Bin4NA, Bin6NA))
+## match names to Alaska Data names
+names(MissingDates) <- names(Alaska_Data)
+## reformat date column
+MissingDates$DATE <- as.Date(MissingDates$DATE)
+Alaska_Data_Fig <- rbind(Alaska_Data, MissingDates)
+  
 ## create plot of temperature over time for all 10 latitude bins
-ggplot(Alaska_Data, aes(x = DATE, y = TMAX)) +
+ggplot(Alaska_Data_Fig, aes(x = DATE, y = TMAX)) +
   geom_line(alpha = 0.8) +
   facet_wrap(~Bin, nrow = 3, ncol = 3) +
   labs(y = "Maximum Daily Temperature (F)", x = "Date")
-
-## create  NA rows where there are data gaps so lines don't connect
-Bin2NA <- matrix(rep(NA, 13))
-names(Bin2NA) <- names(Alaska_Data)
-Bin2NA(DATE) = as.Date("1990-01-01", format = "%Y-%m-%d")
-  
-
 ```
 
 ```{r}

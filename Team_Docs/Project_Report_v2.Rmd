@@ -504,10 +504,16 @@ merge(NWIS_SiteInfo, by='site_no')%>% mutate(Water_Volume=CumPrecip*drain_area_v
 
 
 ```{r, summary table}
+## read in output files
+Discharge_output <- read.csv("./DATA/PROCESSED/Discharge_Change.csv")
+Snowmelt_output <- read.csv("./DATA/PROCESSED/Snowmelt_BinSummary.csv")
+Temp_output <- read.csv("./DATA/PROCESSED/Temperature_Change.csv")
 
- Output_Summary <- 
-   read.csv("../DATA/PROCESSED/Output_Summary.csv")
- 
+## join by bin
+Output_Summary <- Temp_output %>%
+  left_join(Discharge_output, by = "Bin") %>%
+  left_join(Snowmelt_output, by = "Bin") %>%
+  rename(Discharge_Change = Slope)
 
 kable(Output_Summary, format = "html", 
        row.names = FALSE, 
