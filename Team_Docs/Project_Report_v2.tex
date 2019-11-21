@@ -204,8 +204,10 @@ also includes site location.
 \textless{}Describe how your team wrangled your dataset in a format
 similar to a methods section of a journal article.\textgreater{}
 
+\newpage
+
 \hypertarget{data-wrangling}{%
-\subsection{Data Wrangling}\label{data-wrangling}}
+\section{Data Wrangling}\label{data-wrangling}}
 
 \textless{}Add a table that summarizes your data structure (variables,
 units, ranges and/or central tendencies, data source if multiple are
@@ -232,7 +234,10 @@ Glacial Coverage/Melting & Qualitative & Predictor & 1b\tabularnewline
 \bottomrule
 \end{longtable}
 
-\newpage
+\hypertarget{data-wrangling-methods}{%
+\subsection{Data Wrangling Methods}\label{data-wrangling-methods}}
+
+(Gaby)
 
 \hypertarget{exploratory-analysis}{%
 \section{Exploratory Analysis}\label{exploratory-analysis}}
@@ -251,9 +256,42 @@ figure should be referenced within the text\textgreater{}
 \hypertarget{snowmelt-data-wrangling}{%
 \section{Snowmelt Data Wrangling}\label{snowmelt-data-wrangling}}
 
-\includegraphics{Project_Report_v2_files/figure-latex/Snowmelt Day of Year Exploratory Graphs and Code-1.pdf}
-\includegraphics{Project_Report_v2_files/figure-latex/Snowmelt Day of Year Exploratory Graphs and Code-2.pdf}
-\includegraphics{Project_Report_v2_files/figure-latex/Snowmelt Day of Year Exploratory Graphs and Code-3.pdf}
+\hypertarget{snowmelt-graph-1}{%
+\section{Snowmelt Graph 1}\label{snowmelt-graph-1}}
+
+\begin{figure}
+\centering
+\includegraphics{Project_Report_v2_files/figure-latex/Snowmelt Day of Year Exploratory Graph 1-1.pdf}
+\caption{Day of Year vs.~Mean Discharge. This figure shows mean
+discharge across all nine latitude bins for each day of the year. This
+graph served to illustrate variation across sites as to when first day
+of snowmelt and peak snowmelt would occur.}
+\end{figure}
+
+\hypertarget{snowmelt-graph-2}{%
+\section{Snowmelt Graph 2}\label{snowmelt-graph-2}}
+
+\begin{figure}
+\centering
+\includegraphics{Project_Report_v2_files/figure-latex/Snowmelt Day of Year Exploratory Graph 2-1.pdf}
+\caption{Day of Year vs.~Discharge. This figure shows how discharge
+changes with day of year across the period of record for Bin 6. This
+provided a visual cue as to whether snowmelt was occuring earlier and
+during what time of the year the shift was occuring.}
+\end{figure}
+
+\hypertarget{snowmelt-graph-3}{%
+\section{Snowmelt Graph 3}\label{snowmelt-graph-3}}
+
+\begin{figure}
+\centering
+\includegraphics{Project_Report_v2_files/figure-latex/Snowmelt Day of Year Exploratory Graph 3-1.pdf}
+\caption{Day of Year vs Discharge. This figure shows how discharge
+changes with day of year across the every ten years across the period of
+record for fifty years. This provided a visual cue as to whether
+snowmelt was occuring earlier and during what time of the year the shift
+was occuring.}
+\end{figure}
 
 \hypertarget{precipitation-data-wrangling}{%
 \section{Precipitation Data
@@ -264,7 +302,16 @@ Wrangling}\label{precipitation-data-wrangling}}
 by
 Bin}\label{scatterplot-of-full-precipitation-period-of-record-colored-by-bin}}
 
-\includegraphics{Project_Report_v2_files/figure-latex/Scatterplot of Full Precipitation Record by Bin-1.pdf}
+\begin{figure}
+\centering
+\includegraphics{Project_Report_v2_files/figure-latex/Precipitation Exploratory Graph 1-1.pdf}
+\caption{Precipitation Measured Over the Entire Period of Record by Bin.
+This figure shows the general pattern of precipitation changes over
+time, differentiated by the latitude bin (color). Bin 3 has the most
+sample points for the entire precipitation period of record. Bin 3's
+precipitation range has the greatest magnitude compared to the other
+bins.}
+\end{figure}
 
 \hypertarget{group-precip-data-by-bin-and-doy-create-mean-precip-column-and-filter-weeks-to-only-include-the-spring}{%
 \subsubsection{Group Precip Data by Bin and DOY, create Mean Precip
@@ -274,9 +321,14 @@ spring}\label{group-precip-data-by-bin-and-doy-create-mean-precip-column-and-fil
 \hypertarget{graph-1}{%
 \section{GRAPH 1}\label{graph-1}}
 
+\begin{figure}
+\centering
 \includegraphics{Project_Report_v2_files/figure-latex/unnamed-chunk-2-1.pdf}
-dark turquiose, black, yellow, dark orange, dark violet, midnight blue,
-forest green, magenta, indian red
+\caption{Day of Year vs.~Mean Precipitation. This figure shows mean
+precipitation across all nine latitude bins for each day of the year.
+This graph served to illustrate precipitation variation across sites.
+Bin 1 has the greatest spread of mean precipitation.}
+\end{figure}
 
 \hypertarget{graph-2}{%
 \section{GRAPH 2}\label{graph-2}}
@@ -289,8 +341,9 @@ precipitation changes with day of year across the period of record for
 Bin 6.}
 \end{figure}
 
-\hypertarget{exploratory-mapping}{%
-\section{Exploratory Mapping}\label{exploratory-mapping}}
+\hypertarget{exploratory-precipitation-mapping}{%
+\section{Exploratory Precipitation
+Mapping}\label{exploratory-precipitation-mapping}}
 
 \begin{verbatim}
 ## Reading layer `cb_2018_us_state_20m' from data source `/Users/gabrielagarcia/Desktop/Environmental Data Analytics/Environmental_Data_Analytics/Data/Spatial/cb_2018_us_state_20m.shp' using driver `ESRI Shapefile'
@@ -302,21 +355,48 @@ Bin 6.}
 ## proj4string:    +proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs
 \end{verbatim}
 
-\hypertarget{map-of-noaa-site-locations-in-alaska}{%
-\section{Map of NOAA Site Locations in
-Alaska}\label{map-of-noaa-site-locations-in-alaska}}
-
-\includegraphics{Project_Report_v2_files/figure-latex/NOAA Site Locations across Alaska-1.pdf}
-
 \hypertarget{create-alaska-temp-precip-discharge-summary-using-summarize-function}{%
-\subsection{Create Alaska Temp Precip Discharge Summary using summarize
+\section{Create Alaska Temp Precip Discharge Summary using Summarize
 function}\label{create-alaska-temp-precip-discharge-summary-using-summarize-function}}
 
-\hypertarget{precip-map}{%
-\section{Precip Map}\label{precip-map}}
+\hypertarget{noaa-site-locations-map}{%
+\section{NOAA Site Locations Map}\label{noaa-site-locations-map}}
+
+\begin{figure}
+\centering
+\includegraphics{Project_Report_v2_files/figure-latex/unnamed-chunk-4-1.pdf}
+\caption{Map of NOAA Site Locations in Alaska}
+\end{figure}
+
+\hypertarget{mean-precipitation-map}{%
+\section{Mean Precipitation Map}\label{mean-precipitation-map}}
 
 \includegraphics{Project_Report_v2_files/figure-latex/unnamed-chunk-5-1.pdf}
 \newpage
+
+\hypertarget{mean-discharge-map}{%
+\section{Mean Discharge Map}\label{mean-discharge-map}}
+
+\includegraphics{Project_Report_v2_files/figure-latex/unnamed-chunk-6-1.pdf}
+\newpage
+
+\begin{figure}
+\centering
+\includegraphics{Project_Report_v2_files/figure-latex/unnamed-chunk-7-1.pdf}
+\caption{Map of Mean Maximum Temperature across Alaska by Bin}
+\end{figure}
+
+\hypertarget{comparison-of-mean-precipitation-mean-discharge-and-mean-maximum-temperature-by-bin}{%
+\section{Comparison of Mean Precipitation, Mean Discharge, and Mean
+Maximum Temperature by
+Bin}\label{comparison-of-mean-precipitation-mean-discharge-and-mean-maximum-temperature-by-bin}}
+
+\begin{figure}
+\centering
+\includegraphics{Project_Report_v2_files/figure-latex/unnamed-chunk-8-1.pdf}
+\caption{Comparison of Mean Precipitation, Mean Discharge, and Mean
+Maximum Temperature across Alaska by Bin}
+\end{figure}
 
 \hypertarget{analysis}{%
 \section{Analysis}\label{analysis}}
@@ -336,7 +416,7 @@ figure should be referenced within the text\textgreater{}
 
 \begin{figure}
 \centering
-\includegraphics{Project_Report_v2_files/figure-latex/unnamed-chunk-6-1.pdf}
+\includegraphics{Project_Report_v2_files/figure-latex/unnamed-chunk-9-1.pdf}
 \caption{Year vs.~Day of Year of Peak Discharge. This is the only
 Latitude Bin with a significant change in the day of year of peak
 discharge (p = 0.02353). There is a decreasing trend in the data,
