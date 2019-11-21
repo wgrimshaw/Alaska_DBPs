@@ -11,7 +11,7 @@ author: "Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen"
 fontsize: 12pt
 mainfont: Times New Roman
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 \newpage
@@ -37,7 +37,6 @@ library(maps)
 library(dataRetrieval)
 library(viridis)
 library(ggplot2)
-library(wesanderson)
 library(sf)
 library(ggspatial)
 library(cowplot)
@@ -88,7 +87,6 @@ Discharge data were collected from NWIS using the Data Retrieval package. The st
 
 Temperature and precipitation data were downloaded from the National Oceanic and Atmospheric Administration (NOAA) Climate Data Online web portal. As discharge stations do not collect data on temperature and precipitation, the climate data for each latitude bin were downloaded from a station in the same county as each selected discharge station. In each county, daily precipitation, maximum temperature, and minimum temperature, data were downloaded from one station. The criteria for station selection include data extending to the current date, beginning at the earliest date, with at least 80% data coverage. This dataset also includes site location.
 
-<Describe how your team wrangled your dataset in a format similar to a methods section of a journal article.>
 
 \newpage
 
@@ -108,9 +106,17 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 | Permafrost Melt | Qualitative | Predictor | 1b | 
 | Glacial Coverage/Melting | Qualitative | Predictor | 1b |
 
-## Data Wrangling Methods
-(Gaby)
+# Data Wrangling Methods
+<Describe how your team wrangled your dataset in a format similar to a methods section of a journal article.>
 
+### Importing, Cleaning, and Addressing Date Issues
+
+The state of Alaska was divided into 10 bins of equal latitude. Precipitation and temperature data for 10 Alaskan NOAA stations-one inside each latitude bin-was obtained from NOAA's Climate Data Online web portal, and discharge data was retrieved from NWIS's Data Retrieval package using one site in each latitude bin with the greatest number of samples. All discharge data resided in one CSV entitled NWIS_Discharge. All raw CSVs were imported into our Raw Data folder within our project repository on Github, and imported into R using the read.csv function. 
+
+Each of the 10 NOAA stations classified by latitude bin had a unique CSV that was cleaned prior to joining. Ancillary columns from each of the 10 dataframes were removed in order to ensure that each CSV had the same columns in the same order. In order to address date-time issues in the NOAA CSVs for Bin 1 and Bin 5, the as.DATE function was used to change the "DATE" column fron a factor to a date, in the format month/day/year. Next, we changed the format of the "DATE" column to a two digit year, a two digit month, and the two digit day. A function was then written to create early dates that had been misrepresented as years after 2019. Then, the DATE column was inserted into the function written above for each row of the DATE column. Finally, the as.DATE function was used to convert the DATE column into a 4 digit year, a two digit month, and 2 digit day format, our preferred format. 
+
+### Joining Data
+After all 10 NOAA dataframes containing precipitation and temperature data were cleaned, they were all joined by row using the rbind function into a new CSV entitiled "TempPrecip". Next, the "site_no" column in the NWIS_Discharge dataframe was converted into a factor using the as.factor function. The revalue function within the "plyr" package was then used to create a new "Bin" column renaming the USGS Station Numbers in the "site_no" column by their bin number. The "Date" column in the Discharge dataframe was renamed to "DATE" so that it matched the "DATE" column in the "TempPrecip" dataframe. Finally, the merge function was used to join the "TempPrecip" and "NWIS_Discharge" dataframes by "DATE" and "Bin" into a new CSV entitled "AlaskaTempPrecipDischarge", and cleaned for clarity. 
 
 # Exploratory Analysis 
 
@@ -261,7 +267,7 @@ mutate(MeanPRCP=mean(PRCP))%>%
 
 
 # GRAPH 1
-```{r, fig.cap= c("Day of Year vs. Mean Precipitation. This figure shows mean precipitation across all nine latitude bins for each day of the year. This graph served to illustrate precipitation variation across sites. Bin 1 has the greatest spread of mean precipitation."), fig.width=12, fig.height=5}
+```{r, fig.cap= c("Day of Year vs. Mean Precipitation. This figure shows mean precipitation across all nine latitude bins for each day of the year up until Day 200. This graph served to illustrate precipitation variation across sites. Bin 1 has the greatest spread of mean precipitation."), fig.width=12, fig.height=7}
  PrecipMeanSpringPlot<- ggplot(Precip.Mean.Spring) +
    geom_line(aes(x = DOY, y = MeanPRCP, color = Bin)) +
    labs(x = "Day of Year", y = "Mean Precipitation (inches)", color = "Latitude Bin") +
@@ -374,16 +380,21 @@ DischargeComplete_utm<- st_transform(DischargeComplete_sf, c=32609)
 
 
 # NOAA Site Locations Map
-```{r, fig.cap= c("Map of NOAA Site Locations in Alaska"), warning=FALSE, message=FALSE}
+```{r, fig.cap= c("Map of NOAA Site Locations in Alaska"), fig.height=5, fig.width=8, warning=FALSE, message=FALSE}
 ggplot() +
   geom_sf(data = Alaska_sf_utm, color = "black") +
   geom_sf(data = NOAA_sf_utm, color = "red")+
-  gabytheme
+  geom_sf(data = DischargeComplete_utm, color="blue", size=2) +
+gabytheme
 ```
-
+add in all 18 site locations for temp and precip in this map 
+no colors-just red
+discharge 
+use same shape type: orange dots are NOAA sites, blue dots are NWIS discharge 
+export precipitation map and total site locations map 
 
 # Mean Precipitation Map
-```{r fig.cap=c("Map of Mean Precipitation across Alaska by Bin"), fig.height=5, fig.width=9}
+```{r fig.cap=c("Map of Mean Precipitation across Alaska by Bin. This map depicts Bin 3 as having the highest mean precipitation across the state, with the lowest mean precipitation falling in northernmost Bin 9."), fig.height=5, fig.width=9}
 AlaskaPrecipMap<-ggplot(axes = FALSE) +
   geom_sf(data = Alaska_sf_utm, fill="white", color="black") +
   geom_sf(data = AlaskaMeanPrecipDischargeSummary_utm, aes(color=Mean_PRCP), size=5)  +
@@ -400,7 +411,7 @@ annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75,
 \newpage
 
 # Mean Discharge Map
-```{r,fig.cap= c("Map of Mean Discharge across Alaska by Bin"), fig.height=5, fig.width=9}
+```{r,fig.cap= c("Map of Mean Discharge across Alaska by Bin. This map depicts Bin 8 as having the highest mean discharge value of 121266.11 cfs. Bin 1 has the lowest mean discharge value of 4.69 cfs."), fig.height=5, fig.width=9}
 gabytheme2 <- theme_bw(base_size = 17) + 
   theme(plot.title=element_text(face="bold", size="26", color="IndianRed3", hjust=0.5),
         axis.title=element_text(size=22, color="black"),
@@ -425,7 +436,7 @@ annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75,
 \newpage
 
 
-```{r fig.cap=c("Map of Mean Maximum Temperature across Alaska by Bin"), fig.height=5, fig.width=9}
+```{r fig.cap=c("Map of Mean Maximum Temperature across Alaska by Bin. This figure depicts Bin 3 as having the highest mean maximum temperature value of 51.97 degrees Fahrenheit."), fig.height=5, fig.width=9}
 AlaskaTemperatureMap<-ggplot(axes = TRUE) +
   geom_sf(data = Alaska_sf_utm, fill="white") +
   geom_sf(data = AlaskaMeanPrecipDischargeSummary_utm, aes(color=Mean_Max_Temp), size=5)  +
@@ -438,13 +449,6 @@ annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75,
  print(AlaskaTemperatureMap)
 ```
 
-# Comparison of Mean Precipitation, Mean Discharge, and Mean Maximum Temperature by Bin 
-```{r, fig.cap= c("Comparison of Mean Precipitation, Mean Discharge, and Mean Maximum Temperature across Alaska by Bin"),fig.height=10, fig.width=20}
-CompleteAlaskaPlotGrid<-plot_grid(AlaskaPrecipMap, AlaskaDischargeMap, AlaskaTemperatureMap,
-            nrow = 3) 
-print(CompleteAlaskaPlotGrid)
-```
-
 
 # Analysis
 
@@ -452,7 +456,7 @@ print(CompleteAlaskaPlotGrid)
 
 <Each figure should be accompanied by a caption, and each figure should be referenced within the text>
 
-```{r, fig.cap = "Year vs. Day of Year of Peak Discharge. This is the only Latitude Bin with a significant change in the day of year of peak discharge (p = 0.02353). There is a decreasing trend in the data, indicating the day of peak snowmelt is happening sooner across 1952-2018."}
+```{r, fig.cap = "Year vs. Day of Year of Peak Discharge. Bin 5 is the only Latitude Bin with a significant change in the day of year of peak discharge (p = 0.02353). There is a decreasing trend in the data, indicating the day of peak snowmelt is happening sooner across 1952-2018."}
 
 Snowmelt.Discharge.Bin5 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
   filter(Bin == 5)
@@ -478,10 +482,7 @@ print(DOY.Time5) #earlier
 
 bin5.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks5)
 summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
-
-
 ```
-
 
 
 ```{r}
@@ -499,6 +500,21 @@ summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 #   column_spec(column = 1, bold = TRUE) %>%  #columns must be specified by number
 #   row_spec(row = 0, color = "#660033") %>%  #row = 0 allows us to format the header
 #   row_spec(row = 5, color = "#104e8b", background = "#d3d3d3") 
+
+```
+
+# Calculate Cumulative Annual Precipitation for each year by Site
+```{r}
+## Create Year and Cumulative Precipitation columns in a new dataframe
+CumAnnualPrecip<- AlaskaTempPrecipDischarge%>% mutate(Year = year(DATE)) %>% group_by(site_no, Year)%>% summarize(CumPrecip=sum(PRCP, na.rm=TRUE))
+
+### Load in NWIS_SiteInfo.csv which has Drainage Areas for each Station
+NWIS_SiteInfo<- read.csv("../DATA/RAW/NWIS_SiteInfo.csv")
+
+# Join NWIS_SiteInfo and CumAnnual Precip by Site Number and multiply cumulative precipitation for each station and year by drainage area to determine water volume for each year and station
+PrecipVolume<-CumAnnualPrecip%>%
+merge(NWIS_SiteInfo, by='site_no')%>% mutate(Water_Volume=CumPrecip*drain_area_va)%>% select(site_no:dec_long_va, drain_area_va, Water_Volume )
+
 
 ```
 
