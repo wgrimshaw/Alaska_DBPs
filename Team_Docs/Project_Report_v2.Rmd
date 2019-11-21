@@ -11,7 +11,7 @@ author: "Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen"
 fontsize: 12pt
 mainfont: Times New Roman
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 \newpage
@@ -37,9 +37,10 @@ library(maps)
 library(dataRetrieval)
 library(viridis)
 library(ggplot2)
-library(scales)
-library(stats)
+library(wesanderson)
+library(sf)
 #library(kableExtra)
+
 
 # Set your ggplot theme
 theme_set(theme_bw())
@@ -103,6 +104,9 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 | Permafrost Melt | Qualitative | Predictor | 1b | 
 | Glacial Coverage/Melting | Qualitative | Predictor | 1b |
 
+
+
+
 \newpage
 
 # Exploratory Analysis 
@@ -111,6 +115,7 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 
 <Each figure should be accompanied by a caption, and each figure should be referenced within the text>
 
+# Snowmelt Data Wrangling
 ```{r Snowmelt Day of Year Exploratory Graphs and Code, fig.cap= c("Day of Year vs. Mean Discharge. This figure shows mean discharge across all nine latitude bins for each day of the year. This graph served to illustrate variation across sites as to when first day of snowmelt and peak snowmelt would occur.", "Day of Year vs. Discharge. This figure shows how discharge changes with day of year across the period of record for Bin 6. This provided a visual cue as to whether snowmelt was occuring earlier and during what time of the year the shift was occuring.", "Day of Year vs Discharge. This figure shows how  discharge changes with day of year across the every ten years across the period of record for fifty years. This provided a visual cue as to whether snowmelt was occuring earlier and during what time of the year the shift was occuring.")}
  
 #Convert DATE column to class 'Date'
@@ -162,77 +167,206 @@ print(dis.doy.6.10)
 ```
 
 
-```{r Precipitation Day of Year Exploratory Graphs and Code}
+# Precipitation Data Wrangling
+```{r Precipitation Exploratory Data Wrangling}
+### Create Precipitation only Dataframe with Bins included
+AlaskaPrecipOnly<-select(AlaskaTempPrecipDischarge, .data$DATE, .data$PRCP, .data$Bin)
 
-# ### Ensure Date is a date object and not a factor
-# newdata$DATE<-as.Date(newdata$DATE)
-# 
-# ### Ensure Bin is a factor and not an integer
-# newdata$Bin <- as.factor(newdata$Bin)
-# 
-# ### Add Day of Year, Year, Week,and Month Column
-# newdata <-mutate(newdata, DOY = yday(DATE), Year=year(DATE), Month=month(DATE), WEEK = week(DATE))
-#   
-# 
-# # Subset the Data by Bin
-# Bin1Precip<-filter(newdata, Bin== 1)
-# Bin2Precip<-filter(newdata, Bin== 2)
-# Bin3Precip<-filter(newdata, Bin == 3)
-# Bin4Precip<-filter(newdata, Bin == 4)
-# Bin5Precip<-filter(newdata, Bin == 5)
-# Bin6Precip<-filter(newdata, Bin == 6)
-# Bin7Precip<-filter(newdata, Bin == 7)
-# Bin8Precip<-filter(newdata, Bin == 8)
-# Bin9Precip<-filter(newdata, Bin == 9)
+### Check number of Precipitation NA's and remove them
+newdata<-AlaskaPrecipOnly
 
+### Ensure Date is a date object and not a factor
+newdata$DATE<-as.Date(newdata$DATE)
+
+### Ensure Bin is a factor and not an integer
+newdata$Bin <- as.factor(newdata$Bin)
+
+# Subset the Data by Bin
+Bin1Precip<-filter(newdata, Bin== 1)
+Bin2Precip<-filter(newdata, Bin== 2)
+Bin3Precip<-filter(newdata, Bin == 3)
+Bin4Precip<-filter(newdata, Bin == 4)
+Bin5Precip<-filter(newdata, Bin == 5)
+Bin6Precip<-filter(newdata, Bin == 6)
+Bin7Precip<-filter(newdata, Bin == 7)
+Bin8Precip<-filter(newdata, Bin == 8)
+Bin9Precip<-filter(newdata, Bin == 9)
+
+### Ensure Date is a date object and not a factor
+ newdata$DATE<-as.Date(newdata$DATE)
+ 
+### Ensure Bin is a factor and not an integer
+ newdata$Bin <- as.factor(newdata$Bin)
+ 
+### Add Day of Year, Year, Week,and Month Column
+newdata <-mutate(newdata, DOY = yday(DATE), Year=year(DATE), Month=month(DATE), WEEK = week(DATE))
+
+# Subset the Data by Bin
+Bin1Precip<-filter(newdata, Bin== 1)
+Bin2Precip<-filter(newdata, Bin== 2)
+Bin3Precip<-filter(newdata, Bin == 3)
+Bin4Precip<-filter(newdata, Bin == 4)
+Bin5Precip<-filter(newdata, Bin == 5)
+Bin6Precip<-filter(newdata, Bin == 6)
+Bin7Precip<-filter(newdata, Bin == 7)
+Bin8Precip<-filter(newdata, Bin == 8)
+Bin9Precip<-filter(newdata, Bin == 9)
+
+### Set personal theme
+gabytheme <- theme_bw(base_size = 19) + 
+  theme(plot.title=element_text(face="bold", size="26", color="IndianRed3", hjust=0.5),
+        axis.title=element_text(size=22, color="black"),
+axis.text = element_text(face="bold", size=16, color = "black"), 
+panel.background=element_rect(fill="white", color="darkblue"), 
+panel.border = element_rect(color = "black", size = 2),
+legend.position = "top", legend.background = element_rect(fill="white", color="black"),
+            legend.key = element_rect(fill="transparent", color="NA"))
 
 ```
 
-# Scatterplot of Full Precipitation Period of Record Colored by Bin
-```{r, fig.width=10, fig.height=6}
-# PrecipScatterplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
-#   geom_point(alpha=0.5, size=2) +
-# labs(title="Precipitation Measured over Time", x="Sample Year",
-#        y="Precipitation (inches)")+ 
-#   scale_x_date(labels=date_format("%y"),
-#                breaks=date_breaks("5 years"))+
-#   theme(legend.position="top",
-#         legend.key.width=unit(1.5, "cm"))+
-#   gabytheme
-# print(PrecipScatterplot)
+## Scatterplot of Full Precipitation Period of Record Colored by Bin
+```{r Scatterplot of Full Precipitation Record by Bin, fig.width=10, fig.height=5}
+ PrecipScatterplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
+   geom_point(alpha=0.5, size=2) +
+ labs(title="Precipitation Measured over Time", x="Sample Year",
+        y="Precipitation (inches)")+
+  theme(legend.position="top",
+         legend.key.width=unit(1.5, "cm"))+
+   gabytheme
+ print(PrecipScatterplot)
 ```
 
-# Plot mean discharge for each DOY through time by bin
+### Group Precip Data by Bin and DOY, create Mean Precip column, and filter weeks to only include the spring
 ```{r}
-# newdata$Bin<-as.factor(newdata$Bin)
-# 
-# Precip.Mean.Spring<-newdata%>%
-#   group_by(Bin,DOY)%>%
-#   mutate(MeanPRCP=mean(PRCP))%>%
-#   filter(WEEK < 30)
-#             
-# Precip.Mean.Bin6 <- Precip.Mean.Spring %>% 
-#   filter(Bin == 6)
-# 
-# #GRAPH 1
-# PrecipMeanSpringPlot<- ggplot(Precip.Mean.Spring) +
-#   geom_line(aes(x = DOY, y = MeanPRCP, color = Bin)) +
-#   labs(x = "Day of Year", y = "Mean Precipitation (inches)", color = "Latitude Bin") +
-#   scale_color_viridis_d() +
-#   theme(legend.position = "top")
-# print(PrecipMeanSpringPlot)
-# 
-# #GRAPH 2
-# PrecipSpringBin6Plot<- ggplot(Precip.Mean.Bin6 ) +
-#   geom_line(aes(x = DOY, y = PRCP, color = (Year)), 
-#             show.legend = FALSE) +
-#   labs(x = "Day of Year", y = "Precipitation (inches)", color = "Year") +
-#   scale_color_viridis_c() +
-#   theme(legend.position = "top")
-# print(PrecipSpringBin6Plot)
+Precip.Mean.Spring<-newdata%>%
+  group_by(as.factor(Bin),as.factor(DOY))%>%
+mutate(MeanPRCP=mean(PRCP))%>%
+ filter(WEEK < 30)
+
+### Filter for Bin 6            
+ Precip.Mean.Bin6 <- Precip.Mean.Spring %>% 
+   filter(Bin == 6)
+```
+
+
+# GRAPH 1
+```{r, fig.cap= c("Day of Year vs. Mean Precipitation. This figure shows mean precipitation across all nine latitude bins for each day of the year. This graph served to illustrate precipitation variation across sites."), fig.width=6, fig.height=3}
+ PrecipMeanSpringPlot<- ggplot(Precip.Mean.Spring) +
+   geom_line(aes(x = DOY, y = MeanPRCP, color = Bin)) +
+   labs(x = "Day of Year", y = "Mean Precipitation (inches)", color = "Latitude Bin") +
+scale_colour_manual(values = c("#00CED1", "#000000", "#FFFF00", "#FF8C00", "#9400D3", "#191970", "#228B22", "#FF00FF", "#CD5C5C"))+
+
+  theme(legend.position = "top")+
+  gabytheme
+ print(PrecipMeanSpringPlot)
+ 
+```
+ dark turquiose, black, yellow, dark orange, dark violet, midnight blue, forest green, magenta, indian red
+
+# GRAPH 2
+```{r, fig.cap= c("Day of Year vs. Precipitation. This figure shows how precipitation changes with day of year across the period of record for Bin 6."), fig.width=6,fig.height=3}
+ PrecipSpringBin6Plot<- ggplot(Precip.Mean.Bin6) +
+   geom_line(aes(x = DOY, y = PRCP, color = Year)) +
+   labs(x = "Day of Year", y = "Precipitation (inches)", color = "Year") +
+scale_color_viridis_c()+
+  theme(legend.key.width=unit(5, "cm"))+
+  gabytheme
+ print(PrecipSpringBin6Plot)
+```
+
+# Exploratory Mapping 
+
+
+```{r Exploratory Mapping, warning=FALSE, message=FALSE}
+# Convert the Alaska dataset to a spatially enabled "sf" data frame
+AlaskaTempPrecipDischarge_sf<- st_as_sf(AlaskaTempPrecipDischarge,coords = c('LONGITUDE','LATITUDE'),crs=4326)
+
+# Load in US Census Bureau Cartographic Boundary Shapefiles and Filter for Alaska Only
+setwd("~/Desktop/Environmental Data Analytics/Environmental_Data_Analytics/Data/Spatial")
+State_sf<- st_read('cb_2018_us_state_20m.shp') 
+Alaska_sf<-filter(State_sf, NAME == 'Alaska')
+
+# Create summary dataframe with only NOAA site locations
+
+## NOAA site locations
+NOAA_sites <- c("USC00500464", "USC00502107", "USW00025325", "USW00025624",
+                "USW00025704", "USW00026451", "USW00026510", "USW00026615",
+                "USW00027502", "USW00027502")
+NOAA_Lat <- c(58.3814, 64.8603,	55.35, 55.2207,
+              51.88333, 61.169, 62.9574, 60.785,
+              71.2834, 71.2834)
+NOAA_Lon <- c(-134.645, -147.8484, -131.65, -162.7324,
+              -176.65, -150.0278, -155.6103, -161.8293,
+              -156.7815, -156.7815)
+
+## Combine and add bin number by sorting by latitude
+NOAA_site_data <- data.frame(cbind(NOAA_sites, NOAA_Lat, NOAA_Lon)) %>%
+  arrange(NOAA_Lat) %>%
+  mutate(Bin = c(1,2,3,4,5,6,7,8,9, 10),
+         NOAA_Lat = as.numeric(as.character(NOAA_Lat)),
+         NOAA_Lon = as.numeric(as.character(NOAA_Lon)))
+
+NOAA_sf <- st_as_sf(NOAA_site_data, coords = c("NOAA_Lon", "NOAA_Lat"),
+                         crs = 4326)
+
+## Convert all SF Layers to UTM Projection 
+NOAA_sf_utm  <- st_transform(NOAA_sf, c=32609)
+Alaska_sf_utm <-st_transform(Alaska_sf,c=32609)
 
 ```
 
+# Map of NOAA Site Locations in Alaska
+```{r NOAA Site Locations across Alaska}
+ggplot() +
+  geom_sf(data = Alaska_sf_utm, color = "black") +
+  geom_sf(data = NOAA_sf_utm, color = "red")+
+    ggtitle("NOAA Site Locations in Alaska")+
+  gabytheme
+```
+
+
+## Create Alaska Temp Precip Discharge Summary using summarize function
+```{r}
+### Convert Bin Column to a factor
+AlaskaTempPrecipDischarge$Bin<-as.factor(AlaskaTempPrecipDischarge$Bin)
+
+# Create Summary
+AlaskaMeanPrecipDischargeSummary<-AlaskaTempPrecipDischarge%>%
+  group_by(Bin)%>%
+  summarize(Lat_Mean=mean(LATITUDE),
+            Long_Mean=mean(LONGITUDE),
+            Mean_PRCP=mean(PRCP, na.rm=TRUE),
+            Mean_Discharge=mean(Discharge, na.rm=TRUE),
+            Mean_Max_Temp=mean(TMAX, na.rm=TRUE),
+            Mean_Min_Temp=mean(TMIN, na.rm=TRUE))
+            
+
+### Convert AlaskaMeanPrecipDischarge Summary to a spatially enabled SF dataframe
+AlaskaMeanPrecipDischargeSummary_sf<- st_as_sf(AlaskaMeanPrecipDischargeSummary,coords = c('Long_Mean','Lat_Mean'),crs=4326)
+
+### Transform SF Data to UTM Zone 9N Projection for Alaska
+AlaskaMeanPrecipDischargeSummary_utm<- st_transform(AlaskaMeanPrecipDischargeSummary_sf, c=32609)
+```
+
+
+# Precip Map
+```{r, fig.height=4, fig.width=4}
+library(ggspatial)
+AlaskaPrecipMap<-ggplot(axes = FALSE) +
+  geom_sf(data = Alaska_sf_utm, fill="white", color="black") +
+  geom_sf(data = AlaskaMeanPrecipDischargeSummary_utm, aes(color=Mean_PRCP), size=5)  +
+  
+  
+  labs(color="Mean Precipitation (inches)")+
+  theme(legend.key.size=unit(1.5, "cm"))+
+    ggtitle("Mean Precipitation across Alaska by Bin")+
+annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"), style = north_arrow_fancy_orienteering) +
+  scale_color_viridis_c(option="viridis", direction=-1)+
+  annotation_scale(width_hint = 0.5)+
+  gabytheme
+
+ print(AlaskaPrecipMap)
+```
 \newpage
 
 # Analysis
