@@ -267,7 +267,7 @@ mutate(MeanPRCP=mean(PRCP))%>%
 
 
 # GRAPH 1
-```{r, fig.cap= c("Day of Year vs. Mean Precipitation. This figure shows mean precipitation across all nine latitude bins for each day of the year. This graph served to illustrate precipitation variation across sites. Bin 1 has the greatest spread of mean precipitation."), fig.width=12, fig.height=7}
+```{r, fig.cap= c("Day of Year vs. Mean Precipitation. This figure shows mean precipitation across all nine latitude bins for each day of the year up until Day 200. This graph served to illustrate precipitation variation across sites. Bin 1 has the greatest spread of mean precipitation."), fig.width=12, fig.height=7}
  PrecipMeanSpringPlot<- ggplot(Precip.Mean.Spring) +
    geom_line(aes(x = DOY, y = MeanPRCP, color = Bin)) +
    labs(x = "Day of Year", y = "Mean Precipitation (inches)", color = "Latitude Bin") +
@@ -407,7 +407,7 @@ ggplot() +
 
 
 # Mean Precipitation Map
-```{r fig.cap=c("Map of Mean Precipitation across Alaska by Bin"), fig.height=5, fig.width=9}
+```{r fig.cap=c("Map of Mean Precipitation across Alaska by Bin. This map depicts Bin 3 as having the highest mean precipitation across the state, with the lowest mean precipitation falling in northernmost Bin 9."), fig.height=5, fig.width=9}
 AlaskaPrecipMap<-ggplot(axes = FALSE) +
   geom_sf(data = Alaska_sf_utm, fill="white", color="black") +
   geom_sf(data = AlaskaMeanPrecipDischargeSummary_utm, aes(color=Mean_PRCP), size=5)  +
@@ -424,7 +424,7 @@ annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75,
 \newpage
 
 # Mean Discharge Map
-```{r,fig.cap= c("Map of Mean Discharge across Alaska by Bin"), fig.height=5, fig.width=9}
+```{r,fig.cap= c("Map of Mean Discharge across Alaska by Bin. This map depicts Bin 8 as having the highest mean discharge value of 121266.11 cfs. Bin 1 has the lowest mean discharge value of 4.69 cfs."), fig.height=5, fig.width=9}
 gabytheme2 <- theme_bw(base_size = 17) + 
   theme(plot.title=element_text(face="bold", size="26", color="IndianRed3", hjust=0.5),
         axis.title=element_text(size=22, color="black"),
@@ -449,7 +449,7 @@ annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75,
 \newpage
 
 
-```{r fig.cap=c("Map of Mean Maximum Temperature across Alaska by Bin"), fig.height=5, fig.width=9}
+```{r fig.cap=c("Map of Mean Maximum Temperature across Alaska by Bin. This figure depicts Bin 3 as having the highest mean maximum temperature value of 51.97 degrees Fahrenheit."), fig.height=5, fig.width=9}
 AlaskaTemperatureMap<-ggplot(axes = TRUE) +
   geom_sf(data = Alaska_sf_utm, fill="white") +
   geom_sf(data = AlaskaMeanPrecipDischargeSummary_utm, aes(color=Mean_Max_Temp), size=5)  +
@@ -523,6 +523,21 @@ summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 #   column_spec(column = 1, bold = TRUE) %>%  #columns must be specified by number
 #   row_spec(row = 0, color = "#660033") %>%  #row = 0 allows us to format the header
 #   row_spec(row = 5, color = "#104e8b", background = "#d3d3d3") 
+
+```
+
+# Calculate Cumulative Annual Precipitation for each year by Site
+```{r}
+## Create Year and Cumulative Precipitation columns in a new dataframe
+CumAnnualPrecip<- AlaskaTempPrecipDischarge%>% mutate(Year = year(DATE)) %>% group_by(site_no, Year)%>% summarize(CumPrecip=sum(PRCP, na.rm=TRUE))
+
+### Load in NWIS_SiteInfo.csv which has Drainage Areas for each Station
+NWIS_SiteInfo<- read.csv("../DATA/RAW/NWIS_SiteInfo.csv")
+
+# Join NWIS_SiteInfo and CumAnnual Precip by Site Number and multiply cumulative precipitation for each station and year by drainage area to determine water volume for each year and station
+PrecipVolume<-CumAnnualPrecip%>%
+merge(NWIS_SiteInfo, by='site_no')%>% mutate(Water_Volume=CumPrecip*drain_area_va)%>% select(site_no:dec_long_va, drain_area_va, Water_Volume )
+
 
 ```
 
