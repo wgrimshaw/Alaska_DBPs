@@ -78,7 +78,7 @@ Alaska_Temp_Monthly <- Alaska_Data %>%
   summarize(aveTMAX = mean(TMAX, na.rm = T)) %>%
   mutate(Date = as.yearmon(paste(Year, Month), "%Y %m"))
 
-Temp_Change <- rep(0, 9)
+Temp_Change <- rep(NA, 9)
 
 ## Initialize Final Dataframe of monthly data for plotting
 Alaska_Temp_Monthly_Model <- data.frame(Date = numeric(),
@@ -86,35 +86,76 @@ Alaska_Temp_Monthly_Model <- data.frame(Date = numeric(),
                                         Bin = factor())
 
 ## Where for loop will start
-Site_bin <- 7
+#Site_bin <- 7
 
 for(Site_bin in 1:9){
   
   ## Step 1: filter data by site
   Alaska_Temp_Monthly_Site <- Alaska_Temp_Monthly %>%
-    filter(Bin == Site_bin) %>%
-  ## Step 2: Remove incomplete years if first or last year
-    ## interpolate values if missing months internally
-    group_by(Year) %>%
-    add_count(Year) %>%
-    filter(n == 12)
+    filter(Bin == Site_bin)
   
   ## Use only latest data points when there are large gaps in the data record
   ## identified through examination
   ## would like better way to handle smaller gaps in bins 3, 4, 6, 7
   if(Site_bin == 2){
-    Alaska_Temp_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year > 1990)
+    Alaska_Temp_Monthly_Site <- Alaska_Temp_Monthly_Site %>%
+      filter(Year > 1995 &
+               Year < max(Alaska_Temp_Monthly_Site$Year))
   } else if(Site_bin == 3) {
-    Alaska_Temp_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year > 1985)
+    Alaska_Temp_Monthly_Site <- Alaska_Temp_Monthly_Site %>%
+      filter(Year > 1945 &
+               Year < max(Alaska_Temp_Monthly_Site$Year))
   } else if(Site_bin == 4) {
-    Alaska_Temp_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year > 1995)
+    missing_years <- c(1995, 1996)
+    Alaska_Temp_Monthly_Site <- Alaska_Temp_Monthly_Site %>%
+      filter(Year > min(Alaska_Temp_Monthly_Site$Year)
+             & Year < max(Alaska_Temp_Monthly_Site$Year)
+             & Year != 1996)
   } else if(Site_bin == 6) {
-    Alaska_Temp_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year > 1995)
-  #} else if(Site_bin == 7) {
-  #  Alaska_Temp_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year < 2006)
-  } else if(Site_bin == 8) {
-    Alaska_Temp_Monthly_Site <- filter(Alaska_Temp_Monthly_Site, Year < 2018)
-  } 
+    missing_years <- c(1995)
+    Alaska_Temp_Monthly_Site <- Alaska_Temp_Monthly_Site %>%
+      filter(Year > min(Alaska_Temp_Monthly_Site$Year)
+             & Year < max(Alaska_Temp_Monthly_Site$Year)
+             & Year != 1995)
+  } else if(Site_bin == 7) {
+    missing_years <- c(2007)
+    Alaska_Temp_Monthly_Site <- Alaska_Temp_Monthly_Site %>%
+      filter(Year > min(Alaska_Temp_Monthly_Site$Year)
+             & Year < max(Alaska_Temp_Monthly_Site$Year)
+             & Year != 2007)
+  }
+  
+  ## If missing years, fill in annual gaps. if not, skip to interpolating months
+  if(Site_bin %in% c(4,6,7)){
+      ## Calculate Mean for each month
+    Ave_Temp_Site <- Alaska_Temp_Monthly_Site %>%
+      group_by(Month) %>%
+      summarize(aveTMAX_month = mean(aveTMAX, na.rm = T)) %>%
+    ## add columns to match with entire site data
+      transmute(Year = NA, Month = Month, Bin = as.factor(Site_bin),
+                aveTMAX = aveTMAX_month)
+    
+    ## create missing dataframe to fill in annual gaps
+    ## need to make the length of the number of missing years
+    if(Site_bin == 4){
+      Alaska_Temp_Missing <- Ave_Temp_Site %>%
+        bind_rows(Ave_Temp_Site)
+    } else {
+      Alaska_Temp_Missing <- Ave_Temp_Site
+    }
+    Alaska_Temp_Missing <- Alaska_Temp_Missing %>%
+      mutate(Year = rep(missing_years, each = 12),
+             Date = as.yearmon(paste(Year, Month), "%Y %m"))
+        
+    ## fill in gaps and arrange by year and month
+    Alaska_Temp_Monthly_Site <- Alaska_Temp_Monthly_Site %>%
+      bind_rows(Alaska_Temp_Missing) %>%
+      arrange(Year, Month)
+  } else if(Site_bin %in% c(1,5,8,9)) {
+      Alaska_Temp_Monthly_Site <- Alaska_Temp_Monthly_Site %>%
+      filter(Year > min(Alaska_Temp_Monthly_Site$Year)
+             & Year < max(Alaska_Temp_Monthly_Site$Year))
+  }
   
   ## number of data points for interpolation
   n_months = 12 * (max(Alaska_Temp_Monthly_Site$Year) -
@@ -124,11 +165,11 @@ for(Site_bin in 1:9){
     ungroup() %>%
     select(Date, aveTMAX)
   
-  ## Interpolate using neighboring months, will return original data frame if complete
+  ## Interpolate missing months, will return original data frame if complete
   Alaska_Temp_Monthly_Interp <- as.data.frame(approx(Alaska_Temp_Monthly_Interp,
                                                    n = n_months,
                                                    method = "linear")) %>%
-    rename(Date = x, aveTMAX = y)
+    rename(Year = x, aveTMAX = y)
   
   ## create time series object from interpolated temp data
   Alaska_Temp_Monthly_ts <- ts(Alaska_Temp_Monthly_Interp[[2]], frequency = 12)
@@ -162,9 +203,20 @@ write.csv(Sens_Slope_Temp, "./Data/PROCESSED/Temperature_Change.csv",
 
 ```
 
+
+```{r}
+## Interpolate monthly temperatures for internal missing years using monthly averages
+ggplot(Alaska_Temp_Monthly_Site, aes(x = Date, y = aveTMAX)) +
+  geom_line()
+ggplot(Alaska_Temp_Monthly_Interp, aes(x = Year, y = aveTMAX)) +
+  geom_line()
+
+```
+
+
 ```{r}
 ## Final Temp plot, maybe with trend lines
-ggplot(Alaska_Temp_Monthly_Model, aes(x = Date, y = aveTMAX)) +
+ggplot(Alaska_Temp_Monthly_Model, aes(x = Year, y = aveTMAX)) +
   geom_line(alpha = 0.8) +
   geom_smooth(method = lm) +
   facet_wrap(~Bin, nrow = 3, ncol = 3) +
