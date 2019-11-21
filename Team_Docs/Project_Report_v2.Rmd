@@ -11,7 +11,7 @@ author: "Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen"
 fontsize: 12pt
 mainfont: Times New Roman
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 \newpage
@@ -380,31 +380,18 @@ DischargeComplete_utm<- st_transform(DischargeComplete_sf, c=32609)
 
 
 # NOAA Site Locations Map
-```{r, fig.cap= c("Map of NOAA Site Locations in Alaska"), warning=FALSE, message=FALSE}
+```{r, fig.cap= c("Map of NOAA Site Locations in Alaska"), fig.height=5, fig.width=8, warning=FALSE, message=FALSE}
 ggplot() +
   geom_sf(data = Alaska_sf_utm, color = "black") +
   geom_sf(data = NOAA_sf_utm, color = "red")+
-  annotate(geom = "text", x = -2646393.71741443, y = 6892347.12778545, label = "Site 1", 
-    fontface = "bold", color = "black", size = 3)+
-    annotate(geom = "text", x = -1596240.56340557, y = 6651448.13349785, label = "Site 2", 
-    fontface = "bold", color = "black", size = 3)+
-  annotate(geom = "text", x = 331983.335557192, y = 6136937.49851558, label = "Site 3", 
-    fontface = "bold", color = "black", size = 3)+
-    annotate(geom = "text", x = 170124.757452562, y = 6485029.32907615, label = "Site 4", 
-    fontface = "bold", color = "black", size = 3)+
-    annotate(geom = "text", x = -1232606.01673571, y =7190206.5729903, label = "Site 5", 
-    fontface = "bold", color = "black", size = 3)+
-      annotate(geom = "text", x = -617281.853478057, y =6964221.42966571, label = "Site 6", 
-    fontface = "bold", color = "black", size = 3)+
-    annotate(geom = "text", x = -820303.075649912, y =7261018.14280173, label = "Site 7", 
-    fontface = "bold", color = "black", size = 3)+
-     annotate(geom = "text", x = -383013.947088387, y =7326000.84850158, label = "Site 8", 
-    fontface = "bold", color = "black", size = 3)+
-     annotate(geom = "text", x = -463677.067943308, y =8135627.27551388, label = "Site 9", 
-    fontface = "bold", color = "black", size = 3)+
-  gabytheme
+  geom_sf(data = DischargeComplete_utm, color="blue", size=2) +
+gabytheme
 ```
-
+add in all 18 site locations for temp and precip in this map 
+no colors-just red
+discharge 
+use same shape type: orange dots are NOAA sites, blue dots are NWIS discharge 
+export precipitation map and total site locations map 
 
 # Mean Precipitation Map
 ```{r fig.cap=c("Map of Mean Precipitation across Alaska by Bin. This map depicts Bin 3 as having the highest mean precipitation across the state, with the lowest mean precipitation falling in northernmost Bin 9."), fig.height=5, fig.width=9}
@@ -462,13 +449,6 @@ annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75,
  print(AlaskaTemperatureMap)
 ```
 
-# Comparison of Mean Precipitation, Mean Discharge, and Mean Maximum Temperature by Bin 
-```{r, fig.cap= c("Comparison of Mean Precipitation, Mean Discharge, and Mean Maximum Temperature across Alaska by Bin"),fig.height=14, fig.width=20}
-CompleteAlaskaPlotGrid<-plot_grid(AlaskaPrecipMap, AlaskaDischargeMap, AlaskaTemperatureMap,
-            nrow = 3) 
-print(CompleteAlaskaPlotGrid)
-```
-
 
 # Analysis
 
@@ -502,10 +482,7 @@ print(DOY.Time5) #earlier
 
 bin5.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks5)
 summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
-
-
 ```
-
 
 
 ```{r}
