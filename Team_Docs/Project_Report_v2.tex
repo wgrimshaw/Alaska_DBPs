@@ -201,9 +201,6 @@ station selection include data extending to the current date, beginning
 at the earliest date, with at least 80\% data coverage. This dataset
 also includes site location.
 
-\textless{}Describe how your team wrangled your dataset in a format
-similar to a methods section of a journal article.\textgreater{}
-
 \newpage
 
 \hypertarget{data-wrangling}{%
@@ -235,9 +232,53 @@ Glacial Coverage/Melting & Qualitative & Predictor & 1b\tabularnewline
 \end{longtable}
 
 \hypertarget{data-wrangling-methods}{%
-\subsection{Data Wrangling Methods}\label{data-wrangling-methods}}
+\section{Data Wrangling Methods}\label{data-wrangling-methods}}
 
-(Gaby)
+\textless{}Describe how your team wrangled your dataset in a format
+similar to a methods section of a journal article.\textgreater{}
+
+\hypertarget{importing-cleaning-and-addressing-date-issues}{%
+\subsubsection{Importing, Cleaning, and Addressing Date
+Issues}\label{importing-cleaning-and-addressing-date-issues}}
+
+The state of Alaska was divided into 10 bins of equal latitude.
+Precipitation and temperature data for 10 Alaskan NOAA stations-one
+inside each latitude bin-was obtained from NOAA's Climate Data Online
+web portal, and discharge data was retrieved from NWIS's Data Retrieval
+package using one site in each latitude bin with the greatest number of
+samples. All discharge data resided in one CSV entitled NWIS\_Discharge.
+All raw CSVs were imported into our Raw Data folder within our project
+repository on Github, and imported into R using the read.csv function.
+
+Each of the 10 NOAA stations classified by latitude bin had a unique CSV
+that was cleaned prior to joining. Ancillary columns from each of the 10
+dataframes were removed in order to ensure that each CSV had the same
+columns in the same order. In order to address date-time issues in the
+NOAA CSVs for Bin 1 and Bin 5, the as.DATE function was used to change
+the ``DATE'' column fron a factor to a date, in the format
+month/day/year. Next, we changed the format of the ``DATE'' column to a
+two digit year, a two digit month, and the two digit day. A function was
+then written to create early dates that were misrepresented as years
+after 2019. Then, the DATE column was inserted into the function written
+above for each row of the DATE column. Finally, the as.DATE function was
+used to convert the DATE column into a 4 digit year, a two digit month,
+and 2 digit day format, our preferred format.
+
+\hypertarget{joining-data}{%
+\subsubsection{Joining Data}\label{joining-data}}
+
+After all 10 NOAA dataframes containing precipitation and temperature
+data were cleaned, they were all joined by row using the rbind function
+into a new CSV entitiled ``TempPrecip''. Next, the ``site\_no'' column
+in the NWIS\_Discharge dataframe was converted into a factor using the
+as.factor function. The revalue function within the ``plyr'' package was
+then used to create a new ``Bin'' column renaming the USGS Station
+Numbers in the ``site\_no'' column by their bin number. The ``Date''
+column in the Discharge dataframe was renamed to ``DATE'' so that it
+matched the ``DATE'' column in the ``TempPrecip'' dataframe. Finally,
+the merge function was used to join the ``TempPrecip'' and
+``NWIS\_Discharge'' dataframes by ``DATE'' and ``Bin'' into a new CSV
+entitled ``AlaskaTempPrecipDischarge'', and cleaned for clarity.
 
 \hypertarget{exploratory-analysis}{%
 \section{Exploratory Analysis}\label{exploratory-analysis}}
@@ -417,7 +458,7 @@ figure should be referenced within the text\textgreater{}
 \begin{figure}
 \centering
 \includegraphics{Project_Report_v2_files/figure-latex/unnamed-chunk-9-1.pdf}
-\caption{Year vs.~Day of Year of Peak Discharge. This is the only
+\caption{Year vs.~Day of Year of Peak Discharge. Bin 5 is the only
 Latitude Bin with a significant change in the day of year of peak
 discharge (p = 0.02353). There is a decreasing trend in the data,
 indicating the day of peak snowmelt is happening sooner across

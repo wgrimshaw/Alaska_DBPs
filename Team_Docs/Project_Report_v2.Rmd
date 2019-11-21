@@ -37,7 +37,6 @@ library(maps)
 library(dataRetrieval)
 library(viridis)
 library(ggplot2)
-library(wesanderson)
 library(sf)
 library(ggspatial)
 library(cowplot)
@@ -88,7 +87,6 @@ Discharge data were collected from NWIS using the Data Retrieval package. The st
 
 Temperature and precipitation data were downloaded from the National Oceanic and Atmospheric Administration (NOAA) Climate Data Online web portal. As discharge stations do not collect data on temperature and precipitation, the climate data for each latitude bin were downloaded from a station in the same county as each selected discharge station. In each county, daily precipitation, maximum temperature, and minimum temperature, data were downloaded from one station. The criteria for station selection include data extending to the current date, beginning at the earliest date, with at least 80% data coverage. This dataset also includes site location.
 
-<Describe how your team wrangled your dataset in a format similar to a methods section of a journal article.>
 
 \newpage
 
@@ -108,9 +106,17 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 | Permafrost Melt | Qualitative | Predictor | 1b | 
 | Glacial Coverage/Melting | Qualitative | Predictor | 1b |
 
-## Data Wrangling Methods
-(Gaby)
+# Data Wrangling Methods
+<Describe how your team wrangled your dataset in a format similar to a methods section of a journal article.>
 
+### Importing, Cleaning, and Addressing Date Issues
+
+The state of Alaska was divided into 10 bins of equal latitude. Precipitation and temperature data for 10 Alaskan NOAA stations-one inside each latitude bin-was obtained from NOAA's Climate Data Online web portal, and discharge data was retrieved from NWIS's Data Retrieval package using one site in each latitude bin with the greatest number of samples. All discharge data resided in one CSV entitled NWIS_Discharge. All raw CSVs were imported into our Raw Data folder within our project repository on Github, and imported into R using the read.csv function. 
+
+Each of the 10 NOAA stations classified by latitude bin had a unique CSV that was cleaned prior to joining. Ancillary columns from each of the 10 dataframes were removed in order to ensure that each CSV had the same columns in the same order. In order to address date-time issues in the NOAA CSVs for Bin 1 and Bin 5, the as.DATE function was used to change the "DATE" column fron a factor to a date, in the format month/day/year. Next, we changed the format of the "DATE" column to a two digit year, a two digit month, and the two digit day. A function was then written to create early dates that had been misrepresented as years after 2019. Then, the DATE column was inserted into the function written above for each row of the DATE column. Finally, the as.DATE function was used to convert the DATE column into a 4 digit year, a two digit month, and 2 digit day format, our preferred format. 
+
+### Joining Data
+After all 10 NOAA dataframes containing precipitation and temperature data were cleaned, they were all joined by row using the rbind function into a new CSV entitiled "TempPrecip". Next, the "site_no" column in the NWIS_Discharge dataframe was converted into a factor using the as.factor function. The revalue function within the "plyr" package was then used to create a new "Bin" column renaming the USGS Station Numbers in the "site_no" column by their bin number. The "Date" column in the Discharge dataframe was renamed to "DATE" so that it matched the "DATE" column in the "TempPrecip" dataframe. Finally, the merge function was used to join the "TempPrecip" and "NWIS_Discharge" dataframes by "DATE" and "Bin" into a new CSV entitled "AlaskaTempPrecipDischarge", and cleaned for clarity. 
 
 # Exploratory Analysis 
 
@@ -261,7 +267,7 @@ mutate(MeanPRCP=mean(PRCP))%>%
 
 
 # GRAPH 1
-```{r, fig.cap= c("Day of Year vs. Mean Precipitation. This figure shows mean precipitation across all nine latitude bins for each day of the year. This graph served to illustrate precipitation variation across sites. Bin 1 has the greatest spread of mean precipitation."), fig.width=12, fig.height=5}
+```{r, fig.cap= c("Day of Year vs. Mean Precipitation. This figure shows mean precipitation across all nine latitude bins for each day of the year. This graph served to illustrate precipitation variation across sites. Bin 1 has the greatest spread of mean precipitation."), fig.width=12, fig.height=7}
  PrecipMeanSpringPlot<- ggplot(Precip.Mean.Spring) +
    geom_line(aes(x = DOY, y = MeanPRCP, color = Bin)) +
    labs(x = "Day of Year", y = "Mean Precipitation (inches)", color = "Latitude Bin") +
@@ -378,6 +384,24 @@ DischargeComplete_utm<- st_transform(DischargeComplete_sf, c=32609)
 ggplot() +
   geom_sf(data = Alaska_sf_utm, color = "black") +
   geom_sf(data = NOAA_sf_utm, color = "red")+
+  annotate(geom = "text", x = -2646393.71741443, y = 6892347.12778545, label = "Site 1", 
+    fontface = "bold", color = "black", size = 3)+
+    annotate(geom = "text", x = -1596240.56340557, y = 6651448.13349785, label = "Site 2", 
+    fontface = "bold", color = "black", size = 3)+
+  annotate(geom = "text", x = 331983.335557192, y = 6136937.49851558, label = "Site 3", 
+    fontface = "bold", color = "black", size = 3)+
+    annotate(geom = "text", x = 170124.757452562, y = 6485029.32907615, label = "Site 4", 
+    fontface = "bold", color = "black", size = 3)+
+    annotate(geom = "text", x = -1232606.01673571, y =7190206.5729903, label = "Site 5", 
+    fontface = "bold", color = "black", size = 3)+
+      annotate(geom = "text", x = -617281.853478057, y =6964221.42966571, label = "Site 6", 
+    fontface = "bold", color = "black", size = 3)+
+    annotate(geom = "text", x = -820303.075649912, y =7261018.14280173, label = "Site 7", 
+    fontface = "bold", color = "black", size = 3)+
+     annotate(geom = "text", x = -383013.947088387, y =7326000.84850158, label = "Site 8", 
+    fontface = "bold", color = "black", size = 3)+
+     annotate(geom = "text", x = -463677.067943308, y =8135627.27551388, label = "Site 9", 
+    fontface = "bold", color = "black", size = 3)+
   gabytheme
 ```
 
@@ -439,7 +463,7 @@ annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75,
 ```
 
 # Comparison of Mean Precipitation, Mean Discharge, and Mean Maximum Temperature by Bin 
-```{r, fig.cap= c("Comparison of Mean Precipitation, Mean Discharge, and Mean Maximum Temperature across Alaska by Bin"),fig.height=10, fig.width=20}
+```{r, fig.cap= c("Comparison of Mean Precipitation, Mean Discharge, and Mean Maximum Temperature across Alaska by Bin"),fig.height=14, fig.width=20}
 CompleteAlaskaPlotGrid<-plot_grid(AlaskaPrecipMap, AlaskaDischargeMap, AlaskaTemperatureMap,
             nrow = 3) 
 print(CompleteAlaskaPlotGrid)
@@ -452,7 +476,7 @@ print(CompleteAlaskaPlotGrid)
 
 <Each figure should be accompanied by a caption, and each figure should be referenced within the text>
 
-```{r, fig.cap = "Year vs. Day of Year of Peak Discharge. This is the only Latitude Bin with a significant change in the day of year of peak discharge (p = 0.02353). There is a decreasing trend in the data, indicating the day of peak snowmelt is happening sooner across 1952-2018."}
+```{r, fig.cap = "Year vs. Day of Year of Peak Discharge. Bin 5 is the only Latitude Bin with a significant change in the day of year of peak discharge (p = 0.02353). There is a decreasing trend in the data, indicating the day of peak snowmelt is happening sooner across 1952-2018."}
 
 Snowmelt.Discharge.Bin5 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
   filter(Bin == 5)
