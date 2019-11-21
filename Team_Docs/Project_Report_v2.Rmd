@@ -38,9 +38,9 @@ library(dataRetrieval)
 library(viridis)
 library(ggplot2)
 library(sf)
-library(ggspatial)
+#library(ggspatial)
 library(cowplot)
-#library(kableExtra)
+library(kableExtra)
 
 
 # Set your ggplot theme
@@ -485,24 +485,6 @@ summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 ```
 
 
-```{r}
-
-# Snowmelt_BinSummary <- 
-#   read.csv("../DATA/PROCESSED/Snowmelt_BinSummary.csv")
-# 
-# kable(Snowmelt_BinSummary, format = "latex", 
-#       row.names = FALSE, 
-#       #col.names = c("Latitude Bin", "Change in Day of Year"),
-#       align = "c") %>%
-#   kable_styling(bootstrap_options = c("striped", "condensed"),
-#                 full_width = FALSE,
-#                 font_size = 15) %>%
-#   column_spec(column = 1, bold = TRUE) %>%  #columns must be specified by number
-#   row_spec(row = 0, color = "#660033") %>%  #row = 0 allows us to format the header
-#   row_spec(row = 5, color = "#104e8b", background = "#d3d3d3") 
-
-```
-
 # Calculate Cumulative Annual Precipitation for each year by Site
 ```{r}
 ## Create Year and Cumulative Precipitation columns in a new dataframe
@@ -515,6 +497,30 @@ NWIS_SiteInfo<- read.csv("../DATA/RAW/NWIS_SiteInfo.csv")
 PrecipVolume<-CumAnnualPrecip%>%
 merge(NWIS_SiteInfo, by='site_no')%>% mutate(Water_Volume=CumPrecip*drain_area_va)%>% select(site_no:dec_long_va, drain_area_va, Water_Volume )
 
+
+```
+
+
+
+
+```{r, summary table}
+
+ Output_Summary <- 
+   read.csv("../DATA/PROCESSED/Output_Summary.csv")
+ 
+
+kable(Output_Summary, format = "html", 
+       row.names = FALSE, 
+       col.names = c("Latitude Bin", "Temperature Change, °F/yr", 
+                     "Discharge Change, cfs/yr", "Change in Day of Year, days/yr"),
+       align = "c",
+       digits=2) %>%
+   kable_styling(bootstrap_options = c("striped", "condensed"),
+                 full_width = TRUE,
+                 font_size = 15) %>%
+   column_spec(column = 1, bold = TRUE) %>%  #columns must be specified by number
+   row_spec(row = 0, color = "#660033") %>%  #row = 0 allows us to format the header
+   row_spec(row = 5, bold = TRUE, color = "#104e8b", background = "#d3d3d3") 
 
 ```
 
