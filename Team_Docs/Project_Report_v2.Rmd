@@ -38,9 +38,9 @@ library(dataRetrieval)
 library(viridis)
 library(ggplot2)
 library(sf)
-library(ggspatial)
+#library(ggspatial)
 library(cowplot)
-#library(kableExtra)
+library(kableExtra)
 
 
 # Set your ggplot theme
@@ -485,6 +485,7 @@ summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 ```
 
 
+<<<<<<< HEAD
 ```{r}
 
 # Snowmelt_BinSummary <- 
@@ -504,6 +505,9 @@ summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 ```
 
 # Calculate Cumulative Annual Precipitation and Discharge Water Volume for each year by Site
+=======
+# Calculate Cumulative Annual Precipitation for each year by Site
+>>>>>>> dfb6c8aa743b1264eb599038a4061410c50c7f69
 ```{r}
 ## Calculate Cumulative Annual Precipitation for each year by Site and Create Dataframe
 CumAnnualPrecip<- AlaskaTempPrecipDischarge%>%
@@ -556,6 +560,36 @@ summary(PrecipDischargeLM)
 
 
 
+
+
+
+
+```{r, summary table}
+## read in output files
+Discharge_output <- read.csv("./DATA/PROCESSED/Discharge_Change.csv")
+Snowmelt_output <- read.csv("./DATA/PROCESSED/Snowmelt_BinSummary.csv")
+Temp_output <- read.csv("./DATA/PROCESSED/Temperature_Change.csv")
+
+## join by bin
+Output_Summary <- Temp_output %>%
+  left_join(Discharge_output, by = "Bin") %>%
+  left_join(Snowmelt_output, by = "Bin") %>%
+  rename(Discharge_Change = Slope)
+
+kable(Output_Summary, format = "html", 
+       row.names = FALSE, 
+       col.names = c("Latitude Bin", "Temperature Change, °F/yr", 
+                     "Discharge Change, cfs/yr", "Change in Day of Year, days/yr"),
+       align = "c",
+       digits=2) %>%
+   kable_styling(bootstrap_options = c("striped", "condensed"),
+                 full_width = TRUE,
+                 font_size = 15) %>%
+   column_spec(column = 1, bold = TRUE) %>%  #columns must be specified by number
+   row_spec(row = 0, color = "#660033") %>%  #row = 0 allows us to format the header
+   row_spec(row = 5, bold = TRUE, color = "#104e8b", background = "#d3d3d3") 
+
+```
 
 
 ## Question 1: <insert specific question here and add additional subsections for additional questions below>
