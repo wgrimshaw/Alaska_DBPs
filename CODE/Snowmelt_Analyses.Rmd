@@ -16,6 +16,7 @@ library(lubridate)
 library(pracma)
 library(tseries)
 library(cowplot)
+library(gghighlight)
 
 ```
 
@@ -132,7 +133,7 @@ ggplot(Snowmelt.Discharge.Peaks1, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time1) #later (but very few data points)
 
-bin1.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks1)
+bin1.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks1)
 summary(bin1.lm)
 
 ```
@@ -159,7 +160,7 @@ ggplot(Snowmelt.Discharge.Peaks2, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time2) #literally the same?????
 
-bin2.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks2)
+bin2.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks2)
 summary(bin2.lm)
 
 ```
@@ -186,7 +187,7 @@ ggplot(Snowmelt.Discharge.Peaks3, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time3) #earlier (barely)
 
-bin3.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks3)
+bin3.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks3)
 summary(bin3.lm)
 
 ```
@@ -213,7 +214,7 @@ ggplot(Snowmelt.Discharge.Peaks4, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time4) #later (barely)
 
-bin4.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks4)
+bin4.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks4)
 summary(bin4.lm)
 
 ```
@@ -240,7 +241,7 @@ ggplot(Snowmelt.Discharge.Peaks5, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time5) #earlier
 
-bin5.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks5)
+bin5.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks5)
 summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 
 ```
@@ -269,7 +270,7 @@ ggplot(Snowmelt.Discharge.Peaks6, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time6) #earlier
 
-bin6.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks6)
+bin6.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks6)
 summary(bin6.lm) 
 
 #Test for if variance has changed over time?
@@ -297,7 +298,7 @@ ggplot(Snowmelt.Discharge.Peaks7, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time7) #later
 
-bin7.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks7)
+bin7.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks7)
 summary(bin7.lm)
 
 ```
@@ -323,7 +324,7 @@ ggplot(Snowmelt.Discharge.Peaks8, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time8) #earlier
 
-bin8.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks8)
+bin8.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks8)
 summary(bin8.lm)
 
 ```
@@ -349,7 +350,7 @@ ggplot(Snowmelt.Discharge.Peaks9, aes(x = YEAR, y = DOY)) +
        axis.title.x = element_blank())
 print(DOY.Time9) #earlier
 
-bin9.lm <- lm(YEAR ~ DOY, data = Snowmelt.Discharge.Peaks9)
+bin9.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks9)
 summary(bin9.lm)
 
 ```
@@ -366,8 +367,130 @@ plot_grid(DOY.Time1, DOY.Time2, DOY.Time3, DOY.Time4, DOY.Time5, DOY.Time6, DOY.
 ```{r Bin summary}
 
 Snowmelt_BinSummary <- data.frame(Bin = c("1", "2", "3", "4", "5", "6", "7", "8", "9"),
-                Change.DOY = c(NA, NA, NA, NA, -0.4504, NA, NA, NA, NA))
+                Change.DOY = c(NA, NA, NA, NA, -0.16969, NA, NA, NA, NA))
 
 #write.csv(Snowmelt_BinSummary, "./DATA/PROCESSED/Snowmelt_BinSummary.csv", row.names = FALSE)
 
 ```
+
+
+```{r, Graphs for presentation}
+
+#Exploratory 1
+dis.doy.mean <- ggplot(Snowmelt.Discharge.Mean) +
+  geom_line(aes(x = DOY, y = Dis.Mean, color = as.factor(Bin))) +
+  labs(x = "Day of Year", 
+       y = "Mean Discharge, cfs", 
+       color = "Latitude Bin",
+       title = "Day of Year vs Mean Discharge") +
+#       caption = "This figure shows mean discharge across all #nine latitude bins for each day of the year. This graph served \n #to illustrate variation across sites as to when first day of #snowmelt and peak snowmelt would occur.") +
+  scale_color_viridis_d() +
+  theme(legend.position = "right",
+        plot.title = element_text(hjust = 0.5, margin =
+          margin(t = 0, r = 0, b = 10, l = 0)),
+        text = element_text(size=14),
+        axis.title.y = element_text(margin = 
+          margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = 
+          margin(t = 10, r = 0, b = 0, l = 0))) +
+  scale_y_continuous(limits = c(0,400000), labels = comma)
+#        plot.caption = element_text(hjust = 0.5)) 
+  
+print(dis.doy.mean)
+
+#Exploratory 4 - 1 zoomed
+dis.doy.mean0 <- ggplot(Snowmelt.Discharge.Mean) +
+  geom_line(aes(x = DOY, y = Dis.Mean, color = as.factor(Bin))) +
+  labs(x = "Day of Year", 
+       y = "Mean Discharge, cfs", 
+       color = "Latitude Bin",
+       title = "Day of Year vs Mean Discharge") +
+#       caption = "This figure shows mean discharge across all #nine latitude bins for each day of the year. This graph served \n #to illustrate variation across sites as to when first day of #snowmelt and peak snowmelt would occur.") +
+  scale_color_viridis_d() +
+  theme(legend.position = "right",
+        plot.title = element_text(hjust = 0.5, margin =
+          margin(t = 0, r = 0, b = 10, l = 0)),
+        text = element_text(size=14),
+        axis.title.y = element_text(margin = 
+          margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = 
+          margin(t = 10, r = 0, b = 0, l = 0))) +
+  scale_y_continuous(limits = c(0,7500), labels = comma)
+#        plot.caption = element_text(hjust = 0.5)) 
+  
+print(dis.doy.mean0)
+
+
+#Exploratory 2
+dis.doy.6 <- ggplot(Snowmelt.Discharge.Bin6) +
+  geom_line(aes(x = DOY, y = Discharge, color = YEAR)) +
+  labs(x = "Day of Year", 
+       y = "Discharge, cfs", 
+       color = "Year",
+       title = "Bin 6: Day of Year vs Discharge") +
+  scale_color_viridis_c() +
+  theme(legend.position = "right",
+        plot.title = element_text(hjust = 0.5, margin =
+          margin(t = 0, r = 0, b = 10, l = 0)),
+        text = element_text(size=14),
+        axis.title.y = element_text(margin = 
+          margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = 
+          margin(t = 10, r = 0, b = 0, l = 0))) +
+  scale_y_continuous(limits = c(0,400000), labels = comma)
+print(dis.doy.6)
+
+#Exploratory 3
+dis.doy.6.10 <- ggplot(Snowmelt.Discharge.Bin6.10Year) +
+  geom_line(aes(x = DOY, y = Discharge, color = as.factor((YEAR)))) +
+  labs(x = "Day of Year", 
+       y = "Discharge, cfs", 
+       color = "Year",
+       title = "Bin 6: Day of Year vs Discharge") +
+  scale_color_viridis_d() +
+  theme(legend.position = "right",
+        plot.title = element_text(hjust = 0.5, margin =
+          margin(t = 0, r = 0, b = 10, l = 0)),
+        text = element_text(size=14),
+        axis.title.y = element_text(margin = 
+          margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = 
+          margin(t = 10, r = 0, b = 0, l = 0))) +
+  guides(color = guide_legend(reverse=TRUE)) +
+  scale_y_continuous(limits = c(0,400000), labels = comma)
+print(dis.doy.6.10)
+
+##Exploratory 4
+#dis.doy.6.10 <- ggplot(Snowmelt.Discharge.Bin6) +
+#  geom_line(aes(x = DOY, y = Discharge, color = #as.factor(YEAR))) +
+#  labs(x = "Day of Year", 
+#       y = "Discharge, cfs", 
+#       color = "Year",
+#       title = "Day of Year vs Discharge") +
+#  scale_color_viridis_d(option = "magma", end = 0.8) +
+#  gghighlight(YEAR == c(1960, 1975, 1990, 2005, 2019)) +
+#  theme(legend.position = "right",
+#        plot.title = element_text(hjust = 0.5),
+#        text = element_text(size=14)) +
+#  guides(color = guide_legend(reverse=TRUE))
+#print(dis.doy.6.10)
+
+#Bin 5 Analysis
+DOY.Time5 <-
+ggplot(Snowmelt.Discharge.Peaks5, aes(x = YEAR, y = DOY)) +
+  geom_point() +
+ geom_smooth(method = lm, se = FALSE, color = "#c13d75ff") +
+  labs(x = "", 
+       y = "Day of Year",
+       title = "Bin 5: Change in Day of Year of Peak Discharge") +
+ theme(plot.title = element_text(hjust = 0.5, margin =
+          margin(t = 0, r = 0, b = 10, l = 0)),
+        text = element_text(size=14),
+        axis.title.y = element_text(margin = 
+          margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_blank()) 
+
+print(DOY.Time5) #earlier
+
+```
+
