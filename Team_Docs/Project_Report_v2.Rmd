@@ -10,7 +10,8 @@ subtitle: "https://github.com/wgrimshaw/Alaska_DBPs.git"
 author: "Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen"
 fontsize: 12pt
 mainfont: Times New Roman
-
+editor_options: 
+  chunk_output_type: console
 ---
 
 \newpage
@@ -134,16 +135,16 @@ dis.doy.mean <- ggplot(Snowmelt.Discharge.Mean) +
   geom_line(aes(x = DOY, y = Dis.Mean, color = as.factor(Bin))) +
   labs(x = "Day of Year", y = "Mean Discharge", color = "Latitude Bin") +
   scale_color_viridis_d() +
-  theme(legend.position = "top")
+  theme(legend.position = "top") +
+  labs(x = "Day of Year", y = "Mean Discharge, cfs")
 print(dis.doy.mean)
 
 #GRAPH 2
 dis.doy.6 <- ggplot(Snowmelt.Discharge.Bin6) +
-  geom_line(aes(x = DOY, y = Discharge, color = (YEAR)), 
-            show.legend = FALSE) +
+  geom_line(aes(x = DOY, y = Discharge, color = YEAR)) +
   labs(x = "Day of Year", y = "Discharge, cfs", color = "Year") +
   scale_color_viridis_c() +
-  theme(legend.position = "top")
+  theme(legend.position = "right")
 print(dis.doy.6)
 
 #GRAPH 3 - Latitude Bin 6 - discrete years - every 10
@@ -154,7 +155,8 @@ dis.doy.6.10 <- ggplot(Snowmelt.Discharge.Bin6.10Year) +
   geom_line(aes(x = DOY, y = Discharge, color = as.factor((YEAR)))) +
   labs(x = "Day of Year", y = "Discharge, cfs", color = "Year") +
   scale_color_viridis_d() +
-  theme(legend.position = "top")
+  theme(legend.position = "right") +
+  guides(color = guide_legend(reverse=TRUE))
 print(dis.doy.6.10)
 
 ```
