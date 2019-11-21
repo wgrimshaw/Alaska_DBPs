@@ -237,7 +237,7 @@ for (i in 1:9){
 
 # write csv file
 Discharge_Change <- Discharge_Trend[c(1,2)]
-write.csv(Discharge_Change, "./Data/PROCESSED/Discharge_Change_new.csv",
+write.csv(Discharge_Change, "./DATA/PROCESSED/Discharge_Change_new.csv",
           row.names = F)
 
 ```
