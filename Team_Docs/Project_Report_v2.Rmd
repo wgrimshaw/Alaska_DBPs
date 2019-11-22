@@ -553,7 +553,11 @@ Discharge_output <- Discharge_output %>% mutate(Slope = Slope * 100)
 Output_Summary <- Temp_output %>%
   left_join(Discharge_output, by = "Bin") %>%
   left_join(Snowmelt_output, by = "Bin") %>%
-  rename(Discharge_Change = Slope)
+  rename(Discharge_Change = Slope) 
+  
+Output_Summary <- round(Output_Summary, digits = 2)
+Output_Summary[is.na(Output_Summary)] <- "No change"
+
 
 kable(Output_Summary, format = "html", 
        row.names = FALSE, 
