@@ -543,20 +543,26 @@ summary(PrecipDischargeLM)
 
 ```{r, summary table}
 ## read in output files
-Discharge_output <- read.csv("../DATA/PROCESSED/Discharge_Change.csv")
-Snowmelt_output <- read.csv("../DATA/PROCESSED/Snowmelt_BinSummary.csv")
-Temp_output <- read.csv("../DATA/PROCESSED/Temperature_Change.csv")
+Discharge_output <- read.csv("./DATA/PROCESSED/Discharge_Change_new.csv")
+Snowmelt_output <- read.csv("./DATA/PROCESSED/Snowmelt_BinSummary.csv")
+Temp_output <- read.csv("./DATA/PROCESSED/Temperature_Change.csv")
+
+Discharge_output <- Discharge_output %>% mutate(Slope = Slope * 100)
 
 ## join by bin
 Output_Summary <- Temp_output %>%
   left_join(Discharge_output, by = "Bin") %>%
   left_join(Snowmelt_output, by = "Bin") %>%
-  rename(Discharge_Change = Slope)
+  rename(Discharge_Change = Slope) 
+  
+Output_Summary <- round(Output_Summary, digits = 2)
+Output_Summary[is.na(Output_Summary)] <- "No change"
+
 
 kable(Output_Summary, format = "html", 
        row.names = FALSE, 
        col.names = c("Latitude Bin", "Temperature Change, °F/yr", 
-                     "Discharge Change, cfs/yr", "Change in Day of Year, days/yr"),
+                     "Annual Percent Change in Discharge", "Change in Day of Year, days/yr"),
        align = "c",
        digits=2) %>%
    kable_styling(bootstrap_options = c("striped", "condensed"),
