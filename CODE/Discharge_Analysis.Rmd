@@ -254,15 +254,17 @@ ggplot(Discharge_Change, aes(x = Bin, y = Slope )) +
 
 ```{r}
 # plot bin 8 discharge
-AlaskaDischarge_9 <- AlaskaDischarge%>%
-  filter(Bin == 9)
+AlaskaDischarge_2 <- AlaskaDischarge%>%
+  mutate(Year = year(DATE))%>%
+  filter(Bin == 2 & Year >=1996)
+  
 
-ggplot(AlaskaDischarge_9, aes(x = DATE, y = Discharge))+
+ggplot(AlaskaDischarge_2, aes(x = DATE, y = Discharge))+
   geom_point()+
   geom_smooth(method = lm, se = FALSE)+
   labs(x = "Date", y = expression("Discharge (ft"^3*"/s)"))
 
-lm 
+ 
 summary(AlaskaDischarge_5) 
 ```
 
