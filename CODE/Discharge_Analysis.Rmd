@@ -25,7 +25,7 @@ theme_set(theme_bw())
 ```{r,echo = FALSE}
 # import data
 AlaskaTempPrecipDischarge <- read_csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
-# transform bin into factor
+# transform bin and Date into factor
 AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
 
 AlaskaTempPrecipDischarge$DATE <- as.Date(AlaskaTempPrecipDischarge$DATE,
@@ -48,7 +48,8 @@ print(discharge_plot)
 
 
 ```{r}
-## choose the optimal range of dataset of each bin. For missing monthly data, using mean value of that month data to fill the gap. Make sure the number of month is the same for each year in each bin.
+## choose the optimal range of dataset of each bin. For missing monthly data, using mean value of that month over different years to fill the gap. Make sure the number of month is the same for each year in each bin.
+
 #Bin 1
 AlaskaDischarge_1.Monthly <- AlaskaDischarge %>%
   filter(Bin ==1)%>%
@@ -57,7 +58,6 @@ AlaskaDischarge_1.Monthly <- AlaskaDischarge %>%
   summarise(Discharge = mean(Discharge))%>%
   filter(Year>=1968 & Year <= 1973)
 
- 
 #Bin 2
 AlaskaDischarge_2.Monthly <- AlaskaDischarge %>%
   filter(Bin == 2)%>%
@@ -65,7 +65,6 @@ AlaskaDischarge_2.Monthly <- AlaskaDischarge %>%
   group_by(Year, Month)%>%
   summarise(Discharge = mean(Discharge))%>%
   filter(Year >= 1996 & Year <= 2018)
-
 
 #Bin 3
 AlaskaDischarge_3.Monthly <- AlaskaDischarge %>%
@@ -75,7 +74,6 @@ AlaskaDischarge_3.Monthly <- AlaskaDischarge %>%
   summarise(Discharge = mean(Discharge))%>%
   filter(Year >=1989 & Year <= 2018)
   
-
 #Bin 4
 AlaskaDischarge_4_ori.Monthly <- AlaskaDischarge %>%
   filter(Bin == 4 )%>%
@@ -84,6 +82,7 @@ AlaskaDischarge_4_ori.Monthly <- AlaskaDischarge %>%
   summarise(Discharge = mean(Discharge))%>%
   filter(Year >=1966 & Year <= 2018)
 
+# find the mean discharge value of each month over time 
 AlaskaDischarge_4_mean <- AlaskaDischarge_4_ori.Monthly%>%
   group_by(Month)%>%
   summarise(Discharge = mean(Discharge))
@@ -94,8 +93,10 @@ AlaskaDischarge_4_1996 <- data.frame(Year = 1996, Month =c(1,2,3,4,5,6,7,8,9) , 
 
 AlaskaDischarge_4_add <- rbind(AlaskaDischarge_4_1994, AlaskaDischarge_4_1995, AlaskaDischarge_4_1996)
 
+# combine original data with added data
 AlaskaDischarge_4.Monthly <-rbind(data.frame(AlaskaDischarge_4_ori.Monthly), data.frame(AlaskaDischarge_4_add))
 
+# arrange new added data in Year and Month range
 AlaskaDischarge_4.Monthly <- arrange(AlaskaDischarge_4.Monthly, Year, Month)
   
 # Bin 5 
@@ -199,7 +200,7 @@ AlaskaDischarge_9_ts.Monthly <- ts(AlaskaDischarge_9.Monthly[[3]], frequency = 1
 ```
 
 ```{r}
-# run smk.test
+# run smk.test of 9 bins
 AlaskaDischarge_1_trend <-smk.test(AlaskaDischarge_1_ts.Monthly) 
 AlaskaDischarge_2_trend <-smk.test(AlaskaDischarge_2_ts.Monthly) 
 AlaskaDischarge_3_trend <-smk.test(AlaskaDischarge_3_ts.Monthly) 
@@ -212,7 +213,7 @@ AlaskaDischarge_9_trend <-smk.test(AlaskaDischarge_9_ts.Monthly)
 ```
 
 ```{r}
-# run sea.sens.slope
+# find sea.sens.slope of each bin
 slope_1 <- sea.sens.slope(AlaskaDischarge_1_ts.Monthly)
 slope_2 <- sea.sens.slope(AlaskaDischarge_2_ts.Monthly)
 slope_3 <- sea.sens.slope(AlaskaDischarge_3_ts.Monthly)
@@ -225,9 +226,10 @@ slope_9 <- sea.sens.slope(AlaskaDischarge_9_ts.Monthly)
 ```
 
 ```{r}
-## create the dataframe of bin and sens.slope
+## create the dataframe of bin and correlated sens.slope
 Discharge_Trend <- data.frame(Bin = c(1,2,3,4,5,6,7,8,9),Slope = c(slope_1,slope_2,slope_3,slope_4,slope_5,slope_6,slope_7,slope_8,slope_9), Trend = c(AlaskaDischarge_1_trend$p.value, AlaskaDischarge_2_trend$p.value,AlaskaDischarge_3_trend$p.value,AlaskaDischarge_4_trend$p.value,AlaskaDischarge_5_trend$p.value,AlaskaDischarge_6_trend$p.value, AlaskaDischarge_7_trend$p.value, AlaskaDischarge_8_trend$p.value, AlaskaDischarge_9_trend$p.value))
 
+# if the p.value < 0.05, keep the original sens.slope, otherwise replace it with NA
 for (i in 1:9){
   if (Discharge_Trend$Trend[i] > 0.05){
     Discharge_Trend$Slope[i] <- NA
