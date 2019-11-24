@@ -73,6 +73,13 @@ This guiding question encompasses other questions we seek to answer through stat
 
 Another aspect of climate change's impacts on streamflow is the potential of melting permafrost or glaciers. This analysis uses cumulative annual streamflow and cumulative annual precipitation to determine if interannual snowpack is melting with increasing average temperatures. If so, we expect the difference between annual precipitation and annual streamflow to increase over time.
 
+1) Streams at varying latitudes will have different responses to changing climate with a monotonic trend related to latitude.
+
+2) If streams are in areas that experience greater mean air temperature increases, then they will have greater discharge.
+
+3) If temperature increases over time, the day of year of first snowmelt will occur earlier.
+
+
 \newpage
 
 # Dataset Information
