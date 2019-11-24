@@ -1,9 +1,30 @@
-Alaska Discharge Datasets
+# Alaska USGS NWIS Discharge Datasets
 
-Summary
-This dataset was prepared for discharge analysis of Alaska climate change project in Hydrologic Data Analysis course at Duke University, Fall 2019.
+## Summary
 
-Dataset Information
-Data were collected from NWIS using the Data Retrieval package
+Discharge data were collected from USGS NWIS using the Data Retrieval package in R. This dataset includes agency, site number, sample date, discharge value, and discharge code. The state of Alaska was then divided into 9 bins of equal latitude, and daily discharge data was downloaded for the site in each latitude bin with the longest period of records. Then Using readNWISsite to find specific site information for 9 selected sites to search for temperature and precipitation data. 
 
-Discharge data were collected from NWIS using the Data Retrieval package. The state of Alaska was divided into 10 bins of equal latitude, and daily discharge data was downloaded for the site in each latitude bin with the greatest number of samples. This dataset includes the site location, daily discharge, and county of the site, among other variables not used in the analysis.
+## Dataset Information
+
+Data were collected from NWIS using the Data Retrieval package in R.
+
+The discharge dataset contains:
+* Agency
+* Site number
+* Sample date
+* Dischagre value
+* Discharge code
+
+The site information dateset contains:
+* Agency
+* Site number
+* Station name
+* Site latitude
+* Site longitude
+* District code
+* State code
+* County code
+* Huc code
+
+
+
