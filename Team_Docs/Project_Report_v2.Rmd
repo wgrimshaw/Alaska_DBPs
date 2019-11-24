@@ -38,9 +38,9 @@ library(dataRetrieval)
 library(viridis)
 library(ggplot2)
 library(sf)
-#library(ggspatial)
+library(ggspatial)
 library(cowplot)
-library(kableExtra)
+#library(kableExtra)
 
 
 # Set your ggplot theme
@@ -407,7 +407,7 @@ scale_color_viridis_c()+
 ```{r fig.cap=c("Map of Mean Precipitation across Alaska by Bin. This map depicts Bin 3 as having the highest mean precipitation across the state, with the lowest mean precipitation falling in northernmost Bin 9."), fig.height=5, fig.width=9}
 AlaskaPrecipMap<-ggplot(axes = FALSE) +
   geom_sf(data = Alaska_sf_utm, fill="white", color="black") +
-  geom_sf(data = AlaskaMeanPrecipDischargeSummary_utm, aes(color=Mean_PRCP), size=5)  +
+  geom_sf(data = AlaskaMeanPrecipDischargeSummary_utm, aes(color=Mean_PRCP), size=7)  +
   
   
   labs(color="Mean Precipitation (inches)")+
@@ -434,7 +434,7 @@ legend.key.size=unit(2, "cm"))
 
 AlaskaDischargeMap<-ggplot(axes = TRUE) +
   geom_sf(data = Alaska_sf_utm, fill="white") +
-  geom_sf(data = DischargeComplete_utm, aes(color=Mean_Discharge), size=5)  +
+  geom_sf(data = DischargeComplete_utm, aes(color=Mean_Discharge), size=7)  +
   labs(color="Mean Discharge (cubic feet/s)")+
 annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"), style = north_arrow_fancy_orienteering) +
   scale_color_viridis_c(option="viridis", direction=-1)+
@@ -449,7 +449,7 @@ annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75,
 ```{r fig.cap=c("Map of Mean Maximum Temperature across Alaska by Bin. This figure depicts Bin 3 as having the highest mean maximum temperature value of 51.97 degrees Fahrenheit."), fig.height=5, fig.width=9}
 AlaskaTemperatureMap<-ggplot(axes = TRUE) +
   geom_sf(data = Alaska_sf_utm, fill="white") +
-  geom_sf(data = AlaskaMeanPrecipDischargeSummary_utm, aes(color=Mean_Max_Temp), size=5)  +
+  geom_sf(data = AlaskaMeanPrecipDischargeSummary_utm, aes(color=Mean_Max_Temp), size=7)  +
   labs(color="Mean Max Temp (Degrees Fahrenheit)")+
 annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"), style = north_arrow_fancy_orienteering) +
   scale_color_viridis_c(option="viridis", direction=-1)+
@@ -517,10 +517,33 @@ bin5.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks5)
 summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 ```
 
+<<<<<<< HEAD
+
+```{r}
+
+# Snowmelt_BinSummary <- 
+#   read.csv("../DATA/PROCESSED/Snowmelt_BinSummary.csv")
+# 
+# kable(Snowmelt_BinSummary, format = "latex", 
+#       row.names = FALSE, 
+#       #col.names = c("Latitude Bin", "Change in Day of Year"),
+#       align = "c") %>%
+#   kable_styling(bootstrap_options = c("striped", "condensed"),
+#                 full_width = FALSE,
+#                 font_size = 15) %>%
+#   column_spec(column = 1, bold = TRUE) %>%  #columns must be specified by number
+#   row_spec(row = 0, color = "#660033") %>%  #row = 0 allows us to format the header
+#   row_spec(row = 5, color = "#104e8b", background = "#d3d3d3") 
+
+```
+
+# Calculate Cumulative Annual Precipitation and Discharge Water Volume for each year by Site
+=======
 # Calculate Cumulative Annual Precipitation and Discharge Water Volume for each year by Site
 
 # Calculate Cumulative Annual Precipitation for each year by Site
 
+>>>>>>> c01dd2fd19e7bfd2b909afea315805aa23f144b3
 ```{r}
 ## Calculate Cumulative Annual Precipitation for each year by Site and Create Dataframe
 CumAnnualPrecip<- AlaskaTempPrecipDischarge%>%
@@ -560,8 +583,6 @@ PrecipDischargeVolume<-PrecipVolume%>%
   merge(DischargeVolume, by=c('site_no', 'Year'))%>%
   mutate(Precip_Discharge_Ratio=Water_Volume_Precip/Water_Volume_Discharge)
 
-
-
 ```
 >We have the most confidence in our data for Bin 5, and it has a long period of record.
 
@@ -572,6 +593,10 @@ summary(PrecipDischargeLM)
 ```
 
 
+<<<<<<< HEAD
+
+
+=======
 ```{r, summary table}
 ## read in output files
 Discharge_output <- read.csv("./DATA/PROCESSED/Discharge_Change_new.csv")
@@ -826,6 +851,7 @@ Discharge_change.plot<- ggplot(Discharge_Change, aes(x = Bin, y = Slope))+
 print(Discharge_change.plot)
 ```
 >From Seasonal Mann Kendall test and the normalized sens.slope of discharge in each bin, except for bin 1 and 3, discharges of other bins show small seasonal change and they are slightly increasing over time.
+>>>>>>> c01dd2fd19e7bfd2b909afea315805aa23f144b3
 
 ## Question 1: <insert specific question here and add additional subsections for additional questions below>
 

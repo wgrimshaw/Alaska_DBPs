@@ -8,7 +8,6 @@ output: pdf_document
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(ggplot2)
-library(scales)
 library(trend)
 setwd("/Users/gabrielagarcia/Desktop/Hydrologic Data Analysis/Hydrologic_Data_Analysis/Course_Project/Alaska/DATA/PROCESSED")
 AlaskaTempPrecipDischarge<-read.csv("AlaskaTempPrecipDischarge.csv")
@@ -72,8 +71,7 @@ Bin1PrecipPlot<-
   geom_line() +
   ggtitle("Alaska Precipitation over Time in Latitude Bin 1") +
   labs(x = "", y = expression("Precipitation (in)"))+
-  scale_x_date(labels=date_format("%Y"),
-               breaks=date_breaks("1 year"))+
+
   gabytheme
 print(Bin1PrecipPlot)
 
@@ -86,22 +84,19 @@ Bin2PrecipPlot<-
   geom_line() +
   ggtitle("Alaska Precipitation over Time in Latitude Bin 2") +
   labs(x = "", y = expression("Precipitation (in)"))+
-  scale_x_date(labels=date_format("%y"),
-               breaks=date_breaks("1 year"))+
+
   gabytheme
 print(Bin2PrecipPlot)
 ```
 >There is a gap in precipitation data collection for Bin 2 from 1986-12-31 to 1995-10-01
 
 # Plot Bin 3 Precip over Time
-```{r, fig.width=30, fig.height=9}
+```{r, fig.width=5}
 Bin3PrecipPlot<- 
   ggplot(Bin3Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
   ggtitle("Alaska Precipitation over Time in Latitude Bin 3") +
-  labs(x = "", y = expression("Precipitation (in)"))+
-  scale_x_date(labels=date_format("%y"),
-               breaks=date_breaks("2 years"))+
+  labs(x = "", y = expression("Precipitation (inches)"))+
   gabytheme
 print(Bin3PrecipPlot)
 
@@ -109,30 +104,27 @@ print(Bin3PrecipPlot)
 >Much higher range in precip values-->more rain and snowfall?
 
 # Plot Bin 4 Precip over Time
-```{r, fig.width=24, fig.height=6}
+```{r, fig.width=12, fig.height=7}
 Bin4PrecipPlot<- 
   ggplot(Bin4Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
   ggtitle("Alaska Precipitation over Time in Latitude Bin 4") +
   labs(x = "", y = expression("Precipitation (in)"))+
-  scale_x_date(labels=date_format("%y"),
-               breaks=date_breaks("1 year"))+
   gabytheme
 print(Bin4PrecipPlot)
 
 ```
 
 # Plot Bin 5 Precip over Time
-```{r, fig.width=24, fig.height=6}
-library(scales)
+```{r, fig.width=20, fig.height=7}
+
 library(ggplot2)
 Bin5PrecipPlot<- 
   ggplot(Bin5Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
   ggtitle("Alaska Precipitation over Time in Latitude Bin 5") +
   labs(x = "", y = expression("Precipitation (in)"))+
-  scale_x_date(labels=date_format("%y"),
-               breaks=date_breaks("1 year"))+
+
   gabytheme
 print(Bin5PrecipPlot)
 
@@ -140,15 +132,12 @@ print(Bin5PrecipPlot)
 
 # Plot Bin 6 Precip over Time
 ```{r, fig.width=24, fig.height=6}
-library(scales)
 library(ggplot2)
 Bin6PrecipPlot<- 
   ggplot(Bin6Precip, aes(x = DATE, y = PRCP)) +
   geom_line() +
   ggtitle("Alaska Precipitation over Time in Latitude Bin 6") +
   labs(x = "", y = expression("Precipitation (in)"))+
-  scale_x_date(labels=date_format("%y"),
-               breaks=date_breaks("1 year"))+
   gabytheme
 print(Bin6PrecipPlot)
 
@@ -156,8 +145,7 @@ print(Bin6PrecipPlot)
 
 
 # Plot Bin 7 Precip over time
-```{r, fig.width=26, fig.height=6}
-library(scales)
+```{r, fig.width=26, fig.height=6, message=FALSE}
 library(ggplot2)
 Bin7PrecipPlot<- 
   ggplot(Bin7Precip, aes(x = DATE, y = PRCP)) +
@@ -314,8 +302,8 @@ summary(Bin2Precip.smktest)
 Bin3Precip.interpolated <- approx(Bin3Precip$DATE,
                                      Bin3Precip$PRCP, 
                                       method = "linear", n = 33461)
-# Turn the interpolated dataset into a proper dataframe
 
+# Turn the interpolated dataset into a proper dataframe
 Bin3Precip.interpolated  <- do.call(cbind.data.frame, Bin3Precip.interpolated) ##gets us back to data frame
 names(Bin3Precip.interpolated ) <- c("DATE", "PRCP")   ###have to rename the columns
 Bin3Precip.interpolated$DATE<- as.Date(Bin3Precip.interpolated$DATE, ##have to respecify the Date column as a date. Need to specify the origin too. 
@@ -332,10 +320,13 @@ Bin3Precip.timeseries <- ts(Bin3Precip.interpolated$PRCP,
 ## Run a Seasonal Mann-Kendall test for Bin 3
 
 Bin3Precip.smktest <- smk.test(Bin3Precip.timeseries)
-Bin3Precip.smktest  ###gives us overall trend with a zscore of-5.12, p-value of 3.1e-7. So we do not see an increasing trend over time becuse the zscore is negative, but  we have a lot of varability(varsS)
+Bin3Precip.smktest  ###gives us overall trend with a zscore of-5.12, p-value of 3.1e-7. So we see a significant decreasing trend over time becuse the zscore is negative, but  we have a lot of varability(varsS)
 
 summary(Bin3Precip.smktest)
+
+Bin3Slope <- sea.sens.slope(Bin3Precip.timeseries)
 ```
+every year needs to be the same length
 
 
 
@@ -527,9 +518,9 @@ summary(Bin9Precip.smktest)
 
 
 
-#Determine Water Volume of Precipitation by Bin and Site
+# Determine Water Volume of Precipitation by Bin and Site
 
-# Calculate Cumulative Annual Precipitation for each year by Site and Create Dataframe
+## Calculate Cumulative Annual Precipitation for each year by Site and Create Dataframe
 ```{r}
 CumAnnualPrecip<- AlaskaTempPrecipDischarge%>%
   mutate(Year = year(DATE)) %>%
@@ -547,9 +538,164 @@ NWIS_SiteInfo<- read.csv("../DATA/RAW/NWIS_SiteInfo.csv")
 ```{r}
 PrecipVolume<-CumAnnualPrecip%>%
   merge(NWIS_SiteInfo, by='site_no')%>%
-  mutate(Water_Volume=CumPrecip*drain_area_va)%>%
-  select(site_no:dec_long_va, drain_area_va, Water_Volume)
+  mutate(Water_Volume_Precip=CumPrecip*drain_area_va*5280*5280/12)%>%
+  select(site_no:dec_long_va, drain_area_va, Water_Volume_Precip)
+```
+cum percip * drainage area(sq miles)* 5280 *5280/12=cubic feet per year 
+
+# Determine Water Volume of Discharge by Bin and Site 
+
+## Calculate Cumulative AnnualDischarge for each year by Site and Create Dataframe
+```{r}
+CumAnnualDischarge<- AlaskaTempPrecipDischarge%>%
+  mutate(Year = year(DATE)) %>%
+  group_by(site_no, Year)%>%
+  summarize(CumDischarge=sum(Discharge, na.rm=TRUE))
 ```
 
+## Join NWIS_SiteInfo and CumAnnual Precip by Site Number and multiplt cumulative precip for each station and year by drainage area to determine water volume for each year and station
+```{r}
+library(dplyr)
+DischargeVolume<-CumAnnualDischarge%>%
+  merge(NWIS_SiteInfo, by='site_no')%>%
+  mutate(Water_Volume_Discharge=CumDischarge*3600*24)%>%
+  select(site_no:dec_long_va, drain_area_va, Water_Volume_Discharge)
+```
+Discharge is in cubic feet per second *3600 *24 to get discharge volume in cubic feet per year
+
+
+
+
+join the discharge and precip water volumes by inner join by bin and year 
+get rid of any NA's
+make column of ratio of precip: discharge volumes
+so if ratio is <1, then glaciers or permafrost is melting: something else is contribting to discharge
+if 
+
+
+# Calculate Cumulative Annual Precipitation and Discharge Water Volume for each year by Site
+```{r}
+## Calculate Cumulative Annual Precipitation for each year by Site and Create Dataframe
+CumAnnualPrecip<- AlaskaTempPrecipDischarge%>%
+  mutate(Year = year(DATE)) %>%
+  group_by(site_no, Year)%>%
+  summarize(CumPrecip=sum(PRCP, na.rm=TRUE))
+
+### Load in NWIS_SiteInfo.csv which has Drainage Areas for each Station
+NWIS_SiteInfo<- read.csv("../DATA/RAW/NWIS_SiteInfo.csv")
+
+## Join NWIS_SiteInfo and CumAnnual Precip by Site Number and multiply cumulative precip for each station and year by drainage area to determine water volume for each year and station
+PrecipVolume<-CumAnnualPrecip%>%
+  merge(NWIS_SiteInfo, by='site_no')%>%
+  mutate(Water_Volume_Precip=CumPrecip*drain_area_va*5280*5280/12)%>%
+  select(site_no:dec_long_va, drain_area_va, Water_Volume_Precip)
+### cum precip * drainage area(sq miles)* 5280 *5280/12=cubic feet per year 
+
+# Determine Water Volume of Discharge by Bin and Site 
+
+## Calculate Cumulative AnnualDischarge for each year by Site and Create Dataframe
+CumAnnualDischarge<- AlaskaTempPrecipDischarge%>%
+  mutate(Year = year(DATE)) %>%
+  group_by(site_no, Year)%>%
+  summarize(CumDischarge=sum(Discharge, na.rm=TRUE))
+
+## Join NWIS_SiteInfo and CumAnnual Precip by Site Number and multiply cumulative precip for each station and year by drainage area to determine water volume for each year and station
+library(dplyr)
+DischargeVolume<-CumAnnualDischarge%>%
+  merge(NWIS_SiteInfo, by='site_no')%>%
+  mutate(Water_Volume_Discharge=CumDischarge*3600*24)%>%
+  select(site_no:dec_long_va, drain_area_va, Water_Volume_Discharge)
+#### Discharge is in cubic feet per second *3600 *24 to get discharge volume in cubic feet per year
+
+
+## Join Discharge Volume and Precip Volume Data Frames and Create Ratio Column
+PrecipDischargeVolume<-PrecipVolume%>%
+  merge(DischargeVolume, by=c('site_no', 'Year'))%>%
+  mutate(Precip_Discharge_Ratio=Water_Volume_Precip/Water_Volume_Discharge)
+
+```
+>We have the most confidence in our data for Bin 5, and it has a long period of record.
+
+```{r}
+PrecipDischargeVolume$Bin<-revalue(PrecipDischargeVolume$site_no,
+                              c('15297680'='1', '15297610'='2','15072000'='3', '15052500'='4', '15276000'='5', '15304000'='6', '15514000'='7', '15453500'='8', '15908000'='9'))
+```
+
+
+```{r, fig.width=4}
+PrecipDischargeVolume$Bin<-as.factor(PrecipDischargeVolume$Bin)
+
+RatioPlot<-ggplot(PrecipDischargeVolume, aes(x=Year, y=Precip_Discharge_Ratio, color=Bin))+
+  geom_point(alpha=0.5, size=2)+
+  labs(y="Precipitation:Discharge")+
+  gabytheme
+  
+print(RatioPlot)
+```
+
+
+```{r}
+CumPrecipPlot<-ggplot(PrecipDischargeVolume, aes(x=Year, y=CumPrecip, color=Bin))+
+  geom_point(alpha=0.5, size=2)+
+  labs(y="Cumulative Precipitation (inches)")+
+  gabytheme
+  
+print(CumPrecipPlot)
+```
+
+## Filter PrecipDischargeVolume Dataframe by Bin 5
+```{r}
+PrecipDischargeVolumeBin5<-filter(PrecipDischargeVolume, site_no=='15276000')
+```
+
+# Bin 5 Precipitation:Discharge Plot
+```{r, fig.width=4}
+Bin5RatioPlot<-ggplot(PrecipDischargeVolumeBin5, aes(x=Year, y=Precip_Discharge_Ratio))+
+  geom_point(alpha=0.5, size=2, color="black")+
+  geom_smooth(method="lm", se=FALSE)+
+  labs(y="Precipitation:Discharge")+
+  ggtitle("Bin 5: Year on Precipitation:Discharge Ratio")+
+  gabytheme
+print(Bin5RatioPlot)
+```
+the higher the ratio, more precip is being captured but not released into discharge
+
+```{r}
+PrecipDischargeVolumeBin3<-filter(PrecipDischargeVolume, site_no=='15072000')
+```
+
+# Bin 3 Precipitation:Discharge Plot
+```{r, fig.width=4}
+Bin3RatioPlot<-ggplot(PrecipDischargeVolumeBin3, aes(x=Year, y=Precip_Discharge_Ratio))+
+  geom_point(alpha=0.5, size=2, color="black")+
+  geom_smooth(method="lm", se=FALSE)+
+  labs(y="Precipitation:Discharge")+
+  ggtitle("Bin 3: Year on Precipitation:Discharge Ratio")+
+  gabytheme
+print(Bin3RatioPlot)
+```
+
+# Create Linear Model of Year vs. the Precip: Discharge Water Volume Ratio
+```{r}
+PrecipDischargeLM<-lm(Precip_Discharge_Ratio~Year, data=PrecipDischargeVolume)
+summary(PrecipDischargeLM)
+```
+
+# Cumulative Precipitation Plot for Bin 5
+```{r, fig.width=5}
+Bin5CumPrecipPlot<-ggplot(PrecipDischargeVolumeBin5, aes(x=Year, y=CumPrecip))+
+  geom_point(alpha=0.5, size=2, color="black")+
+  geom_smooth(method="lm", se=FALSE)+
+  labs(y="Cumulative Precipitation (inches)")+
+  ggtitle("Bin 5: Year on Cumulative Precipitation")+
+  gabytheme
+print(Bin5CumPrecipPlot)
+```
+
+## Linear Model for Cumulative Precipitation 
+```{r}
+PrecipDischargeLM2<-lm(CumPrecip~Year, data=PrecipDischargeVolume)
+summary(PrecipDischargeLM2)
+```
 
 
