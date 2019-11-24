@@ -11,7 +11,7 @@ author: "Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen"
 fontsize: 12pt
 mainfont: Times New Roman
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 \newpage
@@ -116,7 +116,6 @@ Temperature and precipitation data were downloaded from the National Oceanic and
 | Glacial Coverage/Melting | Qualitative | Predictor | 1b |
 
 # Data Wrangling Methods
-<Describe how your team wrangled your dataset in a format similar to a methods section of a journal article.>
 
 ### Importing, Cleaning, and Addressing Date Issues
 
@@ -140,7 +139,8 @@ After all 10 NOAA dataframes containing precipitation and temperature data were 
 AlaskaTempPrecipDischarge_sf<- st_as_sf(AlaskaTempPrecipDischarge,coords = c('LONGITUDE','LATITUDE'),crs=4326)
 
 # Load in US Census Bureau Cartographic Boundary Shapefiles and Filter for Alaska Only
-State_sf<- st_read('./DATA/RAW/cb_2018_us_state_20m.shp') 
+
+State_sf<- st_read('../DATA/RAW/cb_2018_us_state_20m.shp') 
 Alaska_sf<-filter(State_sf, NAME == 'Alaska')
 
 # Create summary dataframe with only NOAA site locations
@@ -223,11 +223,21 @@ DischargeComplete_utm<- st_transform(DischargeComplete_sf, c=32609)
 ```
 
 
-```{r, fig.cap= c("Map of NOAA Site Locations in Alaska"), fig.height=5, fig.width=8, warning=FALSE, message=FALSE}
+```{r, fig.cap= c("Map of NOAA Site Locations in Alaska. The red sites are NOAA stations where we obtained our climate (temperature and precipitation) data, while the blue sites are the NWIS Stations where we obtained our discharge data. There is one NOAA station and one NWIS station per latitude bin; the station pairs were not colocated and were chosen on the basis of having the longest period of record. Each station pair was located within the same county, however."), fig.height=5, fig.width=8, warning=FALSE, message=FALSE}
+gabytheme <- theme_bw(base_size = 20) + 
+  theme(plot.title=element_text(face="bold", size="22", color="IndianRed4", hjust=0.5),
+        axis.title=element_text(size=19, color="black"),
+axis.text = element_text(face="bold", size=16, color = "black"), 
+panel.background=element_rect(fill="white", color="darkblue"), 
+panel.border = element_rect(color = "black", size = 2),
+legend.position = "top", legend.background = element_rect(fill="white", color="black"),
+            legend.key = element_rect(fill="transparent", color="NA"))
+
+
 ggplot() +
   geom_sf(data = Alaska_sf_utm, color = "black") +
-  geom_sf(data = NOAA_sf_utm, color = "red")+
-  geom_sf(data = DischargeComplete_utm, color="blue", size=2) +
+  geom_sf(data = NOAA_sf_utm, color = "red", size=5)+
+  geom_sf(data = DischargeComplete_utm, color="blue", size=5) +
 gabytheme
 ```
 
@@ -239,14 +249,14 @@ Though climate change is a complex process, the easiest parameter to estimate th
 ## Data wrangling
 ## transform date column from factor to date
 AlaskaTempPrecipDischarge$DATE <-
-  as.Date(AlaskaTempPrecipDischarge$DATE, format = "%Y-%m-%d")
+  as.Date(AlaskaTempPrecipDischarge$DATE, format = "%Y-%m-%d", origin = "1970-01-01")
 
 ## create  NA rows where there are data gaps so lines don't connect
-Bin2NA <- c(as.Date("1990-01-01", format = "%Y-%m-%d"), 2, rep(NA, 11))
-Bin3NA <- c(as.Date("1945-01-01", format = "%Y-%m-%d"), 3, rep(NA, 11))
-Bin3NA_2 <- c(as.Date("1936-01-01", format = "%Y-%m-%d"), 3, rep(NA, 11))
-Bin4NA <- c(as.Date("1996-01-01", format = "%Y-%m-%d"), 4, rep(NA, 11))
-Bin6NA <- c(as.Date("1995-01-01", format = "%Y-%m-%d"), 6, rep(NA, 11))
+Bin2NA <- c(as.Date("1990-01-01", format = "%Y-%m-%d", origin = "1970-01-01"), 2, rep(NA, 11))
+Bin3NA <- c(as.Date("1945-01-01", format = "%Y-%m-%d", origin = "1970-01-01"), 3, rep(NA, 11))
+Bin3NA_2 <- c(as.Date("1936-01-01", format = "%Y-%m-%d", origin = "1970-01-01"), 3, rep(NA, 11))
+Bin4NA <- c(as.Date("1996-01-01", format = "%Y-%m-%d", origin = "1970-01-01"), 4, rep(NA, 11))
+Bin6NA <- c(as.Date("1995-01-01", format = "%Y-%m-%d", origin = "1970-01-01"), 6, rep(NA, 11))
 
 ## rbind missing date vectors
 MissingDates <- as.data.frame(rbind(Bin2NA, Bin3NA, Bin3NA_2, Bin4NA, Bin6NA))
@@ -263,6 +273,7 @@ ggplot(Alaska_Data_TempFig, aes(x = DATE, y = TMAX)) +
   labs(y = "Maximum Daily Temperature (F)", x = "Date")
 ```
 
+# Snowmelt
 
 ```{r Snowmelt Exploratory Data Wrangling, echo=FALSE}
  
@@ -321,12 +332,16 @@ print(dis.doy.6.10)
 ```
 
 
-# Precipitation Data Wrangling
+# Precipitation 
+
+While there are significant regional and seasonal differences in precipitation changes, the mean annual precipitation across the United States has increased about 4% from the 1901-2015 period of record (Walsh et al. 2014). Long-term station observations from core climate networks served as a primary source to establish observed changes in precipitation. Alaska shows little change in annual precipitation (+1.5%); however, in all seasons, central Alaska shows declines and the panhandle shows increase (Easterling et al., 2017). 
+
+Figure XXX shows precipitation over each of the nine NOAA site's period of record, colored by bin. As expected, Bin 3 clearly has the largest range in the magnitude of precipitation, and precipitation in Alaska appears to decrease with increasing latitude.
+This is substantiated by the fact that currently dry regions in Alaska are projected to become drier due to accelerated evaporation caused by warmer temperatures and longer growing seasons, while wet areas are projected to become wetter (EPA, 2017). Bin 3's station is located in Ketchikan, Alaska, which has a temperate oceanic climate and is dubbed the "rainfall capital of Alaska". There are 2 main data gaps in the precipitation period of record. One large gap occurs from the mid to late 1930s, presumably due to the Great Depression, and the second large gap occurs from August 31, 1942 to January 1st, 1948, presumably due to the second World War. These two gaps are not filled in this analysis. 
 ```{r Precipitation Exploratory Data Wrangling}
 ### Create Precipitation only Dataframe with Bins included
 AlaskaPrecipOnly<-select(AlaskaTempPrecipDischarge, .data$DATE, .data$PRCP, .data$Bin)
-
-### Check number of Precipitation NA's and remove them
+### Rename data frame
 newdata<-AlaskaPrecipOnly
 
 ### Ensure Date is a date object and not a factor
@@ -449,7 +464,7 @@ annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75,
 \newpage
 
 # Mean Discharge Map
-```{r,fig.cap= c("Map of Mean Discharge across Alaska by Bin. This map depicts Bin 8 as having the highest mean discharge value of 121266.11 cfs. Bin 1 has the lowest mean discharge value of 4.69 cfs."), fig.height=5, fig.width=9}
+```{r,fig.cap= c("Map of Mean Discharge across Alaska by Bin. This map depicts Bin 8 as having the highest mean discharge value of 121,266.11 cfs. Bin 1 has the lowest mean discharge value of 4.69 cfs."), fig.height=5, fig.width=9}
 gabytheme2 <- theme_bw(base_size = 17) + 
   theme(plot.title=element_text(face="bold", size="26", color="IndianRed3", hjust=0.5),
         axis.title=element_text(size=22, color="black"),
@@ -564,10 +579,14 @@ bin5.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks5)
 summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 ```
 
-# Calculate Cumulative Annual Precipitation and Discharge Water Volume for each year by Site
 
-# Calculate Cumulative Annual Precipitation for each year by Site
 
+
+
+
+# Calculate Cumulative Annual Precipitation and Cumulative Annual Discharge for each year by Site
+
+We calculated the cumulative annual precipitation and discharge water volume for each year by site in cubic feet per year in order to create a column with the ratio of cumulative precipitation water volume: cumulative discharge water volume. This ratio indicates how the proportion of discharge that originates from precipitation. When the precipitation:discharge ratio is less than one, some proportion of discharge is a result from other hydrologic mechanisms such as glacier or permafrost melting. 
 ```{r}
 ## Calculate Cumulative Annual Precipitation for each year by Site and Create Dataframe
 CumAnnualPrecip<- AlaskaTempPrecipDischarge%>%
@@ -607,16 +626,33 @@ PrecipDischargeVolume<-PrecipVolume%>%
   merge(DischargeVolume, by=c('site_no', 'Year'))%>%
   mutate(Precip_Discharge_Ratio=Water_Volume_Precip/Water_Volume_Discharge)
 
-
-
+### Filter PrecipDischargeVolume Dataframe by Bin 5
+PrecipDischargeVolumeBin5<-filter(PrecipDischargeVolume, site_no=='15276000')
 ```
->We have the most confidence in our data for Bin 5, and it has a long period of record.
+
+
+# Bin 5 Precipitation:Discharge Plot
+```{r, fig.width=4, }
+Bin5RatioPlot<-ggplot(PrecipDischargeVolumeBin5, aes(x=Year, y=Precip_Discharge_Ratio))+
+  geom_point(alpha=0.5, size=2, color="black")+
+  geom_smooth(method="lm", se=FALSE)+
+  labs(y="Precipitation:Discharge")+
+  ggtitle("Bin 5: Year on Precipitation:Discharge Ratio")+
+  gabytheme
+print(Bin5RatioPlot)
+```
+
 
 # Create Linear Model of Year vs. the Precip: Discharge Water Volume Ratio
 ```{r}
 PrecipDischargeLM<-lm(Precip_Discharge_Ratio~Year, data=PrecipDischargeVolume)
 summary(PrecipDischargeLM)
 ```
+>The final linear equation of this precipitation:discharge linear model is Y=-16.93 +
+0.0092(Year). A one-year increase in time increases the precipitation:discharge ratio by 0.01 units. This trend is visible in Figure XXX. 
+
+
+
 
 
 ```{r, summary table}
@@ -897,4 +933,12 @@ Future analsyses should take a more nuanced approach to investigating the impact
 
 # References
 <add references here> 
+
+“Climate Impacts in Alaska.” EPA, Environmental Protection Agency, 13 Jan. 2017, 19january2017snapshot.epa.gov/climate-impacts/climate-impacts-alaska_.html#Reference%203.
+
+Easterling, D.R., K.E. Kunkel, J.R. Arnold, T. Knutson, A.N. LeGrande, L.R. Leung, R.S. Vose, D.E. Waliser, and M.F. Wehner, 2017: Precipitation change in the United States. In: Climate Science Special Report: Fourth National Climate Assessment, Volume I [Wuebbles, D.J., D.W. Fahey, K.A. Hibbard, D.J. Dokken, B.C. Stewart, and T.K. Maycock (eds.)]. U.S. Global Change Research Program, Washington, DC, USA, pp. 207-230, doi: 10.7930/J0H993CC.
+
 Serreze, M. C., Barrett, A. P., Stroeve, J. C., Kindig, D. N., and Holland, M. M.: The emergence of surface-based Arctic amplification, The Cryosphere, 3, 11–19, https://doi.org/10.5194/tc-3-11-2009, 2009.
+
+
+Walsh, J. et al., 2014: Ch. 2: Our Changing Climate. J.M. Melillo, T. (T. C.. Richmond, and G.W. Yohe, Eds., U.S. Global Change Research Program, 19–67.
