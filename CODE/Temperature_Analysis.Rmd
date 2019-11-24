@@ -39,6 +39,7 @@ ggplot(Alaska_Temp_Monthly, aes(x = Month, y = aveTMAX, color = Year)) +
 
 ```
 
+Though climate change is a complex process, the easiest parameter to estimate the magnitude of climate change is temperature. Figure XXX shows the maximum daily temperature for the nine NOAA sites over each site's period of record. As expected, the range of maximum temperature increases with increasing latitude. Besides site one, all other sites have reasonable overlap in their periods of record and at least cover from 1980 to 2018. There are gaps in the records of multiple sites that require interpolation however. Larger gaps, such as the 1990s gap for site two and the gaps before 1950 for site three, are not filled in this analysis, and instead the earlier time periods are left out of the time series analysis. Shorter data gaps are filled.
 
 ```{r}
 ## Data wrangling
@@ -82,7 +83,9 @@ Alaska_Decomposed <- stl(Alaska_Temp_Monthly_ts, s.window = "periodic")
 plot(Alaska5_Decomposed)
 ```
 
-For each latitude bin, the monthly average maximum temperature was calculated. If there were large gaps of multiple years in the period of record, only the more recent data were used. However, if there were shorter data gaps of less than one year in length, linear interpolation was used to estimate the average monthly temperature for any months with missing data. For each latitude bin, a seasonal Mann-Kendall test was performed on the monthly time series to determine if there had been a change in temperature over the period of record. If there had been a change over the period of record, the seasonal sen's slope test was used to determine the average magnitude of the change.
+For each latitude bin, the monthly average maximum temperature was calculated from the daily temperature data. As previously mentioned, the earlier data for sites two and three were discarded and not used for analysis. All other data gaps of at least one year in length were filled using the average maximum temperature for each month over the period of record for each site. However, if there were shorter data gaps of less than one year in length, monthly maximum temperatures were filled using linear interpolation from the nearest neighbor points.
+
+For each latitude bin, a Seasonal Mann-Kendall test was performed on the monthly time series to determine if there had been a change in temperature over the period of record and the directionality of the trend. The Seasonal Mann-Kendall was also used to determine which individual months had statistically significant temperature trends and the directionality of those trends. If there was a statistically significant trend over the period of record, the seasonal sen's slope test was used to determine the average magnitude of the change.
 
 ```{r}
 ## Seasonal Mann-Kendall for whether temperature is changing at each site
@@ -93,6 +96,7 @@ Alaska_Temp_Monthly <- Alaska_Data %>%
   summarize(aveTMAX = mean(TMAX, na.rm = T)) %>%
   mutate(Date = as.yearmon(paste(Year, Month), "%Y %m"))
 
+## Initialize sen's slope vector to be filled in by loop
 Temp_Change <- rep(NA, 9)
 
 ## Initialize Final Dataframe of monthly data for plotting
@@ -218,12 +222,16 @@ write.csv(Sens_Slope_Temp, "./Data/PROCESSED/Temperature_Change.csv",
 
 ```
 
+Figure XXX shows the monthly average maximum temperature for site 5, near Anchorage, over time. The monthly average maximum temperature had a statistically significant trend (Seasonal Mann-Kendall, z=4.87, p<0.001). The blue line shows the magnitude of this trend as calculated by the seasonal sen's slope, indicating a 0.04 degree fahrenheit annual increase in average maximum temperature. It should be noted that the statistical tests used here do not estimate the intercept of the seasonal trend line, so while the figure shows the average seasonal temperature increase, the location of the intercept is only an approximation to assist the visualization.
 
 ```{r}
-## Interpolate monthly temperatures for internal missing years using monthly averages
 # Make column of predicted temp
 Alaska_Temp_Monthly_Site <- Alaska_Temp_Monthly_Site %>%
   mutate(Prediction = 0.0412*(Year - 900))
+
+Alaska_Temp_Monthly_5 <- Alaska_Temp_Monthly_Site
+write.csv(Alaska_Temp_Monthly_5, "./DATA/PROCESSED/Alaska_Temp_Monthly_5.csv",
+          row.names = F)
 
 ggplot(Alaska_Temp_Monthly_Site, aes(x = Date)) +
   geom_line(aes(y = aveTMAX)) +
@@ -235,17 +243,15 @@ ggplot(Alaska_Temp_Monthly_Interp, aes(x = Year, y = aveTMAX)) +
 ```
 
 
-```{r}
-## Final Temp plot, maybe with trend lines
-ggplot(Alaska_Temp_Monthly_Model, aes(x = Year, y = aveTMAX)) +
-  geom_line(alpha = 0.8) +
-  geom_smooth(method = lm) +
-  facet_wrap(~Bin, nrow = 3, ncol = 3) +
-  labs(y = "Maximum Daily Temperature (F)", x = "Date")
 
-## Plot of Temp change for each bin
-ggplot(Sens_Slope_Temp, aes(x = Bin, y = Temp_Change)) +
-  geom_point() #+
-  #geom_smooth(method = lm, se = FALSE)
+```{r}
+## regression of temperature over bin
+Temp_lm <- lm(data = Sens_Slope_Temp, Temp_Change ~ Bin, )
+summary(Temp_lm)
 ```
 
+One possible reason for such little impact of temperature on the date of peak snowmelt is the months in which temperature trends occur. For example, though the overal temperature for Bin 5 shows an increasing trend, the spring months of March, April, and May actually show a cooling trends. Summer and fall months however show increasing temperature trends that outweigh the cooling trends of earlier months. As the sen's slope is the median of all monthly trends, this nuance is not exhibited in the overall temperature trend. Warmer summer and fall seasons may have little impact on the date of peak discharge.
+
+The analyses in this study do not strongly support the hypotheses. The overall temperature trends do not show polar amplification, in part due to a small number of latitude bins and only one temperature site per bin. Similarly, there is no statistically significant relationship between change in discharge over time and latitude. There were only five sites that had both statistically significant trends in temperature and discharge, and these five sites did not show a relationship between temperature and discharge or temperature and day of peak discharge.
+
+Future analsyses should take a more nuanced approach to investigating the impacts of climate change on discharge of Alaskan streams. Temperature data show a need to investigate the seasons that will have direct effects on stream discharge rather than looking at the year as a whole.
