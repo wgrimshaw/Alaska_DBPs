@@ -101,7 +101,7 @@ Alaska_Temp_Monthly_Model <- data.frame(Date = numeric(),
                                         Bin = factor())
 
 ## Where for loop will start
-#Site_bin <- 7
+Site_bin <- 5
 
 for(Site_bin in 1:9){
   
@@ -191,7 +191,7 @@ for(Site_bin in 1:9){
     
   ## SMK Test for trend
   Alaska_Monthly_Trend <- smk.test(Alaska_Temp_Monthly_ts)
-  
+  summary(Alaska_Monthly_Trend)
   ## if significant trend, add slope to slope vector
   ## else add 0 to slope vector
   if (Alaska_Monthly_Trend$p.value > 0.05){
@@ -221,8 +221,14 @@ write.csv(Sens_Slope_Temp, "./Data/PROCESSED/Temperature_Change.csv",
 
 ```{r}
 ## Interpolate monthly temperatures for internal missing years using monthly averages
-ggplot(Alaska_Temp_Monthly_Site, aes(x = Date, y = aveTMAX)) +
-  geom_line()
+# Make column of predicted temp
+Alaska_Temp_Monthly_Site <- Alaska_Temp_Monthly_Site %>%
+  mutate(Prediction = 0.0412*(Year - 900))
+
+ggplot(Alaska_Temp_Monthly_Site, aes(x = Date)) +
+  geom_line(aes(y = aveTMAX)) +
+  geom_line(aes(y = Prediction), color = "blue", size = 1) +
+  labs(y = "Maximum Daily Temperature\nAveraged by Month (F)")
 ggplot(Alaska_Temp_Monthly_Interp, aes(x = Year, y = aveTMAX)) +
   geom_line()
 
