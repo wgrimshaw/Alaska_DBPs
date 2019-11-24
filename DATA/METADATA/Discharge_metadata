@@ -1,0 +1,30 @@
+# Alaska USGS NWIS Discharge Datasets
+
+## Summary
+
+Discharge data were collected from USGS NWIS using the Data Retrieval package in R. This dataset includes agency, site number, sample date, discharge value, and discharge code. The state of Alaska was then divided into 9 bins of equal latitude, and daily discharge data was downloaded for the site in each latitude bin with the longest period of records. Then Using readNWISsite to find specific site information for 9 selected sites to search for temperature and precipitation data. 
+
+## Dataset Information
+
+Data were collected from NWIS using the Data Retrieval package in R.
+
+The discharge dataset contains:
+* Agency
+* Site number
+* Sample date
+* Dischagre value
+* Discharge code
+
+The site information dateset contains:
+* Agency
+* Site number
+* Station name
+* Site latitude
+* Site longitude
+* District code
+* State code
+* County code
+* Huc code
+
+
+
