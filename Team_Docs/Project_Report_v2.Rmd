@@ -488,6 +488,9 @@ annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75,
 ```
 
 # Discharge Data Wrangling
+
+To analyze the seasonal change of discharge, it is helpful to know the general trend of discharge over time. Figure Seasonal Change of Discharge 1-1 shows the discharge of 9 bins over time. From this graph, it is clear to see that Bin 6 and 8 have 2 largest river and they also have obvious seasonal changes. Trend of discharge of other bins cannot be identify right now and need further analysis.
+
 ```{r Discharge Exploratory Data Wrangling, echo=FALSE}
 # transform bin and Date into factor
 AlaskaTempPrecipDischarge$Bin <- as.factor(AlaskaTempPrecipDischarge$Bin)
@@ -653,7 +656,12 @@ kable(Output_Summary, format = "html",
 ```
 
 # Seasonal Analysis of Discharge 
-```{r}
+
+To analyze the seasonal treand of discharge of each bin, the monthly average discharge data are applied, which are calculated from the daily discharge data. In order to make sure the result is correct and reasonable, choosing the right period of time to do time series is very important. The criteria for selecting optimal period of records is to make sure it covers at least 30 years most recent data if possible. For Bin 1, it only has 5 years of data, which is not useful to do time series on it. For the gaps in the data, if there is a huge gap(>3 years), drop it to keep the most recent data, if the gap is small(<= 3 years), the average discharge of that month over periods is used to fill the gap. 
+
+Seasonal Mann-Kendall tests were performed on the monthly time series to determine if there is a change in discharge over the period of record. If there was a statistically significant trend (p<0.05) over the period of record, the seasonal sen's slope test was used to determine the average magnitude of the change. In order to remove the impact of river volume, sens'slopes were normalized by divided by average discharge over period of records. Figure Seasonal Change of Discharge 2-1 shows that except for bin 1 and 3, discharge of other bins shows small seasonal change and since the sens'slopes are all positive, discharge is slightly increasing over time. However, there's no clear trend shows that seasonal change of discharge has positive or negative relationship with latitude, which cannot supports the hypothesis that climate change is having larger impacts near the poles.
+
+```{r Discharge Seasonal Change Analysis}
 ## choose the optimal range of dataset of each bin. For missing monthly data, using mean value of that month over different years to fill the gap. Make sure the number of month is the same for each year in each bin.
 
 #Bin 1
@@ -792,7 +800,7 @@ AlaskaDischarge_9.Monthly <- AlaskaDischarge %>%
   filter(Year >=1983 & Year <= 2018)
 ```
 
-```{r}
+```{r Discharge Seasonal Change Analysis}
 # run time series
 AlaskaDischarge_1_ts.Monthly <- ts(AlaskaDischarge_1.Monthly[[3]], frequency = 12)
 AlaskaDischarge_2_ts.Monthly <- ts(AlaskaDischarge_2.Monthly[[3]], frequency = 12)
@@ -827,43 +835,42 @@ slope_8 <- sea.sens.slope(AlaskaDischarge_8_ts.Monthly)
 slope_9 <- sea.sens.slope(AlaskaDischarge_9_ts.Monthly)
 ```
 
-```{r}
+```{r Discharge Seasonal Change Analysis}
 ## create the dataframe of bin and correlated sens.slope
 Discharge_Trend <- data.frame(Bin = c(1,2,3,4,5,6,7,8,9),Slope = c(slope_1,slope_2,slope_3,slope_4,slope_5,slope_6,slope_7,slope_8,slope_9), Trend = c(AlaskaDischarge_1_trend$p.value, AlaskaDischarge_2_trend$p.value,AlaskaDischarge_3_trend$p.value,AlaskaDischarge_4_trend$p.value,AlaskaDischarge_5_trend$p.value,AlaskaDischarge_6_trend$p.value, AlaskaDischarge_7_trend$p.value, AlaskaDischarge_8_trend$p.value, AlaskaDischarge_9_trend$p.value))
 
-# if the p.value < 0.05, keep the original sens.slope, otherwise replace it with NA
-for (i in 1:9){
-  if (Discharge_Trend$Trend[i] > 0.05){
-    Discharge_Trend$Slope[i] <- NA
-  } else {
-    Discharge_Trend$Slope[i] <- Discharge_Trend$Slope[i]
-  }
-}
-
-#mean discharge
+# mean discharge
 AlaskaDischarge_mean <- AlaskaDischarge %>%
   group_by(Bin)%>%
   drop_na()%>%
   summarise(meanDischarge = mean(Discharge))
 
 AlaskaDischarge_mean$Bin <- as.factor(AlaskaDischarge_mean$Bin)
-Discharge_Change$Bin <- as.factor(Discharge_Change$Bin)
+Discharge_Trend$Bin <- as.factor(Discharge_Trend$Bin)
 
-meanDischarge <- left_join(AlaskaDischarge_mean, Discharge_Change, by = 'Bin')
+Discharge_Trend <- left_join(AlaskaDischarge_mean, Discharge_Trend, by = 'Bin')
 
-# Normalize the slope by divided by mean discharge over time of each bin
-meanDischarge <- meanDischarge%>%
+Discharge_Trend <- Discharge_Trend%>%
   mutate(meanSlope = Slope/meanDischarge)
 
-# write csv file of Bin and mean sens.slope of discharge
-names(meanDischarge)[3:4] = c('Old_Slope', 'Slope')
-Discharge_Change <- meanDischarge[c(1,4)]
+# if the p.value < 0.05, keep the original sens.slope, otherwise replace it with NA
+for (i in 1:9){
+  if (Discharge_Trend$Trend[i] > 0.05){
+    Discharge_Trend$meanSlope[i] <- NA
+  } else {
+    Discharge_Trend$meanSlope[i] <- Discharge_Trend$meanSlope[i]
+  }
+}
+
+# write csv file
+Discharge_Change <- Discharge_Trend[c(1,5)]
+names(Discharge_Change)[2]<-'Slope'
 write.csv(Discharge_Change, "./DATA/PROCESSED/Discharge_Change_new.csv",
           row.names = F)
 ```
 
 # Graph of normalized sens.slope of discharge of each bin
-```{r}
+```{r Discharge Seasonal Change Analysis}
 # This graph shows the sens.slope of each bin 
 Discharge_change.plot<- ggplot(Discharge_Change, aes(x = Bin, y = Slope))+
   geom_point()+
@@ -872,7 +879,7 @@ Discharge_change.plot<- ggplot(Discharge_Change, aes(x = Bin, y = Slope))+
   theme(text = element_text(size=18))
 print(Discharge_change.plot)
 ```
->From Seasonal Mann Kendall test and the normalized sens.slope of discharge in each bin, except for bin 1 and 3, discharges of other bins show small seasonal change and they are slightly increasing over time.
+
 
 ## Question 1: <insert specific question here and add additional subsections for additional questions below>
 
