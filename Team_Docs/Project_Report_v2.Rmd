@@ -88,7 +88,9 @@ Another aspect of climate change's impacts on streamflow is the potential of mel
 
 ## Discharge
 
-Discharge data were collected from NWIS using the Data Retrieval package. The state of Alaska was divided into 10 bins of equal latitude, and daily discharge data was downloaded for the site in each latitude bin with the greatest number of samples. This dataset includes the site location, daily discharge, and county of the site, among other variables not used in the analysis.
+Discharge data were collected from the National Water Information System (NWIS) using the Data Retrieval package in R. The state of Alaska was divided into 10 bins of equal latitude, and daily discharge data was downloaded for the site in each latitude bin with the greatest number of samples. This dataset includes the site location, daily discharge, and county of the site, among other variables not used in the analysis.
+
+Site information for each discharge site was also collected using the Data Retrieval package. Site information used in the analyses included upstream catchment area.
 
 ## Temperature and Precipitation
 
@@ -131,7 +133,109 @@ After all 10 NOAA dataframes containing precipitation and temperature data were 
 
 <Each figure should be accompanied by a caption, and each figure should be referenced within the text>
 
-# Snowmelt Data Wrangling
+## Site Locations
+
+```{r Exploratory Precipitation Mapping Data Wrangling, warning=FALSE, message=FALSE}
+# Convert the Alaska dataset to a spatially enabled "sf" data frame
+AlaskaTempPrecipDischarge_sf<- st_as_sf(AlaskaTempPrecipDischarge,coords = c('LONGITUDE','LATITUDE'),crs=4326)
+
+# Load in US Census Bureau Cartographic Boundary Shapefiles and Filter for Alaska Only
+setwd("~/Desktop/Environmental Data Analytics/Environmental_Data_Analytics/Data/Spatial")
+State_sf<- st_read('cb_2018_us_state_20m.shp') 
+Alaska_sf<-filter(State_sf, NAME == 'Alaska')
+
+# Create summary dataframe with only NOAA site locations
+
+## NOAA site locations
+NOAA_sites <- c("USC00500464", "USC00502107", "USW00025325", "USW00025624",
+                "USW00025704", "USW00026451", "USW00026510", "USW00026615",
+                "USW00027502", "USW00027502")
+NOAA_Lat <- c(58.3814, 64.8603,	55.35, 55.2207,
+              51.88333, 61.169, 62.9574, 60.785,
+              71.2834, 71.2834)
+NOAA_Lon <- c(-134.645, -147.8484, -131.65, -162.7324,
+              -176.65, -150.0278, -155.6103, -161.8293,
+              -156.7815, -156.7815)
+
+## Combine and add bin number by sorting by latitude
+NOAA_site_data <- data.frame(cbind(NOAA_sites, NOAA_Lat, NOAA_Lon)) %>%
+  arrange(NOAA_Lat) %>%
+  mutate(Bin = c(1,2,3,4,5,6,7,8,9, 10),
+         NOAA_Lat = as.numeric(as.character(NOAA_Lat)),
+         NOAA_Lon = as.numeric(as.character(NOAA_Lon)))
+
+NOAA_sf <- st_as_sf(NOAA_site_data, coords = c("NOAA_Lon", "NOAA_Lat"),
+                         crs = 4326)
+
+## Convert all SF Layers to UTM Projection 
+NOAA_sf_utm  <- st_transform(NOAA_sf, c=32609)
+Alaska_sf_utm <-st_transform(Alaska_sf,c=32609)
+
+# Create Discharge Sites Dataframe in NAD83
+## discharge lat and lon in NAD83
+discharge_sites <- readNWISsite(c("15052500", "15072000","15276000", "15297610",
+                                "15297680", "15304000", "15453500", "15514000",
+                                "15896000", "15908000")) %>%
+  select(site_no, dec_lat_va, dec_long_va) %>%
+  arrange(dec_lat_va) %>%
+  mutate(Bin = c(1,2,3,4,5,6,7,8,9,10)) %>%
+  rename(discharge_site = site_no, discharge_lat = dec_lat_va,
+         discharge_long = dec_long_va) %>%
+  mutate(discharge_lat = as.numeric(as.character(discharge_lat)),
+         discharge_long = as.numeric(as.character(discharge_long)))
+
+
+```
+
+
+```{r Exploratory Precipitation Mapping}
+# Create Alaska Temp Precip Discharge Summary using Summarize function
+### Convert Bin Column to a factor
+AlaskaTempPrecipDischarge$Bin<-as.factor(AlaskaTempPrecipDischarge$Bin)
+
+## Create Summary
+AlaskaMeanPrecipDischargeSummary<-AlaskaTempPrecipDischarge%>%
+  group_by(Bin)%>%
+  summarize(Lat_Mean=mean(LATITUDE),
+            Long_Mean=mean(LONGITUDE),
+            Mean_PRCP=mean(PRCP, na.rm=TRUE),
+            Mean_Discharge=mean(Discharge, na.rm=TRUE),
+            Mean_Max_Temp=mean(TMAX, na.rm=TRUE),
+            Mean_Min_Temp=mean(TMIN, na.rm=TRUE))
+            
+
+### Convert AlaskaMeanPrecipDischarge Summary to a spatially enabled SF dataframe
+AlaskaMeanPrecipDischargeSummary_sf<- st_as_sf(AlaskaMeanPrecipDischargeSummary,coords = c('Long_Mean','Lat_Mean'),crs=4326)
+
+### Transform SF Data to UTM Zone 9N Projection for Alaska
+AlaskaMeanPrecipDischargeSummary_utm<- st_transform(AlaskaMeanPrecipDischargeSummary_sf, c=32609)
+
+# Join Discharge Sites dataframe to AlaskaMeanPrecipDischarge Summary
+DischargeComplete<- AlaskaMeanPrecipDischargeSummary %>%
+  merge(discharge_sites, by ='Bin')
+
+## Convert DischargeComplete DF to a Spatial Features DF
+DischargeComplete_sf<- st_as_sf(DischargeComplete,
+                              coords = c("discharge_long", "discharge_lat"),
+                              crs = 4326)
+
+### Convert SF Dataframe to NAD 83 Zone 9N Projection 
+DischargeComplete_utm<- st_transform(DischargeComplete_sf, c=32609)
+```
+
+
+```{r, fig.cap= c("Map of NOAA Site Locations in Alaska"), fig.height=5, fig.width=8, warning=FALSE, message=FALSE}
+ggplot() +
+  geom_sf(data = Alaska_sf_utm, color = "black") +
+  geom_sf(data = NOAA_sf_utm, color = "red")+
+  geom_sf(data = DischargeComplete_utm, color="blue", size=2) +
+gabytheme
+```
+
+## Temperature
+
+Though climate change is a complex process, the easiest parameter to estimate the magnitude of climate change is temperature. Figure XXX shows the maximum daily temperature for the nine NOAA sites over each site's period of record. As expected, the range of maximum temperature increases with increasing latitude
+
 ```{r Snowmelt Exploratory Data Wrangling, echo=FALSE}
  
 #Convert DATE column to class 'Date'
@@ -260,20 +364,20 @@ legend.key.size=unit(1, "cm"))
 ```
 
 
-### Group Precip Data by Bin and DOY, create Mean Precip column, and filter weeks to only include the spring
+
 ```{r}
+# Group Precip Data by Bin and DOY, create Mean Precip column, and filter weeks to only include the spring
 Precip.Mean.Spring<-newdata%>%
   group_by(as.factor(Bin),as.factor(DOY))%>%
 mutate(MeanPRCP=mean(PRCP))%>%
  filter(WEEK < 30)
 
-### Filter for Bin 6            
+# Filter for Bin 6            
  Precip.Mean.Bin6 <- Precip.Mean.Spring %>% 
    filter(Bin == 6)
 ```
 
 
-# GRAPH 1
 ```{r, fig.cap= c("Day of Year vs. Mean Precipitation. This figure shows mean precipitation across all nine latitude bins for each day of the year up until Day 200. This graph served to illustrate precipitation variation across sites. Bin 1 has the greatest spread of mean precipitation."), fig.width=12, fig.height=7}
  PrecipMeanSpringPlot<- ggplot(Precip.Mean.Spring) +
    geom_line(aes(x = DOY, y = MeanPRCP, color = Bin)) +
@@ -287,7 +391,6 @@ scale_colour_manual(values = c("#00CED1", "#000000", "#FFFF00", "#FF8C00", "#940
 ```
 
 
-# GRAPH 2
 ```{r, fig.cap= c("Day of Year vs. Precipitation. This figure shows how precipitation changes with day of year across the period of record for Bin 6."), fig.width=7,fig.height=5}
  PrecipSpringBin6Plot<- ggplot(Precip.Mean.Bin6) +
    geom_line(aes(x = DOY, y = PRCP, color = Year)) +
@@ -297,108 +400,8 @@ scale_color_viridis_c()+
  print(PrecipSpringBin6Plot)
 ```
 
-# Exploratory Precipitation Mapping 
-```{r Exploratory Precipitation Mapping Data Wrangling, warning=FALSE, message=FALSE}
-# Convert the Alaska dataset to a spatially enabled "sf" data frame
-AlaskaTempPrecipDischarge_sf<- st_as_sf(AlaskaTempPrecipDischarge,coords = c('LONGITUDE','LATITUDE'),crs=4326)
-
-# Load in US Census Bureau Cartographic Boundary Shapefiles and Filter for Alaska Only
-setwd("~/Desktop/Environmental Data Analytics/Environmental_Data_Analytics/Data/Spatial")
-State_sf<- st_read('cb_2018_us_state_20m.shp') 
-Alaska_sf<-filter(State_sf, NAME == 'Alaska')
-
-# Create summary dataframe with only NOAA site locations
-
-## NOAA site locations
-NOAA_sites <- c("USC00500464", "USC00502107", "USW00025325", "USW00025624",
-                "USW00025704", "USW00026451", "USW00026510", "USW00026615",
-                "USW00027502", "USW00027502")
-NOAA_Lat <- c(58.3814, 64.8603,	55.35, 55.2207,
-              51.88333, 61.169, 62.9574, 60.785,
-              71.2834, 71.2834)
-NOAA_Lon <- c(-134.645, -147.8484, -131.65, -162.7324,
-              -176.65, -150.0278, -155.6103, -161.8293,
-              -156.7815, -156.7815)
-
-## Combine and add bin number by sorting by latitude
-NOAA_site_data <- data.frame(cbind(NOAA_sites, NOAA_Lat, NOAA_Lon)) %>%
-  arrange(NOAA_Lat) %>%
-  mutate(Bin = c(1,2,3,4,5,6,7,8,9, 10),
-         NOAA_Lat = as.numeric(as.character(NOAA_Lat)),
-         NOAA_Lon = as.numeric(as.character(NOAA_Lon)))
-
-NOAA_sf <- st_as_sf(NOAA_site_data, coords = c("NOAA_Lon", "NOAA_Lat"),
-                         crs = 4326)
-
-## Convert all SF Layers to UTM Projection 
-NOAA_sf_utm  <- st_transform(NOAA_sf, c=32609)
-Alaska_sf_utm <-st_transform(Alaska_sf,c=32609)
-
-# Create Discharge Sites Dataframe in NAD83
-## discharge lat and lon in NAD83
-discharge_sites <- readNWISsite(c("15052500", "15072000","15276000", "15297610",
-                                "15297680", "15304000", "15453500", "15514000",
-                                "15896000", "15908000")) %>%
-  select(site_no, dec_lat_va, dec_long_va) %>%
-  arrange(dec_lat_va) %>%
-  mutate(Bin = c(1,2,3,4,5,6,7,8,9,10)) %>%
-  rename(discharge_site = site_no, discharge_lat = dec_lat_va,
-         discharge_long = dec_long_va) %>%
-  mutate(discharge_lat = as.numeric(as.character(discharge_lat)),
-         discharge_long = as.numeric(as.character(discharge_long)))
 
 
-```
-
-# Create Alaska Temp Precip Discharge Summary using Summarize function
-```{r Exploratory Precipitation Mapping}
-### Convert Bin Column to a factor
-AlaskaTempPrecipDischarge$Bin<-as.factor(AlaskaTempPrecipDischarge$Bin)
-
-## Create Summary
-AlaskaMeanPrecipDischargeSummary<-AlaskaTempPrecipDischarge%>%
-  group_by(Bin)%>%
-  summarize(Lat_Mean=mean(LATITUDE),
-            Long_Mean=mean(LONGITUDE),
-            Mean_PRCP=mean(PRCP, na.rm=TRUE),
-            Mean_Discharge=mean(Discharge, na.rm=TRUE),
-            Mean_Max_Temp=mean(TMAX, na.rm=TRUE),
-            Mean_Min_Temp=mean(TMIN, na.rm=TRUE))
-            
-
-### Convert AlaskaMeanPrecipDischarge Summary to a spatially enabled SF dataframe
-AlaskaMeanPrecipDischargeSummary_sf<- st_as_sf(AlaskaMeanPrecipDischargeSummary,coords = c('Long_Mean','Lat_Mean'),crs=4326)
-
-### Transform SF Data to UTM Zone 9N Projection for Alaska
-AlaskaMeanPrecipDischargeSummary_utm<- st_transform(AlaskaMeanPrecipDischargeSummary_sf, c=32609)
-
-# Join Discharge Sites dataframe to AlaskaMeanPrecipDischarge Summary
-DischargeComplete<- AlaskaMeanPrecipDischargeSummary %>%
-  merge(discharge_sites, by ='Bin')
-
-## Convert DischargeComplete DF to a Spatial Features DF
-DischargeComplete_sf<- st_as_sf(DischargeComplete,
-                              coords = c("discharge_long", "discharge_lat"),
-                              crs = 4326)
-
-### Convert SF Dataframe to NAD 83 Zone 9N Projection 
-DischargeComplete_utm<- st_transform(DischargeComplete_sf, c=32609)
-```
-
-
-# NOAA Site Locations Map
-```{r, fig.cap= c("Map of NOAA Site Locations in Alaska"), fig.height=5, fig.width=8, warning=FALSE, message=FALSE}
-ggplot() +
-  geom_sf(data = Alaska_sf_utm, color = "black") +
-  geom_sf(data = NOAA_sf_utm, color = "red")+
-  geom_sf(data = DischargeComplete_utm, color="blue", size=2) +
-gabytheme
-```
-add in all 18 site locations for temp and precip in this map 
-no colors-just red
-discharge 
-use same shape type: orange dots are NOAA sites, blue dots are NWIS discharge 
-export precipitation map and total site locations map 
 
 # Mean Precipitation Map
 ```{r fig.cap=c("Map of Mean Precipitation across Alaska by Bin. This map depicts Bin 3 as having the highest mean precipitation across the state, with the lowest mean precipitation falling in northernmost Bin 9."), fig.height=5, fig.width=9}
