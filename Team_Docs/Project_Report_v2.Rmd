@@ -11,7 +11,7 @@ author: "Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen"
 fontsize: 12pt
 mainfont: Times New Roman
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 \newpage
@@ -41,6 +41,7 @@ library(sf)
 #library(ggspatial)
 library(cowplot)
 library(kableExtra)
+library(scales)
 
 
 # Set your ggplot theme
@@ -49,7 +50,7 @@ theme_set(theme_bw())
 # Load your datasets
 
 AlaskaTempPrecipDischarge <- 
-  read.csv("../DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+  read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 
 ```
 
@@ -61,7 +62,7 @@ AlaskaTempPrecipDischarge <-
 
 ## Background
 
-The climate is changing, in large part due to anthropogenic carbon emissions. These changes have different magnitudes around the world and local impacts of climate change vary as well. Specifically, climate change is already having greater impacts near the poles than many other parts of the globe, a process known as polar amplification or arctic amplification (Serreze et al 2009). Understanding how climate change is affecting discharge, especially in Alaska, has implications for water management, ecological processes, and the larger global system (if we consider ice-albedo feedback). Many communities rely on a given amount of water from snowmelt to arrive at certain times of the year, so a shift in the quantity or timing could drastically affect downstream users and water managers. Additionally, changing the amount of flow in rivers could affect sensitive biological communities. Furthermore, changes in temperature that result in glacial or permafrost melting could reduce the amount of reflective land cover, thus disrupting larger climate systems.
+The climate is changing, in large part due to anthropogenic carbon emissions. These changes have different magnitudes around the world and local impacts of climate change vary as well. Specifically, climate change is already having greater impacts near the poles than many other parts of the globe, a process known as polar amplification or arctic amplification (Serreze et al 2009). Understanding how climate change is affecting discharge, especially in Alaska, has implications for water management, ecological processes, and the larger global system (if we consider ice-albedo feedback) (Kashiwase et al, 2017). Many communities rely on a given amount of water from snowmelt to arrive at certain times of the year, so a shift in the quantity or timing could drastically affect downstream users and water managers (Earth System Research Laboratory, 2017). Additionally, changing the amount of flow in rivers could affect sensitive biological communities (U.S. Geologic Survey). Furthermore, changes in temperature that result in glacial or permafrost melting could reduce the amount of reflective land cover, thus disrupting larger climate systems.
 
 <At the end of your rationale, introduce a numbered list of your questions (or an overarching question and sub-questions). Each question should be accompanied by one or more working hypotheses, inserted beneath each question.>
 
@@ -273,7 +274,10 @@ ggplot(Alaska_Data_TempFig, aes(x = DATE, y = TMAX)) +
   labs(y = "Maximum Daily Temperature (F)", x = "Date")
 ```
 
-# Snowmelt
+## Snowmelt
+
+Recognizing climate change can affect conditions which dictate the timing of snowmelt, we chose to investigate whether timing was in fact changing over time. In order to minimize inconsistencies in period of records for the data across various latitude bins, discharge was used as a proxy for changes in snowmelt. Figure XX1 shows day of year versus mean discharge for all latitude bins. Figure XX2 is similar to Figure XX1 but excludes latitude bins 6 and 8, in order to better visualize how mean discharge changed throughout the year on average for the other latitudes. These graphs were made to provide insight into the variability of when snowmelt had been occuring at the various latitude bins. Graphs exploring day of year compared to discharge were for all latitude bins.Figure XX3 shows day of year compared to discharge for only latitude bin 6. This latitude bin was of interest as it exhibited the trend we expected, a spike in discharge occurring sooner for years later in the period of record. Even when looking at only six years at a time, as seen in Figure XX4, the same trend is clear. 
+
 
 ```{r Snowmelt Exploratory Data Wrangling, echo=FALSE}
  
@@ -293,44 +297,84 @@ Snowmelt.Discharge.Bin6 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONT
 #Plot mean discharge for each DOY through time by bin
 Snowmelt.Discharge.Mean <- Snowmelt.Discharge.Spring %>% group_by(as.factor(Bin), as.factor(DOY)) %>%
   mutate(Dis.Mean = mean(Discharge))
+
 ```
 
 
 # Snowmelt Graph 1
-```{r Snowmelt Day of Year Exploratory Graph 1, fig.cap= c("Day of Year vs. Mean Discharge. This figure shows mean discharge across all nine latitude bins for each day of the year. This graph served to illustrate variation across sites as to when first day of snowmelt and peak snowmelt would occur.")}
+```{r Snowmelt Day of Year Exploratory Graph 1}
 dis.doy.mean <- ggplot(Snowmelt.Discharge.Mean) +
   geom_line(aes(x = DOY, y = Dis.Mean, color = as.factor(Bin))) +
   labs(x = "Day of Year", y = "Mean Discharge", color = "Latitude Bin") +
   scale_color_viridis_d() +
   theme(legend.position = "top") +
-  labs(x = "Day of Year", y = "Mean Discharge, cfs")
+  labs(x = "Day of Year", y = "Mean Discharge, cfs") + theme(legend.position = "right",
+        axis.title.y = element_text(margin = 
+          margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = 
+          margin(t = 10, r = 0, b = 0, l = 0))) +
+  scale_y_continuous(limits = c(0,400000), labels = comma)
 print(dis.doy.mean)
 ```
 
+Figure XX1:  Day of Year vs. Mean Discharge. This figure shows mean discharge across all nine latitude bins for each day of the year. This graph served to illustrate variation across sites as to when first day of snowmelt and peak snowmelt would occur.
+
 # Snowmelt Graph 2
-```{r Snowmelt Day of Year Exploratory Graph 2, fig.cap= c("Day of Year vs. Discharge. This figure shows how discharge changes with day of year across the period of record for Bin 6. This provided a visual cue as to whether snowmelt was occuring earlier and during what time of the year the shift was occuring.")}
+```{r Snowmelt Day of Year Exploratory Graph 2}
+dis.doy.mean2 <- ggplot(Snowmelt.Discharge.Mean) +
+  geom_line(aes(x = DOY, y = Dis.Mean, color = as.factor(Bin))) +
+  labs(x = "Day of Year", y = "Mean Discharge", color = "Latitude Bin") +
+  scale_color_viridis_d() +
+  theme(legend.position = "top") +
+  labs(x = "Day of Year", y = "Mean Discharge, cfs") + theme(legend.position = "right",
+        axis.title.y = element_text(margin = 
+          margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = 
+          margin(t = 10, r = 0, b = 0, l = 0))) +
+  scale_y_continuous(limits = c(0,7500), labels = comma)
+print(dis.doy.mean2)
+```
+
+
+# Snowmelt Graph 3
+```{r Snowmelt Day of Year Exploratory Graph 3}
 dis.doy.6 <- ggplot(Snowmelt.Discharge.Bin6) +
   geom_line(aes(x = DOY, y = Discharge, color = YEAR)) +
   labs(x = "Day of Year", y = "Discharge, cfs", color = "Year") +
   scale_color_viridis_c() +
-  theme(legend.position = "right")
+  theme(legend.position = "right") + 
+  theme(legend.position = "right",
+        axis.title.y = element_text(margin = 
+          margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = 
+          margin(t = 10, r = 0, b = 0, l = 0))) +
+  scale_y_continuous(limits = c(0,400000), labels = comma)
 print(dis.doy.6)
 ```
 
-# Snowmelt Graph 3 
-```{r Snowmelt Day of Year Exploratory Graph 3, fig.cap= c("Day of Year vs Discharge. This figure shows how discharge changes with day of year across the every ten years across the period of record for fifty years. This provided a visual cue as to whether snowmelt was occuring earlier and during what time of the year the shift was occuring.")}
+Figure XX3: Day of Year vs. Discharge. This figure shows how discharge changes with day of year across the entire period of record for Bin 6. This provided a visual cue as to whether snowmelt was occuring earlier and during what time of the year the shift was occuring.
+
+# Snowmelt Graph 4 
+```{r Snowmelt Day of Year Exploratory Graph 4}
 Snowmelt.Discharge.Bin6.10Year <- Snowmelt.Discharge.Bin6 %>% 
   filter(YEAR == 1969 | YEAR == 1979 | YEAR == 1989 | YEAR == 1999 | YEAR == 2009 | YEAR == 2019)
 
 dis.doy.6.10 <- ggplot(Snowmelt.Discharge.Bin6.10Year) +
   geom_line(aes(x = DOY, y = Discharge, color = as.factor((YEAR)))) +
   labs(x = "Day of Year", y = "Discharge, cfs", color = "Year") +
-  scale_color_viridis_d() +
-  theme(legend.position = "right") +
+  scale_color_viridis_d() + 
+  theme(legend.position = "right",
+        axis.title.y = element_text(margin = 
+          margin(t = 0, r = 10, b = 0, l = 0)),
+        axis.title.x = element_text(margin = 
+          margin(t = 10, r = 0, b = 0, l = 0))) +
+  scale_y_continuous(limits = c(0,250000), labels = comma) +
   guides(color = guide_legend(reverse=TRUE))
 print(dis.doy.6.10)
+
 ```
 
+Figure XX4: Day of Year vs Discharge. This figure shows how discharge changes with day of year every ten years across the period of record for fifty years. This provided a visual cue as to whether snowmelt was occuring earlier and during what time of the year the shift was occuring.
 
 # Precipitation 
 
@@ -554,7 +598,11 @@ ggplot(Alaska_Temp_Monthly_5, aes(x = Date)) +
 ```
 
 
-```{r, fig.cap = "Year vs. Day of Year of Peak Discharge. Bin 5 is the only Latitude Bin with a significant change in the day of year of peak discharge (p = 0.02353). There is a decreasing trend in the data, indicating the day of peak snowmelt is happening sooner across 1952-2018."}
+## Snowmelt Analysis
+
+After looking at exploratory graphs, it was decided to use day of year of peak discharge as a proxy for snowmelt, instead of day of year of first large discharge increase. This was because peaks would be changing in a similar fashion, and it was more computationally feasible and efficient for analyses. For each latitude bin, the day of year of peak discharge was determined for each year. Then a linear model was made to determine if the day of year of peak discharge was significantly changing over time for each latitude bin. Only latitude bin 5 was found to have a significant change over time in the day of year of peak discharge. As seen in Figure XX, the decreasing trend in the data indicates that the day of year of peak discharge is occurring sooner for the later years.
+
+```{r, Snowmelt Analysis figure}
 
 Snowmelt.Discharge.Bin5 <- Snowmelt.Discharge.Spring %>% select(DATE, YEAR, MONTH, DAY, WEEK, DOY, Bin, NAME, LATITUDE, LONGITUDE, Discharge) %>%
   filter(Bin == 5)
@@ -582,14 +630,13 @@ bin5.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks5)
 summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 ```
 
+Figure XX: Year vs. Day of Year of Peak Discharge. Bin 5 is the only Latitude Bin with a significant change in the day of year of peak discharge (p = 0.02353, DF = 65, R2 = 0.062). There is a decreasing trend in the data, indicating the day of peak snowmelt is happening sooner across 1952-2018.
 
 
-
-
-
-# Calculate Cumulative Annual Precipitation and Cumulative Annual Discharge for each year by Site
+## Calculate Cumulative Annual Precipitation and Cumulative Annual Discharge for each year by Site
 
 We calculated the cumulative annual precipitation and discharge water volume for each year by site in cubic feet per year in order to create a column with the ratio of cumulative precipitation water volume: cumulative discharge water volume. This ratio indicates how the proportion of discharge that originates from precipitation. When the precipitation:discharge ratio is less than one, some proportion of discharge is a result from other hydrologic mechanisms such as glacier or permafrost melting. 
+
 ```{r}
 ## Calculate Cumulative Annual Precipitation for each year by Site and Create Dataframe
 CumAnnualPrecip<- AlaskaTempPrecipDischarge%>%
@@ -929,7 +976,7 @@ The Climate Science Special Report estimates that maximum temperature increases 
 # Summary and Conclusions
 <Summarize your major findings from your analyses in a few paragraphs. What conclusions do you draw from your findings? Relate your findings back to the original research questions and rationale.>
 
-One possible reason for such little impact of temperature on the date of peak snowmelt is the months in which temperature trends occur. For example, though the overal temperature for Bin 5 shows an increasing trend, the spring months of March, April, and May actually show a cooling trends. Summer and fall months however show increasing temperature trends that outweigh the cooling trends of earlier months. As the sen's slope is the median of all monthly trends, this nuance is not exhibited in the overall temperature trend. Warmer summer and fall seasons may have little impact on the date of peak discharge.
+One possible reason for such little impact of temperature on the date of peak snowmelt is the months in which temperature trends occur. For example, though the overall temperature for Bin 5 shows an increasing trend, the spring months of March, April, and May actually show a cooling trends. Summer and fall months however show increasing temperature trends that outweigh the cooling trends of earlier months. As the sen's slope is the median of all monthly trends, this nuance is not exhibited in the overall temperature trend. Warmer summer and fall seasons may have little impact on the date of peak discharge.
 
 The analyses in this study do not strongly support the hypotheses. The overall temperature trends do not show polar amplification, in part due to a small number of latitude bins and only one temperature site per bin. Similarly, there is no statistically significant relationship between change in discharge over time and latitude. There were only five sites that had both statistically significant trends in temperature and discharge, and these five sites did not show a relationship between temperature and discharge or temperature and day of peak discharge.
 
@@ -943,9 +990,14 @@ Future analsyses should take a more nuanced approach to investigating the impact
 
 “Climate Impacts in Alaska.” EPA, Environmental Protection Agency, 13 Jan. 2017, 19january2017snapshot.epa.gov/climate-impacts/climate-impacts-alaska_.html#Reference%203.
 
+Earth System Research Laboratory. Barrow's Annual Snow Cycle; Ecological Responses to a Lengthening Snow-free Season. (2017). Retrieved from https://www.esrl.noaa.gov/gmd/grad/snomelt.html.
+
 Easterling, D.R., K.E. Kunkel, J.R. Arnold, T. Knutson, A.N. LeGrande, L.R. Leung, R.S. Vose, D.E. Waliser, and M.F. Wehner, 2017: Precipitation change in the United States. In: Climate Science Special Report: Fourth National Climate Assessment, Volume I [Wuebbles, D.J., D.W. Fahey, K.A. Hibbard, D.J. Dokken, B.C. Stewart, and T.K. Maycock (eds.)]. U.S. Global Change Research Program, Washington, DC, USA, pp. 207-230, doi: 10.7930/J0H993CC.
+
+Kashiwase, H., Ohshima, K. I., Nihashi, S., & Eicken, H. (2017). Evidence for ice-ocean albedo feedback in the Arctic Ocean shifting to a seasonal ice zone. Scientific reports, 7(1), 8170.
 
 Serreze, M. C., Barrett, A. P., Stroeve, J. C., Kindig, D. N., and Holland, M. M.: The emergence of surface-based Arctic amplification, The Cryosphere, 3, 11–19, https://doi.org/10.5194/tc-3-11-2009, 2009.
 
+U.S. Geologic Survey. Snowmelt Runoff and the Water Cycle. Retrieved from https://www.usgs.gov/special-topic/water-science-school/science/snowmelt-runoff-and-water-cycle?qt-science_center_objects=0#qt-science_center_objects.
 
 Walsh, J. et al., 2014: Ch. 2: Our Changing Climate. J.M. Melillo, T. (T. C.. Richmond, and G.W. Yohe, Eds., U.S. Global Change Research Program, 19–67.
