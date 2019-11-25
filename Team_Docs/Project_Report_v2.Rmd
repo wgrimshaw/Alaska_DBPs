@@ -11,7 +11,7 @@ author: "Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen"
 fontsize: 12pt
 mainfont: Times New Roman
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 \newpage
@@ -36,7 +36,6 @@ library(sf)
 library(ggspatial)
 library(cowplot)
 #library(kableExtra)
-library(scales)
 
 
 # Set your ggplot theme
@@ -45,7 +44,7 @@ theme_set(theme_bw())
 # Load your datasets
 
 AlaskaTempPrecipDischarge <- 
-  read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+  read.csv("../DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 
 ```
 
@@ -84,7 +83,7 @@ Site information for each discharge site was also collected using the Data Retri
 
 ## Temperature and Precipitation
 
-Temperature and precipitation data were downloaded from the National Oceanic and Atmospheric Administration (NOAA) Climate Data Online web portal. As discharge stations do not collect data on temperature and precipitation, the climate data for each latitude bin were downloaded from a station in the same county as each selected discharge station. In each county, daily precipitation, maximum temperature, and minimum temperature, data were downloaded from one station. The criteria for station selection include data extending to the current date, beginning at the earliest date, with at least 80% data coverage. This dataset also includes site location.
+Temperature and precipitation data were downloaded from the National Oceanic and Atmospheric Administration (NOAA) Climate Data Online web portal. As discharge stations do not collect data on temperature and precipitation, the climate data for each latitude bin were downloaded from a station in the same county as each selected discharge station. In each county, daily precipitation, maximum temperature, and minimum temperature, data were downloaded from one station. The criteria for station selection include data extending to the current date, beginning at the earliest date, with at least 80% data coverage. This dataset also includes site location. All site locations are visible in Figure XXX. 
 
 
 \newpage
@@ -168,8 +167,6 @@ discharge_sites <- readNWISsite(c("15052500", "15072000","15276000", "15297610",
          discharge_long = dec_long_va) %>%
   mutate(discharge_lat = as.numeric(as.character(discharge_lat)),
          discharge_long = as.numeric(as.character(discharge_long)))
-
-
 ```
 
 
@@ -456,7 +453,7 @@ mutate(MeanPRCP=mean(PRCP))%>%
 ```
 
 
-```{r, fig.cap= c("Day of Year vs. Mean Precipitation. This figure shows mean precipitation across all nine latitude bins for each day of the year up until Day 200. This graph served to illustrate precipitation variation across sites. Bin 1 has the greatest spread of mean precipitation."), fig.width=12, fig.height=7}
+```{r, fig.cap= c("Day of Year vs. Mean Precipitation. This figure shows mean precipitation across all nine latitude bins for each day of the year up until Day 200. This graph served to illustrate precipitation variation across sites during the sprintime through mid summer. Bin 1 has the greatest spread of mean precipitation."), fig.width=12, fig.height=7}
  PrecipMeanSpringPlot<- ggplot(Precip.Mean.Spring) +
    geom_line(aes(x = DOY, y = MeanPRCP, color = Bin)) +
    labs(x = "Day of Year", y = "Mean Precipitation (inches)", color = "Latitude Bin") +
@@ -467,7 +464,7 @@ scale_colour_manual(values = c("#00CED1", "#000000", "#FFFF00", "#FF8C00", "#940
  print(PrecipMeanSpringPlot)
  
 ```
-
+>
 
 ```{r, fig.cap= c("Day of Year vs. Precipitation. This figure shows how precipitation changes with day of year across the period of record for Bin 6."), fig.width=7,fig.height=5}
  PrecipSpringBin6Plot<- ggplot(Precip.Mean.Bin6) +
@@ -624,7 +621,7 @@ Figure XX: Year vs. Day of Year of Peak Discharge. Bin 5 is the only Latitude Bi
 
 ## Precipitation
 
-We calculated the cumulative annual precipitation and discharge water volume for each year by site in cubic feet per year in order to create a column with the ratio of cumulative precipitation water volume: cumulative discharge water volume. This ratio indicates how the proportion of discharge that originates from precipitation. When the precipitation:discharge ratio is less than one, some proportion of discharge is a result from other hydrologic mechanisms such as glacier or permafrost melting. 
+We calculated the cumulative annual precipitation and discharge water volume for each year by site in cubic feet per year in order to create a column with the ratio of cumulative precipitation water volume: cumulative discharge water volume. This ratio indicates how the proportion of discharge that originates from precipitation. Figure XXXX displays the precipitation:discharge ratio over time for Bin 5. When the precipitation:discharge ratio is less than one, some proportion of discharge is a result from other hydrologic mechanisms such as glacier or permafrost melting. 
 
 ```{r}
 ## Calculate Cumulative Annual Precipitation and Cumulative Annual Discharge for each year by Site
@@ -636,7 +633,7 @@ CumAnnualPrecip<- AlaskaTempPrecipDischarge%>%
   summarize(CumPrecip=sum(PRCP, na.rm=TRUE))
 
 ### Load in NWIS_SiteInfo.csv which has Drainage Areas for each Station
-NWIS_SiteInfo<- read.csv("./DATA/RAW/NWIS_SiteInfo.csv")
+NWIS_SiteInfo<- read.csv("../DATA/RAW/NWIS_SiteInfo.csv")
 
 ## Join NWIS_SiteInfo and CumAnnual Precip by Site Number and multiply cumulative precip for each station and year by drainage area to determine water volume for each year and station
 PrecipVolume<-CumAnnualPrecip%>%
@@ -672,7 +669,7 @@ PrecipDischargeVolumeBin5<-filter(PrecipDischargeVolume, site_no=='15276000')
 ```
 
 
-```{r, fig.width=4, }
+```{r fig.cap=c("Plot of Precipitation:Discharge ratio across Bin 5's period of record. The precipitation:discharge ratio indicates the proportion of discharge that comes from precipitation. If the precipitation:discharge ratio is less than one, then discharge has inputs other than precipitation, potentially permafrost and glacier melting. As most of the data over the entire period of record falls below the ratio of one, discharge in Bin 5 has other inputs, depending on drainage area. The overall preciptation:discharge ratio is increasing over the period of record, however, potentially because melting of stored water in permafrost and glacier has already occurred due to climate change."), fig.width=4, }
 # Bin 5 Precipitation:Discharge Plot
 
 Bin5RatioPlot<-ggplot(PrecipDischargeVolumeBin5, aes(x=Year, y=Precip_Discharge_Ratio))+
