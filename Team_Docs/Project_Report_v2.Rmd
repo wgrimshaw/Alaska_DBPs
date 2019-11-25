@@ -11,7 +11,7 @@ author: "Gaby Garcia, Walker Grimshaw, Tristen Townsend, Yixin Wen"
 fontsize: 12pt
 mainfont: Times New Roman
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 \newpage
@@ -35,6 +35,7 @@ library(ggplot2)
 library(sf)
 library(ggspatial)
 library(cowplot)
+library(scales)
 #library(kableExtra)
 
 
@@ -44,7 +45,7 @@ theme_set(theme_bw())
 # Load your datasets
 
 AlaskaTempPrecipDischarge <- 
-  read.csv("../DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
+  read.csv("./DATA/PROCESSED/AlaskaTempPrecipDischarge.csv")
 
 ```
 
@@ -53,23 +54,23 @@ AlaskaTempPrecipDischarge <-
 
 ## Background
 
-The climate is changing, in large part due to anthropogenic carbon emissions. These changes have different magnitudes around the world and local impacts of climate change vary as well. Specifically, climate change is already having greater impacts near the poles than many other parts of the globe, a process known as polar amplification or arctic amplification (Serreze et al 2009). Understanding how climate change is affecting discharge, especially in Alaska, has implications for water management, ecological processes, and the larger global system (if we consider ice-albedo feedback) (Kashiwase et al, 2017). Many communities rely on a given amount of water from snowmelt to arrive at certain times of the year, so a shift in the quantity or timing could drastically affect downstream users and water managers (Earth System Research Laboratory, 2017). Additionally, changing the amount of flow in rivers could affect sensitive biological communities (U.S. Geologic Survey). Furthermore, changes in temperature that result in glacial or permafrost melting could reduce the amount of reflective land cover, thus disrupting larger climate systems.
+The climate is changing, in large part due to anthropogenic carbon emissions. These changes have different magnitudes around the world and local impacts of climate change vary as well. Specifically, climate change is already having greater impacts near the poles than many other parts of the globe, a process known as polar amplification or arctic amplification (Serreze et al 2009). Understanding how climate change is affecting discharge, especially in Alaska, has implications for water management, ecological processes, and the larger global system (if we consider ice-albedo feedback) (Kashiwase et al, 2017). Many communities rely on a given amount of water from snowmelt to arrive at certain times of the year, so a shift in the quantity or timing of discharge could drastically affect downstream users and water managers (Earth System Research Laboratory, 2017). Additionally, changing the amount of flow in rivers could affect sensitive biological communities (U.S. Geologic Survey). Furthermore, changes in temperature that result in glacial or permafrost melting could reduce the amount of reflective land cover, thus disrupting larger climate systems.
 
 
 ## Research Question
 
-To what degree does climate change affect discharge in Alaskan streams and rivers?
+**To what degree does climate change affect discharge in Alaskan streams and rivers?**
 
-This guiding question encompasses other questions we seek to answer through statistical analyses. If climate change is causing average temperatures to increase, and the magnitude of the increase is greater at higher latitudes, then higher latitude streams should demonstrate greater changes in timing and magnitude of peak flows. This study first seeks to examine if the magnitude of temperature changes increase with increasing latitude in Alaska. By analyzing historical streamflow records, we will investigate whether the magnitude of maximum daily temperature change causes a proportional change in the magnitude and timing of peak streamflow. 
-
-Another aspect of climate change's impacts on streamflow is the potential of melting permafrost or glaciers. This analysis uses cumulative annual streamflow and cumulative annual precipitation to determine if interannual snowpack is melting with increasing average temperatures. If so, we expect the difference between annual precipitation and annual streamflow to increase over time.
-
+This guiding question encompasses three hypotheses:  
 1) Streams at varying latitudes will have different responses to changing climate with a monotonic trend related to latitude.
 
 2) If streams are in areas that experience greater mean air temperature increases, then they will have greater discharge.
 
 3) If temperature increases over time, the day of year of first snowmelt will occur earlier.
 
+This study first seeks to examine if the magnitude of temperature changes over time increase with increasing latitude in Alaska. By analyzing historical streamflow records, we will investigate whether the magnitude of maximum daily temperature change causes a proportional change in the magnitude and timing of peak streamflow. 
+
+Another aspect of climate change's impacts on streamflow is the potential of melting permafrost or glaciers. This analysis uses cumulative annual streamflow and cumulative annual precipitation to determine if interannual snowpack is melting with increasing average temperatures. If so, we expect the difference between annual precipitation and annual streamflow to increase over time.
 
 \newpage
 
@@ -83,7 +84,7 @@ Site information for each discharge site was also collected using the Data Retri
 
 ## Temperature and Precipitation
 
-Temperature and precipitation data were downloaded from the National Oceanic and Atmospheric Administration (NOAA) Climate Data Online web portal. As discharge stations do not collect data on temperature and precipitation, the climate data for each latitude bin were downloaded from a station in the same county as each selected discharge station. In each county, daily precipitation, maximum temperature, and minimum temperature, data were downloaded from one station. The criteria for station selection include data extending to the current date, beginning at the earliest date, with at least 80% data coverage. This dataset also includes site location. All site locations are visible in Figure XXX. 
+Temperature and precipitation data were downloaded from the National Oceanic and Atmospheric Administration (NOAA) Climate Data Online web portal. As discharge stations do not collect data on temperature and precipitation, the climate data for each latitude bin were downloaded from a station in the same county as each selected discharge station. Though counties in Alaska are large, this was the most reliable way to find climate stations near the discharge stations. In each county, daily precipitation, maximum temperature, and minimum temperature, data were downloaded from one station. The criteria for station selection include data extending to the current date, beginning at the earliest date, with at least 80% data coverage. This dataset also includes site location. All site locations are visible in Figure XXX. 
 
 
 \newpage
@@ -119,7 +120,7 @@ After all 10 NOAA dataframes containing precipitation and temperature data were 
 
 ## Site Locations
 
-```{r Exploratory Precipitation Mapping Data Wrangling, warning=FALSE, message=FALSE, echo = FALSE}
+```{r Exploratory Precipitation Mapping Data Wrangling, message=FALSE}
 # Convert the Alaska dataset to a spatially enabled "sf" data frame
 AlaskaTempPrecipDischarge_sf<- st_as_sf(AlaskaTempPrecipDischarge,coords = c('LONGITUDE','LATITUDE'),crs=4326)
 
@@ -206,7 +207,7 @@ DischargeComplete_utm<- st_transform(DischargeComplete_sf, c=32609)
 ```
 
 
-```{r, fig.cap= c("Map of NOAA Site Locations in Alaska. The red sites are NOAA stations where we obtained our climate (temperature and precipitation) data, while the blue sites are the NWIS Stations where we obtained our discharge data. There is one NOAA station and one NWIS station per latitude bin; the station pairs were not colocated and were chosen on the basis of having the longest period of record. Each station pair was located within the same county, however."), fig.height=5, fig.width=8, warning=FALSE, message=FALSE}
+```{r, fig.height=5, fig.width=8, warning=FALSE, message=FALSE}
 gabytheme <- theme_bw(base_size = 20) + 
   theme(plot.title=element_text(face="bold", size="22", color="IndianRed4", hjust=0.5),
         axis.title=element_text(size=19, color="black"),
@@ -222,12 +223,11 @@ ggplot() +
   geom_sf(data = DischargeComplete_utm, color="blue", size=5) +
 gabytheme
 ```
-
-\newpage
+Figure 1: Map of Site Locations. The red sites are NOAA stations, while the blue sites are the NWIS Stations. There is one NOAA station and one NWIS station per latitude bin. Each pair of stations are located in the same county.
 
 ## Temperature
 
-Though climate change is a complex process, the easiest parameter to estimate the magnitude of climate change is temperature. Figure XXX shows the maximum daily temperature for the nine NOAA sites over each site's period of record. As expected, the range of maximum temperature increases with increasing latitude. Besides site one, all other sites have reasonable overlap in their periods of record and at least cover from 1980 to 2018. There are gaps in the records of multiple sites that require interpolation however. Larger gaps, such as the 1990s gap for site two and the gaps before 1950 for site three, are not filled in this analysis, and instead the earlier time periods are left out of the time series analysis. Shorter data gaps are filled.
+Though climate change is a complex process, the easiest parameter to estimate the magnitude of climate change is temperature. Figure 2 shows the maximum daily temperature for the nine NOAA sites over each site's period of record. As expected, the range of maximum temperature increases with increasing latitude. Besides site one, all other sites have reasonable overlap in their periods of record and at least cover from 1980 to 2018. There are gaps in the records of multiple sites that require interpolation however. Larger gaps, such as the 1990s gap for site two and the gaps before 1950 for site three, are not filled in this analysis, and instead the earlier time periods are left out of the time series analysis. Shorter data gaps are filled. No obvious temperature trends can be seen in the records of any sites.
 
 ```{r Exploratory Temperature Figure}
 ## Data wrangling
@@ -256,13 +256,15 @@ ggplot(Alaska_Data_TempFig, aes(x = DATE, y = TMAX)) +
   facet_wrap(~Bin, nrow = 3, ncol = 3) +
   labs(y = "Maximum Daily Temperature (F)", x = "Date")
 ```
+Figure 2: Maximum daily temperature records of the nine climate sites, showing variation in period of record, continuity of the record, and temperature range.
 
 \newpage
 
 ## Snowmelt
 
-Recognizing climate change can affect conditions which dictate the timing of snowmelt, we chose to investigate whether timing was in fact changing over time. In order to minimize inconsistencies in period of records for the data across various latitude bins, discharge was used as a proxy for changes in snowmelt. Figure XX1 shows day of year versus mean discharge for all latitude bins. Figure XX2 is similar to Figure XX1 but excludes latitude bins 6 and 8, in order to better visualize how mean discharge changed throughout the year on average for the other latitudes. These graphs were made to provide insight into the variability of when snowmelt had been occuring at the various latitude bins. Graphs exploring day of year compared to discharge were for all latitude bins.Figure XX3 shows day of year compared to discharge for only latitude bin 6. This latitude bin was of interest as it exhibited the trend we expected, a spike in discharge occurring sooner for years later in the period of record. Even when looking at only six years at a time, as seen in Figure XX4, the same trend is clear. 
+Recognizing climate change can affect conditions which dictate the timing of snowmelt, we chose to investigate whether timing was in fact changing over time. In order to minimize inconsistencies in period of records for the data across various latitude bins, discharge was used as a proxy for changes in snowmelt. Figure 3 shows day of year versus mean discharge for all latitude bins. Figure 4 is similar to Figure 3 but excludes latitude bins 6 and 8, in order to better visualize how mean discharge changed throughout the year on average for the other latitudes. These graphs were made to provide insight into the variability of when snowmelt had been occuring at the various latitude bins. 
 
+Graphs exploring day of year compared to discharge were for all latitude bins. Figure 5 shows day of year compared to discharge for only latitude bin 6. This latitude bin was of interest as it exhibited the trend we expected, a spike in discharge occurring sooner for years later in the period of record. Even when looking at only six years at a time, as seen in Figure 6, the same trend is clear. 
 
 ```{r Snowmelt Exploratory Data Wrangling, echo=FALSE}
 #Snowmelt Exploratory Data Wrangling
@@ -286,7 +288,6 @@ Snowmelt.Discharge.Mean <- Snowmelt.Discharge.Spring %>% group_by(as.factor(Bin)
 ```
 
 
-
 ```{r Snowmelt Day of Year Exploratory Graph 1}
 # Snowmelt Graph 1
 dis.doy.mean <- ggplot(Snowmelt.Discharge.Mean) +
@@ -294,7 +295,8 @@ dis.doy.mean <- ggplot(Snowmelt.Discharge.Mean) +
   labs(x = "Day of Year", y = "Mean Discharge", color = "Latitude Bin") +
   scale_color_viridis_d() +
   theme(legend.position = "top") +
-  labs(x = "Day of Year", y = "Mean Discharge, cfs") + theme(legend.position = "right",
+  labs(x = "Day of Year", y = "Mean Discharge, cfs") +
+  theme(legend.position = "right",
         axis.title.y = element_text(margin = 
           margin(t = 0, r = 10, b = 0, l = 0)),
         axis.title.x = element_text(margin = 
@@ -302,8 +304,7 @@ dis.doy.mean <- ggplot(Snowmelt.Discharge.Mean) +
   scale_y_continuous(limits = c(0,400000), labels = comma)
 print(dis.doy.mean)
 ```
-
-Figure XX1:  Day of Year vs. Mean Discharge. This figure shows mean discharge across all nine latitude bins for each day of the year. This graph served to illustrate variation across sites as to when first day of snowmelt and peak snowmelt would occur.
+Figure 3:  Day of Year vs. Mean Discharge. This figure shows mean discharge across all nine latitude bins for each day of the year. This graph served to illustrate variation across sites as to when first day of snowmelt and peak snowmelt would occur.
 
 ```{r Snowmelt Day of Year Exploratory Graph 2}
 # Snowmelt Graph 2
@@ -320,7 +321,7 @@ dis.doy.mean2 <- ggplot(Snowmelt.Discharge.Mean) +
   scale_y_continuous(limits = c(0,7500), labels = comma)
 print(dis.doy.mean2)
 ```
-
+Figure 4: Day of Year vs. Mean Discharge for all bins besides 6 and 8 in order to show variations in site with lower discharge.
 
 ```{r Snowmelt Day of Year Exploratory Graph 3}
 dis.doy.6 <- ggplot(Snowmelt.Discharge.Bin6) +
@@ -336,9 +337,7 @@ dis.doy.6 <- ggplot(Snowmelt.Discharge.Bin6) +
   scale_y_continuous(limits = c(0,400000), labels = comma)
 print(dis.doy.6)
 ```
-
-Figure XX3: Day of Year vs. Discharge. This figure shows how discharge changes with day of year across the entire period of record for Bin 6. This provided a visual cue as to whether snowmelt was occuring earlier and during what time of the year the shift was occuring.
-
+Figure 5: Day of Year vs. Discharge. This figure shows how discharge changes with day of year across the entire period of record for Bin 6. This provided a visual cue as to whether snowmelt was occuring earlier and during what time of the year the shift was occuring.
 
 ```{r Snowmelt Day of Year Exploratory Graph 4}
 Snowmelt.Discharge.Bin6.10Year <- Snowmelt.Discharge.Bin6 %>% 
@@ -358,8 +357,7 @@ dis.doy.6.10 <- ggplot(Snowmelt.Discharge.Bin6.10Year) +
 print(dis.doy.6.10)
 
 ```
-
-Figure XX4: Day of Year vs Discharge. This figure shows how discharge changes with day of year every ten years across the period of record for fifty years. This provided a visual cue as to whether snowmelt was occuring earlier and during what time of the year the shift was occuring.
+Figure 6: Day of Year vs Discharge. This figure shows how discharge changes with day of year every ten years across the period of record for fifty years. This provided a visual cue as to whether snowmelt was occuring earlier and during what time of the year the shift was occuring.
 
 \newpage
  
@@ -367,7 +365,8 @@ Figure XX4: Day of Year vs Discharge. This figure shows how discharge changes wi
 
 While there are significant regional and seasonal differences in precipitation changes, the mean annual precipitation across the United States has increased about 4% from the 1901-2015 period of record (Walsh et al. 2014). Long-term station observations from core climate networks served as a primary source to establish observed changes in precipitation. Alaska shows little change in annual precipitation (+1.5%); however, in all seasons, central Alaska shows declines and the panhandle shows increase (Easterling et al., 2017). 
 
-Figure XXX shows precipitation over each of the nine NOAA site's period of record, colored by bin. As expected, Bin 3 clearly has the largest range in the magnitude of precipitation, and precipitation in Alaska appears to decrease with increasing latitude.
+Figure 7 shows precipitation over each of the nine NOAA site's period of record, colored by bin. As expected, Bin 3 clearly has the largest range in the magnitude of precipitation, and precipitation in Alaska appears to decrease with increasing latitude.
+
 This is substantiated by the fact that currently dry regions in Alaska are projected to become drier due to accelerated evaporation caused by warmer temperatures and longer growing seasons, while wet areas are projected to become wetter (EPA, 2017). Bin 3's station is located in Ketchikan, Alaska, which has a temperate oceanic climate and is dubbed the "rainfall capital of Alaska". There are 2 main data gaps in the precipitation period of record. One large gap occurs from the mid to late 1930s, presumably due to the Great Depression, and the second large gap occurs from August 31, 1942 to January 1st, 1948, presumably due to the second World War. These two gaps are not filled in this analysis. 
 
 ```{r Precipitation Exploratory Data Wrangling}
@@ -427,18 +426,18 @@ legend.key.size=unit(1, "cm"))
 ```
 
 
-```{r Precipitation Exploratory Graph 1, fig.cap= c("Precipitation Measured Over the Entire Period of Record by Bin. This figure shows the general pattern of precipitation changes over time, differentiated by the latitude bin (color). Bin 3 has the most sample points for the entire precipitation period of record. Bin 3's precipitation range has the greatest magnitude compared to the other bins."),fig.width=10, fig.height=6}
+```{r Precipitation Exploratory Graph 1,fig.width=10, fig.height=6, eval = T}
 ## Scatterplot of Full Precipitation Period of Record Colored by Bin
 
  PrecipScatterplot<-ggplot(newdata, aes(x = DATE, y = PRCP, color = Bin))  +
-   geom_point(alpha=0.3, size=2) +
+   geom_line(alpha=0.3) +
  labs( x="Year",
         y="Precipitation (inches)")+
   theme(legend.position="top")+
    gabytheme
  print(PrecipScatterplot)
 ```
-
+Figure 7: Precipitation Measured Over the Entire Period of Record by Bin. This figure shows the general pattern of precipitation changes over time, differentiated by the latitude bin (color). Bin 3 has the most sample points for the entire precipitation period of record. Bin 3's precipitation range has the greatest magnitude compared to the other bins.
 
 ```{r}
 # Group Precip Data by Bin and DOY, create Mean Precip column, and filter weeks to only include the spring
@@ -453,7 +452,7 @@ mutate(MeanPRCP=mean(PRCP))%>%
 ```
 
 
-```{r, fig.cap= c("Day of Year vs. Mean Precipitation. This figure shows mean precipitation across all nine latitude bins for each day of the year up until Day 200. This graph served to illustrate precipitation variation across sites during the sprintime through mid summer. Bin 1 has the greatest spread of mean precipitation."), fig.width=12, fig.height=7}
+```{r, fig.cap= c("Day of Year vs. Mean Precipitation. This figure shows mean precipitation across all nine latitude bins for each day of the year up until Day 200. This graph served to illustrate precipitation variation across sites during the sprintime through mid summer. Bin 1 has the greatest spread of mean precipitation."), fig.width=12, fig.height=7, eval = F}
  PrecipMeanSpringPlot<- ggplot(Precip.Mean.Spring) +
    geom_line(aes(x = DOY, y = MeanPRCP, color = Bin)) +
    labs(x = "Day of Year", y = "Mean Precipitation (inches)", color = "Latitude Bin") +
@@ -464,9 +463,9 @@ scale_colour_manual(values = c("#00CED1", "#000000", "#FFFF00", "#FF8C00", "#940
  print(PrecipMeanSpringPlot)
  
 ```
->
 
-```{r, fig.cap= c("Day of Year vs. Precipitation. This figure shows how precipitation changes with day of year across the period of record for Bin 6."), fig.width=7,fig.height=5}
+
+```{r, fig.cap= c("Day of Year vs. Precipitation. This figure shows how precipitation changes with day of year across the period of record for Bin 6."), fig.width=7,fig.height=5, eval = F}
  PrecipSpringBin6Plot<- ggplot(Precip.Mean.Bin6) +
    geom_line(aes(x = DOY, y = PRCP, color = Year)) +
    labs(x = "Day of Year", y = "Precipitation (inches)", color = "Year") +
@@ -476,7 +475,7 @@ scale_color_viridis_c()+
 ```
 
 
-```{r fig.cap=c("Map of Mean Precipitation across Alaska by Bin. This map depicts Bin 3 as having the highest mean precipitation across the state, with the lowest mean precipitation falling in northernmost Bin 9."), fig.height=5, fig.width=9}
+```{r, fig.height=5, fig.width=9}
 AlaskaPrecipMap<-ggplot(axes = FALSE) +
   geom_sf(data = Alaska_sf_utm, fill="white", color="black") +
   geom_sf(data = AlaskaMeanPrecipDischargeSummary_utm,
@@ -489,11 +488,12 @@ annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75,
 
  print(AlaskaPrecipMap)
 ```
+Figure 8: Map of Mean Precipitation across Alaska by Bin. This map depicts Bin 3 as having the highest mean precipitation across the state, with the lowest mean precipitation falling in northernmost Bin 9.
 
 \newpage
 
 
-```{r,fig.cap= c("Map of Mean Discharge across Alaska by Bin. This map depicts Bin 8 as having the highest mean discharge value of 121,266.11 cfs. Bin 1 has the lowest mean discharge value of 4.69 cfs."), fig.height=5, fig.width=9}
+```{r,fig.cap= c("Map of Mean Discharge across Alaska by Bin. This map depicts Bin 8 as having the highest mean discharge value of 121,266.11 cfs. Bin 1 has the lowest mean discharge value of 4.69 cfs."), fig.height=5, fig.width=9, eval = F}
 # Mean Discharge Map
 
 gabytheme2 <- theme_bw(base_size = 17) + 
@@ -520,7 +520,7 @@ annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75,
 \newpage
 
 
-```{r fig.cap=c("Map of Mean Maximum Temperature across Alaska by Bin. This figure depicts Bin 3 as having the highest mean maximum temperature value of 51.97 degrees Fahrenheit."), fig.height=5, fig.width=9}
+```{r fig.cap=c("Map of Mean Maximum Temperature across Alaska by Bin. This figure depicts Bin 3 as having the highest mean maximum temperature value of 51.97 degrees Fahrenheit."), fig.height=5, fig.width=9, include=FALSE}
 AlaskaTemperatureMap<-ggplot(axes = TRUE) +
   geom_sf(data = Alaska_sf_utm, fill="white") +
   geom_sf(data = AlaskaMeanPrecipDischargeSummary_utm, aes(color=Mean_Max_Temp), size=5)  +
@@ -537,7 +537,7 @@ annotation_north_arrow(location = "tl", which_north = "true", pad_x = unit(0.75,
 
 ## Discharge 
 
-To analyze the seasonal change of discharge, it is helpful to know the general trend of discharge over time. Figure Seasonal Change of Discharge 1-1 shows the discharge of 9 bins over time. From this graph, it is clear to see that Bin 6 and 8 have 2 largest river and they also have obvious seasonal changes. Trend of discharge of other bins cannot be identify right now and need further analysis.
+To analyze the seasonal change of discharge, it is helpful to know the general trend of discharge over time. Figure 9 shows the discharge of 9 bins over time. From this graph, it is clear to see that Bin 6 and 8 have 2 largest river and they also have obvious seasonal changes. Trend of discharge of other bins cannot be identify right now and need further analysis.
 
 ```{r Discharge Exploratory Data Wrangling, echo=FALSE}
 # transform bin and Date into factor
@@ -560,6 +560,7 @@ discharge_plot <- ggplot(AlaskaDischarge,aes(x = DATE, y = Discharge))+
 print(discharge_plot)
 
 ```
+Figure 9: Discharge records for all nine bins.
 
 \newpage
 
@@ -571,7 +572,7 @@ For each latitude bin, the monthly average maximum temperature was calculated fr
 
 For each latitude bin, a Seasonal Mann-Kendall test was performed on the monthly time series to determine if there had been a change in temperature over the period of record and the directionality of the trend. The Seasonal Mann-Kendall was also used to determine which individual months had statistically significant temperature trends and the directionality of those trends. If there was a statistically significant trend over the period of record, the seasonal sen's slope test was used to determine the average magnitude of the change.
 
-Figure XXX shows the monthly average maximum temperature for site 5, near Anchorage, over time. The monthly average maximum temperature had a statistically significant trend (Seasonal Mann-Kendall, z=4.87, p<0.001). The blue line shows the magnitude of this trend as calculated by the seasonal sen's slope, indicating a 0.04 degree fahrenheit annual increase in average maximum temperature. It should be noted that the statistical tests used here do not estimate the intercept of the seasonal trend line, so while the figure shows the average seasonal temperature increase, the location of the intercept is only an approximation to assist the visualization.
+Figure 10 shows the monthly average maximum temperature for site 5, near Anchorage, over time. The monthly average maximum temperature had a statistically significant trend (Seasonal Mann-Kendall, z=4.87, p<0.001). The blue line shows the magnitude of this trend as calculated by the seasonal sen's slope, indicating a 0.04 degree fahrenheit annual increase in average maximum temperature. It should be noted that the statistical tests used here do not estimate the intercept of the seasonal trend line, so while the figure shows the average seasonal temperature increase, the location of the intercept is only an approximation to assist the visualization.
 
 ```{r Temperature Analysis}
 # Make column of predicted temp
@@ -582,11 +583,11 @@ ggplot(Alaska_Temp_Monthly_5, aes(x = Date)) +
   geom_line(aes(y = Prediction), color = "blue", size = 1) +
   labs(y = "Maximum Daily Temperature\nAveraged by Month (F)")
 ```
-
+Figure 10: Monthly average maximum temperature for bin 5 near Anchorage along with the trend in temperature shown in blue.
 
 ## Snowmelt 
 
-After looking at exploratory graphs, it was decided to use day of year of peak discharge as a proxy for snowmelt, instead of day of year of first large discharge increase. This was because peaks would be changing in a similar fashion, and it was more computationally feasible and efficient for analyses. For each latitude bin, the day of year of peak discharge was determined for each year. Then a linear model was made to determine if the day of year of peak discharge was significantly changing over time for each latitude bin. Only latitude bin 5 was found to have a significant change over time in the day of year of peak discharge. As seen in Figure XX, the decreasing trend in the data indicates that the day of year of peak discharge is occurring sooner for the later years.
+After looking at exploratory graphs, it was decided to use day of year of peak discharge as a proxy for snowmelt, instead of day of year of first large discharge increase. This was because peaks would be changing in a similar fashion, and it was more computationally feasible and efficient for analyses. For each latitude bin, the day of year of peak discharge was determined for each year. Then a linear model was made to determine if the day of year of peak discharge was significantly changing over time for each latitude bin. Only latitude bin 5 was found to have a significant change over time in the day of year of peak discharge. As seen in Figure 11, the decreasing trend in the data indicates that the day of year of peak discharge is occurring sooner for the later years.
 
 ```{r, Snowmelt Analysis figure}
 
@@ -615,13 +616,12 @@ print(DOY.Time5) #earlier
 bin5.lm <- lm(DOY ~ YEAR, data = Snowmelt.Discharge.Peaks5)
 summary(bin5.lm) #IT IS SIGNIFICANT!!! p-value = 0.02 so it's earlier
 ```
-
-Figure XX: Year vs. Day of Year of Peak Discharge. Bin 5 is the only Latitude Bin with a significant change in the day of year of peak discharge (p = 0.02353, DF = 65, R2 = 0.062). There is a decreasing trend in the data, indicating the day of peak snowmelt is happening sooner across 1952-2018.
+Figure 11: Year vs. Day of Year of Peak Discharge. Bin 5 is the only Latitude Bin with a significant change in the day of year of peak discharge (p = 0.02353, DF = 65, R2 = 0.062). There is a decreasing trend in the data, indicating the day of peak snowmelt is happening sooner across 1952-2018.
 
 
 ## Precipitation
 
-We calculated the cumulative annual precipitation and discharge water volume for each year by site in cubic feet per year in order to create a column with the ratio of cumulative precipitation water volume: cumulative discharge water volume. This ratio indicates how the proportion of discharge that originates from precipitation. Figure XXXX displays the precipitation:discharge ratio over time for Bin 5. When the precipitation:discharge ratio is less than one, some proportion of discharge is a result from other hydrologic mechanisms such as glacier or permafrost melting. 
+We calculated the cumulative annual precipitation and discharge water volume for each year by site in cubic feet per year in order to create a column with the ratio of cumulative precipitation water volume: cumulative discharge water volume. This ratio indicates how the proportion of discharge that originates from precipitation. Figure 12 displays the precipitation:discharge ratio over time for Bin 5. When the precipitation:discharge ratio is less than one, some proportion of discharge is a result from other hydrologic mechanisms such as glacier or permafrost melting. 
 
 ```{r}
 ## Calculate Cumulative Annual Precipitation and Cumulative Annual Discharge for each year by Site
@@ -633,7 +633,7 @@ CumAnnualPrecip<- AlaskaTempPrecipDischarge%>%
   summarize(CumPrecip=sum(PRCP, na.rm=TRUE))
 
 ### Load in NWIS_SiteInfo.csv which has Drainage Areas for each Station
-NWIS_SiteInfo<- read.csv("../DATA/RAW/NWIS_SiteInfo.csv")
+NWIS_SiteInfo<- read.csv("./DATA/RAW/NWIS_SiteInfo.csv")
 
 ## Join NWIS_SiteInfo and CumAnnual Precip by Site Number and multiply cumulative precip for each station and year by drainage area to determine water volume for each year and station
 PrecipVolume<-CumAnnualPrecip%>%
@@ -668,19 +668,17 @@ PrecipDischargeVolume<-PrecipVolume%>%
 PrecipDischargeVolumeBin5<-filter(PrecipDischargeVolume, site_no=='15276000')
 ```
 
-
-```{r fig.cap=c("Plot of Precipitation:Discharge ratio across Bin 5's period of record. The precipitation:discharge ratio indicates the proportion of discharge that comes from precipitation. If the precipitation:discharge ratio is less than one, then discharge has inputs other than precipitation, potentially permafrost and glacier melting. As most of the data over the entire period of record falls below the ratio of one, discharge in Bin 5 has other inputs, depending on drainage area. The overall preciptation:discharge ratio is increasing over the period of record, however, potentially because melting of stored water in permafrost and glacier has already occurred due to climate change."), fig.width=4, }
+```{r}
 # Bin 5 Precipitation:Discharge Plot
 
 Bin5RatioPlot<-ggplot(PrecipDischargeVolumeBin5, aes(x=Year, y=Precip_Discharge_Ratio))+
   geom_point(alpha=0.5, size=2, color="black")+
   geom_smooth(method="lm", se=FALSE)+
   labs(y="Precipitation:Discharge")+
-  ggtitle("Bin 5: Year on Precipitation:Discharge Ratio")+
-  gabytheme
+  ggtitle("Bin 5: Year on Precipitation:Discharge Ratio")
 print(Bin5RatioPlot)
 ```
-
+Figure 12: Plot of Precipitation:Discharge ratio across Bin 5's period of record. The precipitation:discharge ratio indicates the proportion of discharge that comes from precipitation. If the precipitation:discharge ratio is less than one, then discharge has inputs other than precipitation, potentially permafrost and glacier melting. As most of the data over the entire period of record falls below the ratio of one, discharge in Bin 5 has other inputs, depending on drainage area. The overall preciptation:discharge ratio is increasing over the period of record, however, potentially because melting of stored water in permafrost and glacier has already occurred due to climate change.
 
 ```{r}
 # Create Linear Model of Year vs. the Precip: Discharge Water Volume Ratio
@@ -691,14 +689,13 @@ summary(PrecipDischargeLM)
 ```
 
 >The final linear equation of this precipitation:discharge linear model is Y=-16.93 +
-0.0092(Year). A one-year increase in time increases the precipitation:discharge ratio by 0.01 units. This trend is visible in Figure XXX. 
-
+0.0092(Year). A one-year increase in time increases the precipitation:discharge ratio by 0.01 units. This trend is visible in Figure 12. 
 
 ## Discharge 
 
 To analyze the seasonal trend of discharge of each bin, the monthly average discharge data are applied, which are calculated from the daily discharge data. In order to make sure the result is correct and reasonable, choosing the right period of time to do time series is very important. The criteria for selecting optimal period of records is to make sure it covers at least 30 years most recent data if possible. For Bin 1, it only has 5 years of data, which is not useful to do time series on it. For the gaps in the data, if there is a huge gap(>3 years), drop it to keep the most recent data, if the gap is small(<= 3 years), the average discharge of that month over periods is used to fill the gap. 
 
-Seasonal Mann-Kendall tests are performed on the monthly time series to determine if there is a change in discharge over the period of record. If there is a statistically significant trend (p<0.05) over the period of record, the seasonal sen's slope test is used to determine the average magnitude of the change. In order to remove the impact of river volume, sens'slopes are normalized by divided by average discharge over period of records. Figure Seasonal Change of Discharge 2-1 shows that except for bin 1 and 3, discharge of other bins shows small seasonal change and since the sens'slopes are all positive, discharge is slightly increasing over time. However, there's no clear trend shows that seasonal change of discharge has positive or negative relationship with latitude, which cannot supports the hypothesis that climate change is having larger impacts near the poles.
+Seasonal Mann-Kendall tests are performed on the monthly time series to determine if there is a change in discharge over the period of record. If there is a statistically significant trend (p<0.05) over the period of record, the seasonal sen's slope test is used to determine the average magnitude of the change. In order to remove the impact of river volume, sens'slopes are normalized by divided by average discharge over period of records. Figure 13 shows that except for bin 1 and 3, discharge of other bins shows small seasonal change and since the sens'slopes are all positive, discharge is slightly increasing over time. However, there's no clear trend shows that seasonal change of discharge has positive or negative relationship with latitude, which cannot supports the hypothesis that climate change is having larger impacts near the poles.
 
 ```{r Discharge Seasonal Change Analysis 1}
 ## choose the optimal range of dataset of each bin. For missing monthly data, using mean value of that month over different years to fill the gap. Make sure the number of month is the same for each year in each bin.
@@ -920,15 +917,15 @@ Discharge_change.plot<- ggplot(Discharge_Change, aes(x = Bin, y = Slope))+
   theme(text = element_text(size=18))
 print(Discharge_change.plot)
 ```
-
+Figure 13: Annual trend in stream discharge divided by mean discharge for each bin.
 
 
 \newpage
 
 # Summary and Conclusions
 
-
-```{r, summary table}
+```{r summary table, out.width= '100%'}
+knitr::include_graphics("../FIGURES/Summary_Table.png")
 ## read in output files
 #Discharge_output <- #read.csv("./DATA/PROCESSED/Discharge_Change_new.csv")
 #Snowmelt_output <- #read.csv("./DATA/PROCESSED/Snowmelt_BinSummary.csv")
@@ -965,10 +962,13 @@ print(Discharge_change.plot)
 
 One possible reason for such little impact of temperature on the date of peak snowmelt is the months in which temperature trends occur. For example, though the overall temperature for Bin 5 shows an increasing trend, the spring months of March, April, and May actually show a cooling trends. Summer and fall months however show increasing temperature trends that outweigh the cooling trends of earlier months. As the sen's slope is the median of all monthly trends, this nuance is not exhibited in the overall temperature trend. Warmer summer and fall seasons may have little impact on the date of peak discharge.
 
-The analyses in this study do not strongly support the hypotheses. The overall temperature trends do not show polar amplification, in part due to a small number of latitude bins and only one temperature site per bin. Similarly, there is no statistically significant relationship between change in discharge over time and latitude. There were only five sites that had both statistically significant trends in temperature and discharge, and these five sites did not show a relationship between temperature and discharge or temperature and day of peak discharge.
+The analyses in this study do not strongly support the original hypotheses. The overall temperature trends do not show polar amplification, in part due to a small number of latitude bins and only one temperature site per bin. Similarly, there is no statistically significant relationship between change in discharge over time and latitude. There were only five sites that had both statistically significant trends in temperature and discharge, and these five sites did not show a relationship between temperature and discharge or temperature and day of peak discharge.
 
 Future analsyses should take a more nuanced approach to investigating the impacts of climate change on discharge of Alaskan streams. Temperature data show a need to investigate the seasons that will have direct effects on stream discharge rather than looking at the year as a whole.
 
+## Limitations
+
+This study had many limitations, which likely contributed to the inability to prove our hypotheses. In order to perform analyses within an appropriate timeframe, it was necessary to constrain the number of sites used in the study. However, having only ten latitude bins, each with one point representative of all possible conditions within that latitude range, severely reduced the ability to understand how being located near coasts, mountains, cities, etc affected climate and discharge at each site. Furthermore, the lack of accountability for the physical characteristics of each stream and its watershed likely resulted in many of our models explaining little of the variation within the data. Most climate stations were not located near discharge sites, and rather were only located within the same county. Alaskan counties are extremely large in area, so in some cases climate data was obtained hundreds of miles away from the discharge site. This hindered our ability to accurately see the role of temperature and precipitation on discharge. The period of record across each latitude bin was inconsistent, with one bin having as little as seven years of data to another having over fifty years of data. Short periods of record coupled with inconsistencies across latitude bins made it difficult to find statistically significant changes and to make reasonable comparisons across various sites. In order to keep periods of record as consistent as possible, discharge data was used as a proxy for snowmelt. However, using data related to snow cover and/or albedo would have been far more appropriate when attempting to analyze changes in snowmelt, as there are many factors that could affect snowmelt and discharge in different ways.
 
 \newpage
 
